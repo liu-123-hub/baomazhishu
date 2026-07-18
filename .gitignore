@@ -14,10 +14,6 @@ build/
 *.swp
 *.swo
 
-# 数据文件（可选 — 如果要跟踪数据则删除下面几行）
-# data/*.json
-# frontend/data/*.json
-
 # 环境
 .env
 .venv/
@@ -28,5 +24,36 @@ venv/
 Thumbs.db
 desktop.ini
 
+# 日志
+*.log
+logs/
+
 # Chrome profiles (Playwright)
 *.pw_profile/
+
+# 项目临时归档
+_archive*/
+_archive_*/
+
+# 临时验证脚本
+verify_*.py
+execute_rectification.py
+
+# 数据报告文件
+data/*_report.json
+data/*_doc.json
+data/*_manual.json
+data/*_audit_log.json
+
+# 数据备份目录
+data/backup_*/
+
+# 前端依赖与构建产物
+frontend-vue/node_modules/
+frontend-vue/dist/
+
+# 旧版前端目录
+frontend/
+
+# SQLite 数据库文件
+backend/dashboard.db

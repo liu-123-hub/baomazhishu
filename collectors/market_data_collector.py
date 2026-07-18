@@ -1,0 +1,330 @@
+"""行情数据采集器，基于 AKShare（新浪财经数据源）获取 ETF 和指数日线。"""
+import json
+import os
+import time
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional
+
+import akshare
+
+DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
+MARKET_DATA_FILE = os.path.join(DATA_DIR, "market_data.json")
+
+SECTOR_ETF_MAP = {
+    "nasdaq":        {"code": "513100", "name": "纳指ETF",   "ak_symbol": "sh513100"},
+    "gold":          {"code": "518880", "name": "黄金ETF",   "ak_symbol": "sh518880"},
+    "cpo":           {"code": "515880", "name": "通信ETF",   "ak_symbol": "sh515880"},
+    "semiconductor": {"code": "159995", "name": "芯片ETF",   "ak_symbol": "sz159995"},
+    "bank":          {"code": "512800", "name": "银行ETF",   "ak_symbol": "sh512800"},
+    "securities":    {"code": "512880", "name": "证券ETF",   "ak_symbol": "sh512880"},
+    "biotech":       {"code": "159992", "name": "创新药ETF", "ak_symbol": "sz159992"},
+    "consumer":      {"code": "159928", "name": "消费ETF",   "ak_symbol": "sz159928"},
+    "newenergy":     {"code": "516160", "name": "新能源ETF", "ak_symbol": "sh516160"},
+    "insurance":      {"code": "512570", "name": "保险ETF",   "ak_symbol": "sh512570"},
+    "baijiu":         {"code": "512690", "name": "酒ETF",     "ak_symbol": "sh512690"},
+    "food":           {"code": "515080", "name": "食品ETF",   "ak_symbol": "sh515080"},
+    "medicine":       {"code": "512010", "name": "医药ETF",   "ak_symbol": "sh512010"},
+    "appliance":      {"code": "159996", "name": "家电ETF",   "ak_symbol": "sz159996"},
+    "tourism":        {"code": "159766", "name": "旅游ETF",   "ak_symbol": "sz159766"},
+    "electronics":    {"code": "159997", "name": "电子ETF",   "ak_symbol": "sz159997"},
+    "computer":       {"code": "512720", "name": "计算机ETF", "ak_symbol": "sh512720"},
+    "communication":  {"code": "515050", "name": "5G通信ETF", "ak_symbol": "sh515050"},
+    "media":          {"code": "512980", "name": "传媒ETF",   "ak_symbol": "sh512980"},
+    "nonferrous":     {"code": "512400", "name": "有色ETF",   "ak_symbol": "sh512400"},
+    "coal":           {"code": "515220", "name": "煤炭ETF",   "ak_symbol": "sh515220"},
+    "chemical":       {"code": "516220", "name": "化工ETF",   "ak_symbol": "sh516220"},
+    "steel":          {"code": "515210", "name": "钢铁ETF",   "ak_symbol": "sh515210"},
+    "realestate":     {"code": "512200", "name": "房地产ETF", "ak_symbol": "sh512200"},
+    "infrastructure": {"code": "516950", "name": "基建ETF",   "ak_symbol": "sh516950"},
+}
+
+BENCHMARK_INDICES = {
+    "sh000001": "上证指数",
+    "sh000300": "沪深300",
+    "sz399006": "创业板指",
+}
+
+REQUEST_INTERVAL = 0.5
+MAX_RETRIES = 2
+
+
+def load_market_data() -> Dict:
+    """加载已有的行情数据文件。"""
+    if os.path.exists(MARKET_DATA_FILE):
+        with open(MARKET_DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {
+        "etf_data": {},
+        "benchmark_indices": {},
+        "last_update": None,
+        "update_count": 0,
+    }
+
+
+def save_market_data(data: Dict):
+    """原子写入行情数据文件。"""
+    os.makedirs(DATA_DIR, exist_ok=True)
+    tmp_file = MARKET_DATA_FILE + ".tmp"
+    with open(tmp_file, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+    os.replace(tmp_file, MARKET_DATA_FILE)
+
+
+def _fetch_etf_daily(ak_symbol: str, start_date: str, end_date: str) -> Optional[List[Dict]]:
+    """通过 AKShare 获取 ETF 日线行情，按日期范围过滤。"""
+    for attempt in range(MAX_RETRIES + 1):
+        try:
+            df = akshare.fund_etf_hist_sina(symbol=ak_symbol)
+            if df is None or df.empty:
+                print(f"    [{ak_symbol}] 无数据返回")
+                return None
+
+            records = []
+            prev_close = None
+            for _, row in df.iterrows():
+                date_str = str(row.get("date", ""))
+                if date_str < start_date or date_str > end_date:
+                    prev_close = float(row.get("close", 0))
+                    continue
+
+                close_val = round(float(row.get("close", 0)), 4)
+                change_pct = None
+                if prev_close is not None and prev_close != 0:
+                    change_pct = round((close_val - prev_close) / prev_close * 100, 2)
+
+                records.append({
+                    "date": date_str,
+                    "open": round(float(row.get("open", 0)), 4),
+                    "high": round(float(row.get("high", 0)), 4),
+                    "low": round(float(row.get("low", 0)), 4),
+                    "close": close_val,
+                    "volume": int(row.get("volume", 0)),
+                    "amount": round(float(row.get("amount", 0)), 2),
+                    "change_pct": change_pct,
+                })
+                prev_close = close_val
+
+            return records
+
+        except Exception as e:
+            if attempt < MAX_RETRIES:
+                time.sleep(2)
+            else:
+                print(f"    [{ak_symbol}] 获取失败: {e}")
+                return None
+
+    return None
+
+
+def collect_etf_data(start_date: Optional[str] = None, end_date: Optional[str] = None) -> Dict[str, List[Dict]]:
+    """采集所有板块 ETF 的日线行情数据。"""
+    if end_date is None:
+        end_date = datetime.now().strftime("%Y-%m-%d")
+    if start_date is None:
+        start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+
+    result = {}
+    print("  [行情数据] 开始采集 ETF 日线行情 (新浪财经数据源)...")
+
+    for sector, etf_info in SECTOR_ETF_MAP.items():
+        ak_symbol = etf_info["ak_symbol"]
+        print(f"    [{etf_info['name']}({etf_info['code']})] 获取中...")
+        records = _fetch_etf_daily(ak_symbol, start_date, end_date)
+        if records:
+            result[sector] = records
+            print(f"    [{etf_info['name']}] 获取到 {len(records)} 条日线数据")
+        else:
+            print(f"    [{etf_info['name']}] 获取失败，跳过")
+        time.sleep(REQUEST_INTERVAL)
+
+    return result
+
+
+def _fetch_index_daily(index_code: str, start_date: str, end_date: str) -> Optional[List[Dict]]:
+    """通过 AKShare stock_zh_index_daily 获取指数日线行情。"""
+    for attempt in range(MAX_RETRIES + 1):
+        try:
+            df = akshare.stock_zh_index_daily(symbol=index_code)
+            if df is None or df.empty:
+                print(f"    [{index_code}] 无数据返回")
+                return None
+
+            records = []
+            prev_close = None
+            for _, row in df.iterrows():
+                date_str = str(row.get("date", ""))
+                if date_str < start_date or date_str > end_date:
+                    prev_close = float(row.get("close", 0))
+                    continue
+
+                close_val = round(float(row.get("close", 0)), 2)
+                change_pct = None
+                if prev_close is not None and prev_close != 0:
+                    change_pct = round((close_val - prev_close) / prev_close * 100, 2)
+
+                records.append({
+                    "date": date_str,
+                    "open": round(float(row.get("open", 0)), 2),
+                    "high": round(float(row.get("high", 0)), 2),
+                    "low": round(float(row.get("low", 0)), 2),
+                    "close": close_val,
+                    "volume": int(row.get("volume", 0)),
+                    "change_pct": change_pct,
+                })
+                prev_close = close_val
+
+            return records
+
+        except Exception as e:
+            if attempt < MAX_RETRIES:
+                time.sleep(2)
+            else:
+                print(f"    [{index_code}] 获取失败: {e}")
+                return None
+
+    return None
+
+
+def collect_benchmark_indices(start_date: Optional[str] = None, end_date: Optional[str] = None) -> Dict:
+    """采集市场基准指数日线行情。"""
+    if end_date is None:
+        end_date = datetime.now().strftime("%Y-%m-%d")
+    if start_date is None:
+        start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+
+    result = {}
+    print("  [行情数据] 开始采集市场基准指数...")
+
+    for index_code, index_name in BENCHMARK_INDICES.items():
+        print(f"    [{index_name}({index_code})] 获取中...")
+        records = _fetch_index_daily(index_code, start_date, end_date)
+        if records:
+            result[index_code] = {"name": index_name, "data": records}
+            print(f"    [{index_name}] 获取到 {len(records)} 条日线数据")
+        else:
+            print(f"    [{index_name}] 获取失败，跳过")
+        time.sleep(REQUEST_INTERVAL)
+
+    return result
+
+
+def _should_update(existing: Dict) -> bool:
+    """判断是否需要更新：今天尚未更新或从未更新。"""
+    last = existing.get("last_update")
+    if not last:
+        return True
+    today = datetime.now().strftime("%Y%m%d")
+    return last < today
+
+
+def collect_all(start_date: Optional[str] = None, end_date: Optional[str] = None, force: bool = False) -> Dict:
+    """采集所有行情数据（ETF + 指数），支持增量更新（按日期去重合并）。"""
+    if end_date is None:
+        end_date = datetime.now().strftime("%Y-%m-%d")
+    if start_date is None:
+        start_date = (datetime.now() - timedelta(days=30)).strftime("%Y-%m-%d")
+
+    existing = load_market_data()
+
+    if not force and not _should_update(existing):
+        print("  [行情数据] 今日已更新，跳过（force=True 可强制更新）")
+        return existing
+
+    new_etf = collect_etf_data(start_date, end_date)
+    new_idx = collect_benchmark_indices(start_date, end_date)
+
+    existing_etf = existing.get("etf_data", {})
+    for sector, records in new_etf.items():
+        existing_etf.setdefault(sector, [])
+        existing_dates = {r["date"] for r in existing_etf[sector]}
+        for rec in records:
+            if rec["date"] not in existing_dates:
+                existing_etf[sector].append(rec)
+                existing_dates.add(rec["date"])
+        existing_etf[sector].sort(key=lambda x: x["date"])
+
+    existing_idx = existing.get("benchmark_indices", {})
+    for code, idx_data in new_idx.items():
+        if code not in existing_idx:
+            existing_idx[code] = idx_data
+        else:
+            existing_dates = {r["date"] for r in existing_idx[code].get("data", [])}
+            for rec in idx_data.get("data", []):
+                if rec["date"] not in existing_dates:
+                    existing_idx[code]["data"].append(rec)
+                    existing_dates.add(rec["date"])
+            existing_idx[code]["data"].sort(key=lambda x: x["date"])
+
+    existing["etf_data"] = existing_etf
+    existing["benchmark_indices"] = existing_idx
+    existing["last_update"] = datetime.now().strftime("%Y%m%d")
+    existing["update_count"] = existing.get("update_count", 0) + 1
+
+    save_market_data(existing)
+    total_etf_records = sum(len(v) for v in existing_etf.values())
+    print(f"  [行情数据] 已保存至 {MARKET_DATA_FILE}")
+    print(f"  [行情数据] ETF 板块: {len(existing_etf)} 个，总记录: {total_etf_records} 条")
+    print(f"  [行情数据] 基准指数: {len(existing_idx)} 个，更新次数: {existing['update_count']}")
+
+    return existing
+
+
+def validate_market_data(data: Dict) -> Dict:
+    """校验行情数据完整性：板块覆盖、OHLC逻辑、涨跌幅、日期排序。"""
+    issues = []
+    stats = {"total_sectors": 0, "total_records": 0, "valid_sectors": 0, "issues": 0}
+
+    etf_data = data.get("etf_data", {})
+    for sector, records in etf_data.items():
+        stats["total_sectors"] += 1
+        if not records:
+            issues.append(f"[{sector}] 无行情数据")
+            continue
+
+        stats["total_records"] += len(records)
+        ok = True
+
+        for i, r in enumerate(records):
+            o, h, l, c = r.get("open"), r.get("high"), r.get("low"), r.get("close")
+            if None in (o, h, l, c):
+                issues.append(f"[{sector}] {r['date']}: 缺少 OHLC")
+                ok = False; continue
+            if h < l:
+                issues.append(f"[{sector}] {r['date']}: high({h}) < low({l})")
+                ok = False
+            if h < max(o, c):
+                issues.append(f"[{sector}] {r['date']}: high({h}) < max(open,close)")
+                ok = False
+            if l > min(o, c):
+                issues.append(f"[{sector}] {r['date']}: low({l}) > min(open,close)")
+                ok = False
+
+            if i > 0:
+                prev = records[i - 1]["close"]
+                if prev and prev != 0:
+                    exp = round((c - prev) / prev * 100, 2)
+                    act = r.get("change_pct")
+                    if act is not None and abs(exp - act) > 2:
+                        issues.append(f"[{sector}] {r['date']}: 涨跌幅偏差 预期{exp}% 实际{act}%")
+
+        if ok:
+            stats["valid_sectors"] += 1
+
+    stats["issues"] = len(issues)
+    return {"stats": stats, "issues": issues}
+
+
+if __name__ == "__main__":  # pragma: no cover
+    print("=" * 50)
+    print("  行情数据采集器测试 (新浪财经数据源)")
+    print("=" * 50)
+    data = collect_all()
+    print("\n数据质量校验:")
+    v = validate_market_data(data)
+    print(f"  板块数: {v['stats']['total_sectors']}")
+    print(f"  有效板块: {v['stats']['valid_sectors']}")
+    print(f"  总记录: {v['stats']['total_records']}")
+    print(f"  问题数: {v['stats']['issues']}")
+    if v["issues"]:
+        for issue in v["issues"][:10]:
+            print(f"    - {issue}")

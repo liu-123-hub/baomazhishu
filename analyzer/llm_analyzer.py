@@ -1,24 +1,16 @@
-"""
-宝妈指数 LLM 分析引擎
-多维度精准分类，输出有理有据的判定逻辑
-"""
+"""宝妈指数 LLM 分析引擎，多维度分类与判定。"""
 from typing import Dict, List, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
 import json
 
-# ============================================================
-# 信号定义库
-# ============================================================
-
 @dataclass
 class Signal:
-    """单个判定信号"""
+    """单个判定信号。"""
     name: str
-    weight: float          # 权重 (-5 到 +5, 正=小白, 负=专业)
-    description: str       # 人类可读的描述
+    weight: float
+    description: str
 
-# ---- 小白信号 (正向) ----
 NEWBIE_SIGNALS = [
     Signal("身份自述", 8, "明确自称小白/新手/刚入门/宝妈"),
     Signal("知识求助", 6, "在问基础问题（怎么买/在哪看/什么意思）"),
@@ -32,7 +24,6 @@ NEWBIE_SIGNALS = [
     Signal("互动异常", 3, "大量emoji/感叹号/问号，情绪化表达"),
 ]
 
-# ---- 专业信号 (负向) ----
 PRO_SIGNALS = [
     Signal("专业术语", -5, "使用PE/PB/ROE/基本面/技术面/估值等专业词汇"),
     Signal("策略思维", -4, "讨论定投/仓位/分散/对冲/止损等策略"),
@@ -42,7 +33,6 @@ PRO_SIGNALS = [
     Signal("冷静表达", -2, "理性分析，客观陈述，无情绪化表达"),
 ]
 
-# 关键词匹配规则
 NEWBIE_KEYWORDS = {
     "身份自述": ["小白", "新手", "新人", "刚入", "第一次", "菜鸟", "萌新", "宝妈", "全职妈妈", "学生党"],
     "知识求助": ["不懂", "请教", "各位大哥", "大佬", "请问", "有没有人", "谁知道", "求助", "怎么买", "在哪看", "什么意思"],
@@ -62,7 +52,6 @@ PRO_KEYWORDS = {
     "冷静表达": ["分析", "观点", "看法", "逻辑", "原因在于"],
 }
 
-# ---- 买入/卖出意图关键词 ----
 BUY_KEYWORDS = [
     "上车", "冲", "梭哈", "all in", "满仓", "抄底", "加仓", "买入", "买了", "入手", "已入",
     "追", "杀入", "建仓", "补仓", "定投", "已上车",
@@ -81,44 +70,34 @@ SELL_KEYWORDS = [
 ]
 
 
-# ============================================================
-# 分析引擎
-# ============================================================
-
 @dataclass
 class AnalysisResult:
-    """单条帖子的完整分析结果"""
+    """单条帖子的分析结果。"""
     post_id: str
     title: str
     platform: str
     sector: str
     
-    # 分数
-    newbie_score: float = 0.0       # 小白总分 (0-100)
-    newbie_confidence: str = "low"   # 置信度: high/medium/low
+    newbie_score: float = 0.0
+    newbie_confidence: str = "low"
     
-    # 命中信号
     matched_newbie: List[Tuple[str, str, float]] = field(default_factory=list)  
     matched_pro: List[Tuple[str, str, float]] = field(default_factory=list)
     
-    # 判定
-    level: str = "未判定"      # 纯小白/偏小白/中间派/偏专业/专业
-    reasoning: str = ""        # 人类可读的推理过程
-    sentiment_score: float = 0  # -1(恐慌) ~ +1(贪婪)
-    intent: str = "neutral"     # buy/sell/neutral — 买入/卖出意图
-    intent_strength: float = 0  # 0~1 意图强度
+    level: str = "未判定"
+    reasoning: str = ""
+    sentiment_score: float = 0
+    intent: str = "neutral"
+    intent_strength: float = 0
     
-    # 用于前端展示
     key_signals: List[str] = field(default_factory=list)
 
 
 def analyze_post(post: Dict, sector: str) -> AnalysisResult:
-    """分析单条帖子，返回详细判定"""
     title = post.get("title", "")
     content = post.get("content", "")
     full_text = f"{title} {content}" if content else title
     
-    # 0. 垃圾过滤
     SPAM_PATTERNS = [
         "我是冲着金条来的",
         "金条来的，你呢",
@@ -148,7 +127,6 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
         sector=sector,
     )
     
-    # 1. 逐信号匹配
     matched_newbie = []
     matched_pro = []
     
@@ -164,8 +142,6 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
         if matched_kws:
             matched_pro.append((signal.name, signal.description, signal.weight, matched_kws))
     
-    # 2. 额外特征
-    # 标题长度很短 + 情绪化
     extra_score = 0
     extra_reasons = []
     
@@ -177,14 +153,12 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
         extra_score += 2
         extra_reasons.append("以问句结尾，在寻求答案")
     
-    # 3. 计算总分
     total_newbie = sum(s[2] for s in matched_newbie) + extra_score
     total_pro = abs(sum(s[2] for s in matched_pro))
     
-    raw_score = total_newbie - total_pro * 0.8  # 专业信号打8折
+    raw_score = total_newbie - total_pro * 0.8
     result.newbie_score = max(0, min(100, raw_score * 4 + 10))
     
-    # 4. 置信度
     total_signals = len(matched_newbie) + len(matched_pro)
     if total_signals >= 4:
         result.newbie_confidence = "high"
@@ -193,7 +167,6 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
     else:
         result.newbie_confidence = "low"
     
-    # 5. 判定等级
     s = result.newbie_score
     if s >= 50:
         result.level = "纯小白"
@@ -206,16 +179,13 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
     else:
         result.level = "专业投资者"
     
-    # 6. 生成推理文本
     result.reasoning = _generate_reasoning(
         title, matched_newbie, matched_pro, extra_reasons,
         total_newbie, total_pro, result
     )
     
-    # 7. 情绪分析
     result.sentiment_score = _analyze_sentiment(full_text)
     
-    # 8. 买入/卖出意图判定
     buy_count = sum(1 for kw in BUY_KEYWORDS if kw in full_text)
     sell_count = sum(1 for kw in SELL_KEYWORDS if kw in full_text)
     
@@ -229,7 +199,6 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
         result.intent = "neutral"
         result.intent_strength = 0
     
-    # 9. 关键信号摘要（用于前端卡片）
     result.key_signals = []
     for name, desc, weight, kws in matched_newbie[:3]:
         result.key_signals.append(f"「{name}」{desc} (命中: {', '.join(kws[:2])})")
@@ -251,10 +220,8 @@ def _generate_reasoning(
     total_pro: float,
     result: AnalysisResult,
 ) -> str:
-    """生成人类可读的推理文本"""
     parts = []
     
-    # 开头
     parts.append(f"帖子「{title[:40]}...」")
     
     if not matched_newbie and not matched_pro:
@@ -262,21 +229,17 @@ def _generate_reasoning(
         parts.append("根据有限信息判定为中间派。")
         return " ".join(parts)
     
-    # 小白信号
     if matched_newbie:
         signal_descs = [f"{name}({weight}分)" for name, desc, weight, kws in matched_newbie]
         parts.append(f"命中{len(matched_newbie)}个小信号: {', '.join(signal_descs)}。")
     
-    # 专业信号
     if matched_pro:
         signal_descs = [f"{name}({weight}分)" for name, desc, weight, kws in matched_pro]
         parts.append(f"命中{len(matched_pro)}个专业信号: {', '.join(signal_descs)}。")
     
-    # 额外
     if extra_reasons:
         parts.extend(extra_reasons)
     
-    # 结论
     parts.append(f"综合得分{result.newbie_score}分，")
     parts.append(f"判定为「{result.level}」")
     parts.append(f"(置信度: {result.newbie_confidence})。")
@@ -285,7 +248,6 @@ def _generate_reasoning(
 
 
 def _analyze_sentiment(text: str) -> float:
-    """情绪分析: -1(恐慌) ~ +1(贪婪)"""
     greed_words = ["冲", "梭哈", "稳赚", "必涨", "躺赚", "满仓", "抄底", "起飞", "暴涨", "翻倍", "赚了", "盈利"]
     fear_words = ["割肉", "止损", "亏", "跌惨", "暴跌", "崩盘", "完了", "套牢", "深套", "亏了", "赔了", "大跌"]
     
@@ -298,24 +260,17 @@ def _analyze_sentiment(text: str) -> float:
     return round((greed - fear) / total, 2)
 
 
-# ============================================================
-# 批量分析
-# ============================================================
-
 def analyze_sector(posts: List[Dict], sector: str) -> List[AnalysisResult]:
-    """分析一个板块的所有帖子"""
     results = []
     for post in posts:
         result = analyze_post(post, sector)
         results.append(result)
     
-    # 按小白分数排序
     results.sort(key=lambda r: r.newbie_score, reverse=True)
     return results
 
 
 def analyze_all(sector_data: Dict[str, List[Dict]]) -> Dict[str, List[AnalysisResult]]:
-    """分析所有板块"""
     all_results = {}
     for sector, posts in sector_data.items():
         print(f"  分析 {sector}: {len(posts)} 条帖子...")

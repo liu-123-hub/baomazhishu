@@ -1,60 +1,339 @@
-"""
-宝妈指数 — 主流程
-采集 → 分析 → 计算 → 存储 → 输出
-"""
+"""宝妈指数主流程：采集→分析→计算→存储→输出。"""
 import sys
 import os
 import json
-from datetime import datetime
+import time
+from datetime import datetime, timedelta
+from typing import Dict, List, Optional
 
-# 确保项目根目录在 path 中
 sys.path.insert(0, os.path.dirname(__file__))
 
 from collectors.guba_collector import collect_all as collect_guba
 from collectors.xhs_collector import collect_all as collect_xhs
+from collectors.google_news_collector import collect_all as collect_google_news
+from collectors.netease_finance_collector import collect_all as collect_netease
+from collectors.xueqiu_collector import collect_all as collect_xueqiu
+from collectors.sina_finance_collector import collect_all as collect_sina
+from collectors.xueqiu_community_collector import collect_all as collect_xueqiu_community
+from collectors.market_data_collector import collect_all as collect_market_data
+from collectors.capital_flow_collector import collect_all as collect_capital_flow
+from collectors.data_validation import validate_source_posts
+from collectors.data_authenticator import (
+    authenticate_collected_data,
+    build_data_provenance,
+)
 from analyzer.llm_analyzer import analyze_all
 from analyzer.index_calculator import (
-    compute_sector_index, add_record, get_dashboard_data, SECTOR_NAMES
+    compute_sector_index, add_record, get_dashboard_data, load_history, save_history, SECTOR_NAMES
 )
 
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 
-def run_pipeline():
-    """执行完整的数据采集→分析→指数计算流程"""
+class DataSourceStatus:
+    """数据源状态追踪器。"""
+    
+    def __init__(self):
+        self.sources: Dict[str, Dict] = {}
+    
+    def add_source(self, name: str, status: str, count: int = 0, error: str = "", duration: float = 0.0):
+        self.sources[name] = {
+            "name": name,
+            "status": status,
+            "count": count,
+            "error": error,
+            "duration": round(duration, 2),
+        }
+    
+    def get_summary(self) -> str:
+        lines = []
+        total_count = 0
+        for name, info in self.sources.items():
+            status_icon = {
+                "success": "✅",
+                "failed": "❌",
+                "skipped": "⏭️",
+                "partial": "⚠️",
+            }.get(info["status"], "❓")
+            count_str = f"{info['count']}条" if info["count"] > 0 else ""
+            time_str = f"({info['duration']}s)" if info["duration"] > 0 else ""
+            error_str = f" — {info['error']}" if info["error"] else ""
+            lines.append(f"  {status_icon} {name}: {count_str} {time_str}{error_str}")
+            total_count += info["count"]
+        lines.append(f"  📊 总计: {total_count} 条真实数据")
+        return "\n".join(lines)
+    
+    def has_data(self) -> bool:
+        return any(info["count"] > 0 for info in self.sources.values())
+
+
+def _merge_sector_posts(
+    all_posts: Dict,
+    source_name: str,
+    source_posts: Dict,
+    auth_reports: List,
+    display_name: str,
+) -> int:
+    cleaned_posts, issues = validate_source_posts(source_name, source_posts)
+
+    issue_count = len([i for i in issues if "缺少字段" in i or "数据已过期" in i or "重复" in i])
+    if issue_count > 0:
+        print(f"  [校验] 发现 {issue_count} 个问题（详情见日志）")
+    for issue in issues:
+        print(f"    - {issue}")
+
+    auth_report = authenticate_collected_data(display_name, cleaned_posts)
+    auth_reports.append(auth_report)
+    if not auth_report["passed"]:
+        print(f"  [真实性校验] ❌ 数据源「{display_name}」校验未通过:")
+        for issue in auth_report["issues"]:
+            print(f"    - {issue}")
+
+    valid_count = 0
+    for sector, posts in cleaned_posts.items():
+        all_posts.setdefault(sector, [])
+        all_posts[sector].extend(posts)
+        valid_count += len(posts)
+
+    return valid_count
+
+
+def _write_dashboard_data(dashboard: Dict):
+    os.makedirs(DATA_DIR, exist_ok=True)
+    dashboard_file = os.path.join(DATA_DIR, "dashboard_data.json")
+    tmp_file = dashboard_file + ".tmp"
+    with open(tmp_file, 'w', encoding='utf-8') as f:
+        json.dump(dashboard, f, ensure_ascii=False, indent=2)
+    os.replace(tmp_file, dashboard_file)
+    print(f"  💾 数据已保存: {dashboard_file}")
+
+
+def run_pipeline() -> Dict:
+    """执行完整的数据采集→分析→指数计算流程。"""
     print("=" * 65)
-    print("   👩‍👧 宝妈指数 · 数据采集与分析")
+    print("   👩‍👧 宝妈指数 · 真实数据采集与分析")
     print(f"   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
     print("=" * 65)
     
-    # ===== 第1步: 数据采集 =====
-    print("\n📡 第1步: 数据采集")
-    
-    all_posts = {}
-    
-    # 东方财富股吧
-    print("  [东方财富股吧]")
-    guba_data = collect_guba()
-    for sector, posts in guba_data.items():
-        all_posts[sector] = all_posts.get(sector, []) + posts
-    
-    # 小红书 (如果有API Key)
-    print("  [小红书]")
+    status_tracker = DataSourceStatus()
+    auth_reports: List = []
+
+    print("\n🔌 第0步: 数据源连通性预检")
+    print("-" * 45)
+    try:
+        import asyncio as _asyncio
+        from collectors.source_health_check import run_health_check
+        loop = _asyncio.new_event_loop()
+        try:
+            health_result = loop.run_until_complete(run_health_check())
+        finally:
+            loop.close()
+        summary = health_result["summary"]
+        print(f"  可达: {summary['reachable']}/{summary['total']}，"
+              f"不可达: {summary['unreachable']}，跳过: {summary['skipped']}")
+        for d in health_result["details"]:
+            icon = {"reachable": "✅", "unreachable": "❌", "skipped": "⏭️"}.get(d["status"], "❓")
+            latency = f"({d['latency_ms']}ms)" if d["latency_ms"] else ""
+            err = f" — {d['error']}" if d["error"] else ""
+            print(f"    {icon} {d['name']}{latency}{err}")
+        if summary["all_unreachable"]:
+            print("\n  ⚠️ 所有数据源均不可达，但仍尝试执行采集（可能为预检误判）")
+    except Exception as e:
+        print(f"  ⚠️ 连通性预检异常（不阻断采集）: {e}")
+
+    print("\n📡 第1步: 真实数据采集")
+    print("-" * 45)
+
+    all_posts: Dict[str, List] = {}
+
+    print("\n  [1/6] 东方财富股吧")
+    guba_start = time.time()
+    try:
+        guba_data = collect_guba()
+        guba_count = _merge_sector_posts(all_posts, "guba", guba_data, auth_reports, "东方财富股吧")
+        guba_duration = time.time() - guba_start
+        status_tracker.add_source(
+            "东方财富股吧",
+            "success" if guba_count > 0 else "partial",
+            guba_count,
+            duration=guba_duration
+        )
+    except Exception as e:
+        guba_duration = time.time() - guba_start
+        status_tracker.add_source("东方财富股吧", "failed", 0, str(e), guba_duration)
+        print(f"  ❌ 东方财富股吧采集失败: {e}")
+
+    print("\n  [2/6] 小红书")
+    xhs_start = time.time()
     try:
         xhs_data = collect_xhs()
-        for sector, posts in xhs_data.items():
-            all_posts[sector] = all_posts.get(sector, []) + posts
+        xhs_count = _merge_sector_posts(all_posts, "xiaohongshu", xhs_data, auth_reports, "小红书")
+        xhs_duration = time.time() - xhs_start
+        xhs_has_key = os.environ.get("RNODE_API_KEY", "") != ""
+        if xhs_has_key:
+            status = "success" if xhs_count > 0 else "partial"
+        else:
+            status = "skipped"
+        status_tracker.add_source(
+            "小红书",
+            status,
+            xhs_count,
+            error="" if xhs_has_key else "未配置API Key",
+            duration=xhs_duration
+        )
     except Exception as e:
-        print(f"  小红书采集跳过: {e}")
+        xhs_duration = time.time() - xhs_start
+        status_tracker.add_source("小红书", "failed", 0, str(e), xhs_duration)
+        print(f"  ❌ 小红书采集失败: {e}")
+
+    print("\n  [3/6] Google News RSS")
+    gnews_start = time.time()
+    try:
+        google_news_data = collect_google_news()
+        gnews_count = _merge_sector_posts(all_posts, "google_news_rss", google_news_data, auth_reports, "Google News")
+        gnews_duration = time.time() - gnews_start
+        status_tracker.add_source(
+            "Google News",
+            "success" if gnews_count > 0 else "partial",
+            gnews_count,
+            duration=gnews_duration
+        )
+    except Exception as e:
+        gnews_duration = time.time() - gnews_start
+        status_tracker.add_source("Google News", "failed", 0, str(e), gnews_duration)
+        print(f"  ❌ Google News采集失败: {e}")
+
+    print("\n  [4/6] 网易财经 RSS")
+    netease_start = time.time()
+    try:
+        netease_data = collect_netease()
+        netease_count = _merge_sector_posts(all_posts, "netease_finance_rss", netease_data, auth_reports, "网易财经")
+        netease_duration = time.time() - netease_start
+        status_tracker.add_source(
+            "网易财经",
+            "success" if netease_count > 0 else "partial",
+            netease_count,
+            duration=netease_duration
+        )
+    except Exception as e:
+        netease_duration = time.time() - netease_start
+        status_tracker.add_source("网易财经", "failed", 0, str(e), netease_duration)
+        print(f"  ❌ 网易财经采集失败: {e}")
+
+    print("\n  [5/6] 东方财富资讯")
+    xq_start = time.time()
+    try:
+        xq_data = collect_xueqiu()
+        xq_count = _merge_sector_posts(all_posts, "eastmoney_news", xq_data, auth_reports, "东方财富资讯")
+        xq_duration = time.time() - xq_start
+        status_tracker.add_source(
+            "东方财富资讯",
+            "success" if xq_count > 0 else "partial",
+            xq_count,
+            duration=xq_duration
+        )
+    except Exception as e:
+        xq_duration = time.time() - xq_start
+        status_tracker.add_source("东方财富资讯", "failed", 0, str(e), xq_duration)
+        print(f"  ❌ 东方财富资讯采集失败: {e}")
+
+    print("\n  [6/9] 同花顺财经")
+    sina_start = time.time()
+    try:
+        sina_data = collect_sina()
+        sina_count = _merge_sector_posts(all_posts, "ths_finance", sina_data, auth_reports, "同花顺财经")
+        sina_duration = time.time() - sina_start
+        status_tracker.add_source(
+            "同花顺财经",
+            "success" if sina_count > 0 else "partial",
+            sina_count,
+            duration=sina_duration
+        )
+    except Exception as e:
+        sina_duration = time.time() - sina_start
+        status_tracker.add_source("同花顺财经", "failed", 0, str(e), sina_duration)
+        print(f"  ❌ 同花顺财经采集失败: {e}")
+
+    print("\n  [7/9] 雪球社区")
+    xq_community_start = time.time()
+    try:
+        xq_community_data = collect_xueqiu_community()
+        xq_community_count = _merge_sector_posts(all_posts, "xueqiu_community", xq_community_data, auth_reports, "雪球社区")
+        xq_community_duration = time.time() - xq_community_start
+        status_tracker.add_source(
+            "雪球社区",
+            "success" if xq_community_count > 0 else "partial",
+            xq_community_count,
+            duration=xq_community_duration
+        )
+    except Exception as e:
+        xq_community_duration = time.time() - xq_community_start
+        status_tracker.add_source("雪球社区", "failed", 0, str(e), xq_community_duration)
+        print(f"  ❌ 雪球社区采集失败: {e}")
+
+    print("\n  [8/9] 行情数据 (AKShare)")
+    market_start = time.time()
+    try:
+        market_data = collect_market_data()
+        market_duration = time.time() - market_start
+        market_etf_count = sum(len(v) for v in market_data.get("etf_data", {}).values())
+        market_idx_count = len(market_data.get("benchmark_indices", {}))
+        status_tracker.add_source(
+            "行情数据(AKShare)",
+            "success" if market_etf_count > 0 else "partial",
+            market_etf_count,
+            duration=market_duration
+        )
+        print(f"     ETF板块: {len(market_data.get('etf_data', {}))}个, 基准指数: {market_idx_count}个")
+    except Exception as e:
+        market_duration = time.time() - market_start
+        status_tracker.add_source("行情数据(AKShare)", "failed", 0, str(e), market_duration)
+        print(f"  ❌ 行情数据采集失败: {e}")
+
+    print("\n  [9/9] 市场异动数据 (AKShare)")
+    cf_start = time.time()
+    try:
+        capital_flow_data = collect_capital_flow()
+        cf_duration = time.time() - cf_start
+        lu_days = len(capital_flow_data.get("limit_up_pool", {}).get("data", []))
+        lu_stocks = sum(
+            len(d.get("stocks", []))
+            for d in capital_flow_data.get("limit_up_pool", {}).get("data", [])
+        )
+        dtl_days = len(capital_flow_data.get("dragon_tiger_list", {}).get("data", []))
+        dtl_stocks = sum(
+            len(d.get("stocks", []))
+            for d in capital_flow_data.get("dragon_tiger_list", {}).get("data", [])
+        )
+        status_tracker.add_source(
+            "市场异动数据(AKShare)",
+            "success" if lu_days > 0 or dtl_days > 0 else "partial",
+            lu_stocks + dtl_stocks,
+            duration=cf_duration
+        )
+        print(f"     涨停池: {lu_days}天/{lu_stocks}只, 龙虎榜: {dtl_days}天/{dtl_stocks}只")
+    except Exception as e:
+        cf_duration = time.time() - cf_start
+        status_tracker.add_source("市场异动数据(AKShare)", "failed", 0, str(e), cf_duration)
+        print(f"  ❌ 市场异动数据采集失败: {e}")
+
+    print("\n" + "-" * 45)
+    print("  📋 数据源状态汇总:")
+    print(status_tracker.get_summary())
     
     total_collected = sum(len(v) for v in all_posts.values())
-    print(f"\n  共采集 {total_collected} 条帖子\n")
+    if total_collected == 0:
+        print("\n❌ 所有数据源均未采集到数据，无法继续分析")
+        raise RuntimeError("所有真实数据源均不可用，请检查网络连接或数据源配置")
     
-    # ===== 第2步: LLM分析 =====
-    print("🧠 第2步: LLM 多维度分析")
+    print(f"\n  📊 共采集 {total_collected} 条真实数据\n")
+    
+    print("🧠 第2步: 多维度分析")
+    print("-" * 45)
+    analysis_start = time.time()
     analysis_results = analyze_all(all_posts)
+    analysis_duration = time.time() - analysis_start
     
-    # 打印每个板块的 top 小白帖
     for sector, results in analysis_results.items():
         top_newbie = [r for r in results if r.newbie_score >= 30][:3]
         print(f"\n  [{SECTOR_NAMES.get(sector, sector)}] 共分析 {len(results)} 条")
@@ -63,8 +342,10 @@ def run_pipeline():
             for r in top_newbie:
                 print(f"     [{r.level} {r.newbie_score}分] {r.title[:50]}...")
     
-    # ===== 第3步: 指数计算 =====
+    print(f"\n  ⏱️ 分析耗时: {round(analysis_duration, 2)}s")
+    
     print("\n📊 第3步: 指数计算")
+    print("-" * 45)
     
     sector_indices = {}
     for sector, results in analysis_results.items():
@@ -75,34 +356,30 @@ def run_pipeline():
         bar = "█" * int(result["index"] / 5) + "░" * (20 - int(result["index"] / 5))
         print(f"  {name:6s} {bar} {result['index']:5.1f}  [{d['newbie_posts']}/{d['total_posts']}小白, {d['newbie_ratio']}%]")
     
-    # ===== 第4步: 存储历史 =====
     print("\n💾 第4步: 存储历史记录")
+    print("-" * 45)
     add_record(sector_indices, analysis_results)
+    print("  ✅ 历史记录已更新")
     
-    # ===== 第5步: 输出前端数据 =====
+    print("\n🌐 第5步: 生成前端数据")
+    print("-" * 45)
     dashboard = get_dashboard_data()
-    os.makedirs(DATA_DIR, exist_ok=True)
-    dashboard_file = os.path.join(DATA_DIR, "dashboard_data.json")
-    with open(dashboard_file, 'w', encoding='utf-8') as f:
-        json.dump(dashboard, f, ensure_ascii=False, indent=2)
-    print(f"  数据已保存: {dashboard_file}")
     
-    # 同步到 frontend/data/（前端服务器从这里读取）
-    frontend_data_dir = os.path.join(os.path.dirname(__file__), "frontend", "data")
-    os.makedirs(frontend_data_dir, exist_ok=True)
-    for fname in ["dashboard_data.json", "history.json", "xhs_posts.json"]:
-        src = os.path.join(DATA_DIR, fname)
-        dst = os.path.join(frontend_data_dir, fname)
-        if os.path.exists(src):
-            import shutil
-            shutil.copy2(src, dst)
-    print(f"  已同步到: {frontend_data_dir}")
+    dashboard["data_sources"] = status_tracker.sources
+    dashboard["generated_at"] = datetime.now().isoformat()
+    dashboard["is_real_data"] = True
+
+    total_records = sum(len(v) for v in all_posts.values())
+    dashboard["data_provenance"] = build_data_provenance(auth_reports, total_records)
+
+    _write_dashboard_data(dashboard)
     
-    # ===== 总结 =====
     print("\n" + "=" * 65)
     print("   ✅ 分析完成!")
-    print(f"   历史记录: {dashboard['record_count']} 条")
+    print(f"   📅 历史记录: {dashboard['record_count']} 天")
+    print(f"   🔢 今日数据: {total_collected} 条真实帖子")
     if dashboard["latest"]:
+        print()
         for sector, data in dashboard["latest"]["sectors"].items():
             name = SECTOR_NAMES.get(sector, sector)
             print(f"   {name}: {data['index']} — {data['interpretation']}")
@@ -111,87 +388,17 @@ def run_pipeline():
     return dashboard
 
 
-def generate_sample_history(days: int = 30):
-    """生成模拟历史数据（用于展示前端曲线效果）"""
-    import random
-    import math
-    
-    history = {"records": []}
-    base_indices = {
-        "nasdaq": 35,
-        "gold": 28,
-        "cpo": 22,
-        "semiconductor": 30,
-    }
-    
-    today = datetime.now()
-    for i in range(days, 0, -1):
-        d = today.replace(day=min(today.day, 28))  # 简化
-        d = d.replace(day=max(1, d.day - i))
-        record = {"date": d.strftime("%Y-%m-%d"), "sectors": {}}
-        
-        for sector, base in base_indices.items():
-            # 模拟波动：当前趋势 + 随机噪音
-            trend = 15 * math.sin(i / 10.0)  # 周期性波动
-            noise = random.uniform(-8, 8)
-            idx = round(base + trend + noise, 1)
-            idx = max(0, min(100, idx))
-            
-            record["sectors"][sector] = {
-                "index": idx,
-                "interpretation": interpret(idx),
-                "details": {
-                    "total_posts": random.randint(60, 85),
-                    "valid_posts": random.randint(55, 80),
-                    "spam_posts": random.randint(0, 5),
-                    "newbie_posts": random.randint(3, 25),
-                    "pure_newbie": random.randint(0, 5),
-                    "newbie_ratio": round(random.uniform(5, 35), 1),
-                    "avg_newbie_score": round(random.uniform(20, 50), 1),
-                    "avg_sentiment": round(random.uniform(20, 80), 1),
-                    "purity_signal": round(random.uniform(10, 60), 1),
-                    "activity": round(random.uniform(60, 100), 1),
-                },
-                "top_newbie_posts": [],
-            }
-        
-        history["records"].append(record)
-    
-    history["records"].sort(key=lambda r: r["date"])
-    return history
-
-
-def interpret(idx):
-    if idx >= 75: return "🔴 极度狂热"
-    if idx >= 60: return "🟠 高度警惕"
-    if idx >= 40: return "🟡 开始升温"
-    if idx >= 20: return "🟢 正常区间"
-    return "🔵 极度冷清"
-
-
-if __name__ == "__main__":
-    # 先跑真实采集
-    dashboard = run_pipeline()
-    
-    # 如果历史数据不够，补充模拟数据
-    if dashboard["record_count"] < 5:
-        print("\n📝 历史数据不足，生成30天模拟数据用于前端展示...")
-        sample = generate_sample_history(30)
-        from analyzer.index_calculator import save_history
-        # 合并：保留真实数据，补充模拟历史
-        existing = dashboard.get("sector_history", {})
-        real_dates = set()
-        if dashboard["latest"]:
-            real_dates.add(dashboard["latest"]["date"])
-        
-        history = {"records": []}
-        for r in sample["records"]:
-            if r["date"] not in real_dates:
-                history["records"].append(r)
-        # 再加回真实记录
-        history["records"].extend([
-            r for r in sample["records"] if r["date"] in real_dates
-        ])
-        history["records"].sort(key=lambda r: r["date"])
-        save_history(history)
-        print(f"  已生成 {len(history['records'])} 天历史数据")
+if __name__ == "__main__":  # pragma: no cover
+    try:
+        dashboard = run_pipeline()
+    except RuntimeError as e:
+        print(f"\n❌ 运行失败: {e}")
+        sys.exit(1)
+    except KeyboardInterrupt:
+        print("\n\n⏹️ 用户中断")
+        sys.exit(0)
+    except Exception as e:
+        print(f"\n❌ 未预期的错误: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)

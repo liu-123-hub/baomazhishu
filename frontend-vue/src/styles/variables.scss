@@ -1,0 +1,418 @@
+// ==========================================
+// Design Token - 现代深色大屏设计系统 v4.0
+// ==========================================
+// 设计原则：
+// - 8pt 网格、更柔和的深色背景、更大圆角、细腻边框
+// - 主色采用 Sky 500（科技蓝青），保留板块专属霓虹色作为图表 accent
+// - WCAG 2.1 AA 对比度
+// ==========================================
+
+// ------------------------------------------
+// 1. 色彩体系 Color Palette
+// ------------------------------------------
+
+// 主色 - 科技天青
+$color-primary: #0ea5e9;
+$color-primary-light: #38bdf8;
+$color-primary-lighter: #7dd3fc;
+$color-primary-dark: #0284c7;
+$color-primary-50: rgba(14, 165, 233, 0.05);
+$color-primary-100: rgba(14, 165, 233, 0.08);
+$color-primary-200: rgba(14, 165, 233, 0.15);
+$color-primary-300: rgba(14, 165, 233, 0.25);
+$color-primary-500: rgba(14, 165, 233, 0.5);
+$color-primary-700: rgba(14, 165, 233, 0.7);
+
+// 辅助色 - 极光绿
+$color-secondary: #22c55e;
+$color-success: #22c55e;
+$color-success-light: #4ade80;
+$color-success-dark: #16a34a;
+$color-success-100: rgba(34, 197, 94, 0.08);
+$color-success-200: rgba(34, 197, 94, 0.15);
+$color-success-500: rgba(34, 197, 94, 0.5);
+
+// 警告色 - 琥珀金
+$color-warning: #f59e0b;
+$color-warning-light: #fbbf24;
+$color-warning-dark: #d97706;
+$color-warning-100: rgba(245, 158, 11, 0.08);
+$color-warning-200: rgba(245, 158, 11, 0.15);
+$color-warning-500: rgba(245, 158, 11, 0.5);
+
+// 危险色 - 玫瑰红
+$color-danger: #ef4444;
+$color-error: #ef4444;
+$color-danger-light: #f87171;
+$color-danger-dark: #dc2626;
+$color-danger-100: rgba(239, 68, 68, 0.08);
+$color-danger-200: rgba(239, 68, 68, 0.15);
+$color-danger-500: rgba(239, 68, 68, 0.5);
+
+// 信息色 - 青蓝
+$color-info: #06b6d4;
+$color-info-light: #22d3ee;
+$color-info-dark: #0891b2;
+$color-info-100: rgba(6, 182, 212, 0.08);
+$color-info-500: rgba(6, 182, 212, 0.5);
+
+// 板块专属色（图表/标记，保持高饱和）
+$color-purple: #a855f7;
+$color-pink: #f472b6;
+$color-orange: #fb923c;
+$color-green: #22c55e;
+$color-cyan: #06b6d4;
+
+// ------------------------------------------
+// 2. 统一图表色板 Chart Color Palette
+// ------------------------------------------
+$chart-colors: (
+  0: #0ea5e9,
+  1: #22c55e,
+  2: #f59e0b,
+  3: #ef4444,
+  4: #06b6d4,
+  5: #a855f7,
+  6: #f472b6,
+  7: #fb923c,
+  8: #84cc16,
+  9: #60a5fa,
+  10: #f87171,
+  11: #34d399,
+  12: #fbbf24,
+  13: #a78bfa,
+  14: #fb7185
+);
+
+$chart-text-primary: #f8fafc;
+$chart-text-secondary: rgba(248, 250, 252, 0.7);
+$chart-text-tertiary: rgba(248, 250, 252, 0.55);
+$chart-bg-tooltip: rgba(15, 23, 42, 0.95);
+$chart-border-tooltip: rgba(14, 165, 233, 0.3);
+$chart-split-line: rgba(248, 250, 252, 0.06);
+$chart-axis-line: rgba(248, 250, 252, 0.15);
+
+// ------------------------------------------
+// 3. 中性色 Neutral Colors
+// ------------------------------------------
+
+// 背景色
+$color-bg-base: #020617;
+$color-bg-base-gradient: radial-gradient(ellipse 80% 50% at 50% -10%, rgba(14, 165, 233, 0.12), transparent),
+  radial-gradient(ellipse 60% 40% at 100% 100%, rgba(34, 197, 94, 0.06), transparent);
+$color-bg-card: rgba(15, 23, 42, 0.65);
+$color-bg-card-hover: rgba(30, 41, 59, 0.75);
+$color-bg-card-fallback: #0f172a;
+$color-bg-elevated: rgba(30, 41, 59, 0.85);
+$color-bg-overlay: rgba(2, 6, 23, 0.7);
+$color-bg-input: rgba(248, 250, 252, 0.05);
+$color-bg-hover: rgba(248, 250, 252, 0.05);
+$color-bg-active: rgba(248, 250, 252, 0.08);
+
+// 边框色
+$color-border: rgba(148, 163, 184, 0.12);
+$color-border-light: rgba(248, 250, 252, 0.06);
+$color-border-lighter: rgba(248, 250, 252, 0.04);
+
+// 文字色
+$color-text-primary: #f8fafc;
+$color-text-secondary: #94a3b8;
+$color-text-tertiary: #64748b;
+$color-text-disabled: #475569;
+$color-text-inverse: #020617;
+
+// ------------------------------------------
+// 4. 板块专属色 Sector Colors
+// ------------------------------------------
+$sector-colors: (
+  nasdaq: #0ea5e9,
+  gold: #f59e0b,
+  cpo: #22c55e,
+  semiconductor: #ef4444,
+  bank: #06b6d4,
+  securities: #a855f7,
+  biotech: #f472b6,
+  consumer: #fb923c,
+  newenergy: #22c55e
+);
+
+// ------------------------------------------
+// 5. 字体 Typography
+// ------------------------------------------
+$font-family-base: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC',
+  'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+$font-family-mono: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'Consolas',
+  'Liberation Mono', Menlo, monospace;
+$font-family-numeric: 'SF Mono', 'JetBrains Mono', 'Fira Code', 'DIN Alternate',
+  'Microsoft YaHei', monospace;
+
+$font-size-xs: 12px;
+$font-size-sm: 13px;
+$font-size-base: 14px;
+$font-size-md: 15px;
+$font-size-lg: 16px;
+$font-size-xl: 18px;
+$font-size-2xl: 20px;
+$font-size-3xl: 24px;
+$font-size-4xl: 32px;
+$font-size-5xl: 48px;
+$font-size-6xl: 64px;
+
+$font-weight-regular: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+$line-height-tight: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.75;
+
+// ------------------------------------------
+// 6. 间距 Spacing (8pt 网格系统)
+// ------------------------------------------
+$spacing-1: 4px;
+$spacing-2: 8px;
+$spacing-3: 12px;
+$spacing-4: 16px;
+$spacing-5: 20px;
+$spacing-6: 24px;
+$spacing-8: 32px;
+$spacing-10: 40px;
+$spacing-12: 48px;
+$spacing-16: 64px;
+
+// ------------------------------------------
+// 7. 圆角 Border Radius
+// ------------------------------------------
+$radius-sm: 6px;
+$radius-md: 10px;
+$radius-lg: 14px;
+$radius-xl: 18px;
+$radius-2xl: 24px;
+$radius-full: 9999px;
+
+// ------------------------------------------
+// 8. 阴影 Shadows
+// ------------------------------------------
+$shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.25);
+$shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+$shadow-md: 0 4px 16px rgba(0, 0, 0, 0.35);
+$shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4);
+$shadow-xl: 0 12px 40px rgba(0, 0, 0, 0.45);
+$shadow-glow-primary: 0 0 24px rgba(14, 165, 233, 0.22);
+$shadow-glow-success: 0 0 24px rgba(34, 197, 94, 0.22);
+$shadow-glow-warning: 0 0 24px rgba(245, 158, 11, 0.22);
+$shadow-glow-danger: 0 0 24px rgba(239, 68, 68, 0.22);
+
+// ------------------------------------------
+// 9. 层级 Z-Index Scale
+// ------------------------------------------
+$z-index-hidden: -1;
+$z-index-base: 0;
+$z-index-sticky: 100;
+$z-index-dropdown: 1000;
+$z-index-sticky-header: 1020;
+$z-index-fixed: 1030;
+$z-index-modal-backdrop: 1040;
+$z-index-modal: 1050;
+$z-index-popover: 1060;
+$z-index-tooltip: 1070;
+$z-index-notification: 1080;
+$z-index-toast: 1090;
+
+// ------------------------------------------
+// 10. 断点 Breakpoints (Mobile First)
+// ------------------------------------------
+$breakpoint-xs: 320px;
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+$breakpoint-4k: 2560px;
+
+// ------------------------------------------
+// 11. 过渡动画 Transitions
+// ------------------------------------------
+$transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-normal: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+$transition-slower: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+
+// ------------------------------------------
+// 12. 混合宏 Mixins
+// ------------------------------------------
+
+@mixin flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+@mixin card-style {
+  position: relative;
+  background: $color-bg-card;
+  @supports (backdrop-filter: blur(16px)) or (-webkit-backdrop-filter: blur(16px)) {
+    background: $color-bg-card;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  box-shadow: $shadow-md;
+  // 性能优化：仅对 transform 和 opacity 做过渡（GPU 合成属性），避免 background/border-color 触发重绘
+  // box-shadow 通过伪元素 opacity 变化实现，避免直接过渡阴影引发重绘
+  transition: transform $transition-normal, opacity $transition-normal;
+  backface-visibility: hidden;
+  // 隔离卡片内部布局与绘制，避免单卡片变化触发大面积重排/重绘
+  contain: layout paint;
+
+  // 悬停背景通过伪元素 opacity 变化实现，可硬件加速
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: $color-bg-card-hover;
+    opacity: 0;
+    transition: opacity $transition-normal;
+    pointer-events: none;
+    z-index: -1;
+  }
+
+  // 阴影层：通过 opacity 过渡替代直接过渡 box-shadow
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: $shadow-lg, $shadow-glow-primary;
+    opacity: 0;
+    transition: opacity $transition-normal;
+    pointer-events: none;
+    z-index: -2;
+  }
+}
+
+@mixin card-hover {
+  &:hover {
+    border-color: rgba($color-primary, 0.35);
+    transform: translateY(-2px);
+    will-change: transform;
+
+    &::before,
+    &::after {
+      opacity: 1;
+    }
+  }
+}
+
+@mixin text-glow($color: $color-primary) {
+  text-shadow: 0 0 12px rgba($color, 0.4), 0 0 24px rgba($color, 0.15);
+}
+
+@mixin ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin ellipsis-multi($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+@mixin custom-scrollbar($size: 6px, $color: $color-primary-300) {
+  scrollbar-width: thin;
+  scrollbar-color: $color transparent;
+
+  &::-webkit-scrollbar {
+    width: $size;
+    height: $size;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: $color;
+    border-radius: calc($size / 2);
+
+    &:hover {
+      background: $color-primary-500;
+    }
+  }
+}
+
+@mixin safe-area-inset-top {
+  padding-top: max(env(safe-area-inset-top, 0px), 0px);
+}
+
+@mixin safe-area-inset-bottom {
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 0px);
+}
+
+@mixin numeric-font {
+  font-family: $font-family-numeric;
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+@mixin focus-ring($color: $color-primary) {
+  outline: 2px solid $color;
+  outline-offset: 2px;
+}
+
+@mixin reduce-motion {
+  @media (prefers-reduced-motion: reduce) {
+    @content;
+  }
+}
+
+@mixin skeleton-loading {
+  position: relative;
+  overflow: hidden;
+  background: rgba(248, 250, 252, 0.03);
+
+  // 使用 transform 位移动画代替 background-position，提升 GPU 合成效率
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(248, 250, 252, 0.05) 50%,
+      transparent 100%
+    );
+    transform: translateX(-100%);
+    animation: skeleton-shimmer 1.5s ease-in-out infinite;
+    will-change: transform;
+  }
+}
+
+@mixin glass-effect($blur: 16px, $bg: $color-bg-card, $fallback: $color-bg-card-fallback) {
+  background: $fallback;
+  @supports (backdrop-filter: blur(#{$blur})) or (-webkit-backdrop-filter: blur(#{$blur})) {
+    background: $bg;
+    backdrop-filter: blur($blur);
+    -webkit-backdrop-filter: blur($blur);
+  }
+}
+
+@mixin page-transition {
+  animation: page-enter 0.25s cubic-bezier(0.22, 0.61, 0.36, 1) both;
+}
+
+// ==========================================
+// 13. CSS 自定义属性（在 global.scss :root 注入）
+// ==========================================

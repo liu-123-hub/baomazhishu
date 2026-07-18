@@ -1,763 +1,1024 @@
 {
   "latest": {
-    "date": "2026-06-21",
-    "timestamp": "2026-06-21T12:20:00",
+    "date": "2026-07-17",
+    "timestamp": "2026-07-17T07:44:43.751780",
     "sectors": {
       "nasdaq": {
-        "index": 50.4,
-        "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
         "details": {
-          "total_posts": 91,
-          "valid_posts": 86,
-          "spam_posts": 5,
-          "newbie_posts": 24,
-          "pure_newbie": 6,
-          "newbie_ratio": 27.9,
-          "avg_newbie_score": 41.3,
-          "avg_sentiment": 80.0,
-          "purity_signal": 25.0,
-          "activity": 100,
-          "mom_buy_index": 46.2,
-          "mom_sell_index": 0.0,
-          "buy_sell_ratio": 3.0,
-          "buy_count": 9,
-          "sell_count": 0
-        },
-        "top_newbie_posts": [
-          {
-            "title": "美股还能不能买啊，感觉涨好多了",
-            "score": 70.0,
-            "level": "纯小白",
-            "reasoning": "命中3个小信号: 身份自述(8分)、决策依赖(7分)、知识求助(6分)。综合得分70分，判定为「纯小白」(置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「决策依赖」请求他人替自己做投资决策 (命中: 能不能买)"
-            ]
-          },
-          {
-            "title": "纳指还能上车吗，纠结了好几天了",
-            "score": 48.0,
-            "level": "偏小白",
-            "reasoning": "命中决策依赖(7分)+情绪恐慌(5分)。标题极短+情绪化。综合得分48分，判定为「偏小白」(置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策 (命中: 还能上车吗)",
-              "「情绪恐慌」表达明显的恐惧/焦虑 (命中: 纠结)"
-            ]
-          },
-          {
-            "title": "把A股清仓全部换纳指了",
-            "score": 46.0,
-            "level": "偏小白",
-            "reasoning": "命中身份自述(8分)+过度乐观(4分)。全仓换标的典型小白操作。综合得分46分。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「身份自述」明确自称小白 (命中: 小白)",
-              "「过度乐观」非理性乐观 (命中: 全部)"
-            ]
-          }
-        ]
-      },
-      "gold": {
-        "index": 51.8,
-        "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
-        "details": {
-          "total_posts": 92,
-          "valid_posts": 86,
-          "spam_posts": 6,
-          "newbie_posts": 28,
-          "pure_newbie": 12,
-          "newbie_ratio": 32.6,
-          "avg_newbie_score": 53.8,
-          "avg_sentiment": 82.1,
-          "purity_signal": 42.9,
-          "activity": 100,
+          "total_posts": 22,
+          "valid_posts": 22,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 27.5,
           "mom_buy_index": 0.0,
-          "mom_sell_index": 64.1,
+          "mom_sell_index": 0.0,
           "buy_sell_ratio": 0.0,
           "buy_count": 0,
-          "sell_count": 14
+          "sell_count": 0
         },
-        "top_newbie_posts": [
-          {
-            "title": "黄金亏了20%了要不要割肉啊😭",
-            "score": 100,
-            "level": "纯小白",
-            "reasoning": "命中5个小信号: 身份自述(8分)、知识求助(6分)、决策依赖(7分)、情绪恐慌(5分)、跟风行为(6分)。综合得分100分，判定为「纯小白」(置信度: high)。",
-            "sentiment": -1.0,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「决策依赖」请求他人替自己做投资决策 (命中: 要不要割肉)"
-            ]
-          },
-          {
-            "title": "救命！！黄金大跌我要不要跑",
-            "score": 78.0,
-            "level": "纯小白",
-            "reasoning": "命中决策依赖(7分)+情绪恐慌(5分)。以问句结尾。综合得分78分，判定为「纯小白」(置信度: medium)。",
-            "sentiment": -1.0,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策 (命中: 要不要跑)",
-              "「情绪恐慌」表达明显的恐惧/焦虑 (命中: 救命)"
-            ]
-          },
-          {
-            "title": "亏了两万块，老公说再亏就离婚",
-            "score": 62.0,
-            "level": "纯小白",
-            "reasoning": "命中情绪恐慌(5分)+跟风行为(6分)。家庭财务冲突典型小白特征。综合得分62分，判定为「纯小白」(置信度: medium)。",
-            "sentiment": -1.0,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「情绪恐慌」表达明显的恐惧/焦虑 (命中: 亏了)",
-              "「跟风行为」典型的小白冲动决策"
-            ]
-          }
-        ]
+        "top_newbie_posts": []
+      },
+      "gold": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 20,
+          "valid_posts": 20,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 25.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
       },
       "cpo": {
-        "index": 60.4,
-        "interpretation": "🟠 高度警惕 — 小白大量涌入，市场情绪过热，建议大幅减仓",
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
         "details": {
-          "total_posts": 89,
-          "valid_posts": 86,
-          "spam_posts": 3,
-          "newbie_posts": 26,
-          "pure_newbie": 8,
-          "newbie_ratio": 30.2,
-          "avg_newbie_score": 50.8,
-          "avg_sentiment": 92.3,
-          "purity_signal": 30.8,
-          "activity": 100,
-          "mom_buy_index": 51.9,
-          "mom_sell_index": 20.9,
-          "buy_sell_ratio": 5.0,
-          "buy_count": 10,
-          "sell_count": 2
+          "total_posts": 24,
+          "valid_posts": 24,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 30.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
         },
-        "top_newbie_posts": [
-          {
-            "title": "CPO还能买吗？小白求教",
-            "score": 94.0,
-            "level": "纯小白",
-            "reasoning": "命中3个小信号: 身份自述(8分)、知识求助(6分)、决策依赖(7分)。综合得分94分，判定为「纯小白」(置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 小白)",
-              "「决策依赖」请求他人替自己做投资决策 (命中: 还能买吗)"
-            ]
-          },
-          {
-            "title": "满仓干就完了！冲冲冲！",
-            "score": 46.0,
-            "level": "偏小白",
-            "reasoning": "命中过度乐观(4分)+情绪恐慌(5分)。极端FOMO情绪。综合得分46分，判定为「偏小白」(置信度: medium)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观 (命中: 满仓干、冲)",
-              "「FOMO情绪」追逐已涨高的标的"
-            ]
-          },
-          {
-            "title": "后悔上周没买CPO少赚好多",
-            "score": 42.0,
-            "level": "偏小白",
-            "reasoning": "命中情绪恐慌(5分)+短期思维(3分)。后悔情绪典型追涨信号。综合得分42分。",
-            "sentiment": 0.5,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「情绪恐慌」后悔/焦虑情绪 (命中: 后悔)",
-              "「短期思维」只关注短期涨跌"
-            ]
-          }
-        ]
+        "top_newbie_posts": []
       },
       "semiconductor": {
-        "index": 43.5,
-        "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
         "details": {
-          "total_posts": 92,
-          "valid_posts": 90,
-          "spam_posts": 2,
-          "newbie_posts": 28,
-          "pure_newbie": 5,
-          "newbie_ratio": 31.1,
-          "avg_newbie_score": 38.6,
-          "avg_sentiment": 75.0,
-          "purity_signal": 17.9,
-          "activity": 100,
-          "mom_buy_index": 59.6,
+          "total_posts": 20,
+          "valid_posts": 20,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 25.0,
+          "mom_buy_index": 0.0,
           "mom_sell_index": 0.0,
-          "buy_sell_ratio": 3.0,
-          "buy_count": 12,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "bank": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 22,
+          "valid_posts": 22,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 27.5,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "securities": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 23,
+          "valid_posts": 23,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 28.7,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "biotech": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 23,
+          "valid_posts": 23,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 28.7,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "consumer": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 22,
+          "valid_posts": 22,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 27.5,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "newenergy": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 24,
+          "valid_posts": 24,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 30.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "insurance": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 24,
+          "valid_posts": 24,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 30.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "baijiu": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 23,
+          "valid_posts": 23,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 28.7,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "food": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 20,
+          "valid_posts": 20,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 25.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "medicine": {
+        "index": 28.2,
+        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
+        "details": {
+          "total_posts": 23,
+          "valid_posts": 23,
+          "spam_posts": 0,
+          "newbie_posts": 1,
+          "pure_newbie": 0,
+          "newbie_ratio": 4.3,
+          "avg_newbie_score": 26.0,
+          "avg_sentiment": 100.0,
+          "purity_signal": 0.0,
+          "activity": 28.7,
+          "mom_buy_index": 56.3,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 1.0,
+          "buy_count": 1,
           "sell_count": 0
         },
         "top_newbie_posts": [
           {
-            "title": "芯片半导体还能上车吗",
-            "score": 63.6,
-            "level": "纯小白",
-            "reasoning": "命中决策依赖(7分)+跟风行为(6分)。以问句结尾。综合得分63.6分，判定为「纯小白」(置信度: medium)。",
-            "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「决策依赖」请求他人替自己做投资决策 (命中: 还能上车吗)",
-              "「跟风行为」看见周围人都在买 (命中: 周围人都在买)"
-            ]
-          },
-          {
-            "title": "现在不买芯片老了会后悔",
-            "score": 58.0,
-            "level": "纯小白",
-            "reasoning": "命中FOMO信号(恐惧错过)。典型牛市顶部特征叙事。综合得分58分。",
+            "title": "中预控股CEO宫宇：携 2 亿营收启航，冲刺港股 IPO - 新浪新闻_手机新浪网",
+            "score": 26.0,
+            "level": "中间派",
+            "reasoning": "帖子「中预控股CEO宫宇：携 2 亿营收启航，冲刺港股 IPO - 新浪新闻_手机新浪...」 命中1个小信号: 过度乐观(4分)。 综合得分26.0分， 判定为「中间派」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
             "key_signals": [
-              "「FOMO信号」恐惧错过 (命中: 不买会后悔)",
-              "「过度乐观」非理性乐观"
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
             ]
-          },
+          }
+        ]
+      },
+      "appliance": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 24,
+          "valid_posts": 24,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 30.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "tourism": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 22,
+          "valid_posts": 22,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 27.5,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "electronics": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 21,
+          "valid_posts": 21,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 26.2,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "computer": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 24,
+          "valid_posts": 24,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 30.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "communication": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 23,
+          "valid_posts": 23,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 28.7,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "media": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 24,
+          "valid_posts": 24,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 30.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "nonferrous": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 23,
+          "valid_posts": 23,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 28.7,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "coal": {
+        "index": 11.2,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 24,
+          "valid_posts": 24,
+          "spam_posts": 0,
+          "newbie_posts": 1,
+          "pure_newbie": 0,
+          "newbie_ratio": 4.2,
+          "avg_newbie_score": 38.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0.0,
+          "activity": 30.0,
+          "mom_buy_index": 61.4,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 1.0,
+          "buy_count": 1,
+          "sell_count": 0
+        },
+        "top_newbie_posts": [
           {
-            "title": "后悔没早点买半导体",
-            "score": 44.0,
+            "title": "煤炭彻底火了！还能上车吗？重磅解读来了 - 证券时报",
+            "score": 38.0,
             "level": "偏小白",
-            "reasoning": "命中情绪恐慌(5分)+跟风行为(6分)。后悔情绪+跟风特征。综合得分44分。",
+            "reasoning": "帖子「煤炭彻底火了！还能上车吗？重磅解读来了 - 证券时报...」 命中1个小信号: 决策依赖(7分)。 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
             "key_signals": [
-              "「情绪恐慌」后悔/焦虑情绪 (命中: 后悔)",
-              "「跟风行为」跟随大众情绪"
+              "「决策依赖」请求他人替自己做投资决策（该不该/要不要/能不能） (命中: 还能上车吗)"
             ]
           }
         ]
+      },
+      "chemical": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 24,
+          "valid_posts": 24,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 30.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "steel": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 24,
+          "valid_posts": 24,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 30.0,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "realestate": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 21,
+          "valid_posts": 21,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 26.2,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
+      },
+      "infrastructure": {
+        "index": 0.0,
+        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "details": {
+          "total_posts": 21,
+          "valid_posts": 21,
+          "spam_posts": 0,
+          "newbie_posts": 0,
+          "pure_newbie": 0,
+          "newbie_ratio": 0.0,
+          "avg_newbie_score": 0.0,
+          "avg_sentiment": 0.0,
+          "purity_signal": 0,
+          "activity": 26.2,
+          "mom_buy_index": 0.0,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 0.0,
+          "buy_count": 0,
+          "sell_count": 0
+        },
+        "top_newbie_posts": []
       }
     }
   },
   "sector_history": {
-    "nasdaq": [
+    "bank": [
       {
-        "date": "2026-05-21",
-        "index": 25.8
+        "date": "2026-07-14",
+        "index": 13.3
       },
       {
-        "date": "2026-05-22",
-        "index": 24.8
+        "date": "2026-07-15",
+        "index": 9.7
       },
       {
-        "date": "2026-05-23",
-        "index": 28.5
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-05-24",
-        "index": 31.3
-      },
-      {
-        "date": "2026-05-25",
-        "index": 36.9
-      },
-      {
-        "date": "2026-05-26",
-        "index": 30.8
-      },
-      {
-        "date": "2026-05-27",
-        "index": 25.2
-      },
-      {
-        "date": "2026-05-28",
-        "index": 32.8
-      },
-      {
-        "date": "2026-05-29",
-        "index": 36.4
-      },
-      {
-        "date": "2026-05-30",
-        "index": 38.3
-      },
-      {
-        "date": "2026-05-31",
-        "index": 35.1
-      },
-      {
-        "date": "2026-06-01",
-        "index": 35.8
-      },
-      {
-        "date": "2026-06-02",
-        "index": 33.6
-      },
-      {
-        "date": "2026-06-03",
-        "index": 29.6
-      },
-      {
-        "date": "2026-06-04",
-        "index": 36.2
-      },
-      {
-        "date": "2026-06-05",
-        "index": 37.0
-      },
-      {
-        "date": "2026-06-06",
-        "index": 44.0
-      },
-      {
-        "date": "2026-06-07",
-        "index": 35.8
-      },
-      {
-        "date": "2026-06-08",
-        "index": 33.6
-      },
-      {
-        "date": "2026-06-09",
-        "index": 33.2
-      },
-      {
-        "date": "2026-06-10",
-        "index": 37.6
-      },
-      {
-        "date": "2026-06-11",
-        "index": 35.2
-      },
-      {
-        "date": "2026-06-12",
-        "index": 35.9
-      },
-      {
-        "date": "2026-06-13",
-        "index": 37.8
-      },
-      {
-        "date": "2026-06-14",
-        "index": 41.9
-      },
-      {
-        "date": "2026-06-15",
-        "index": 43.0
-      },
-      {
-        "date": "2026-06-16",
-        "index": 44.7
-      },
-      {
-        "date": "2026-06-17",
-        "index": 39.6
-      },
-      {
-        "date": "2026-06-18",
-        "index": 43.9
-      },
-      {
-        "date": "2026-06-19",
-        "index": 45.3
-      },
-      {
-        "date": "2026-06-20",
-        "index": 47.3
+        "date": "2026-07-17",
+        "index": 0.0
       }
     ],
-    "gold": [
+    "securities": [
       {
-        "date": "2026-05-21",
-        "index": 15
+        "date": "2026-07-14",
+        "index": 12.3
       },
       {
-        "date": "2026-05-22",
-        "index": 21.8
+        "date": "2026-07-15",
+        "index": 18.7
       },
       {
-        "date": "2026-05-23",
-        "index": 18.4
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-05-24",
-        "index": 30.9
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "insurance": [
+      {
+        "date": "2026-07-16",
+        "index": 28.2
       },
       {
-        "date": "2026-05-25",
-        "index": 26.8
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "baijiu": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-05-26",
-        "index": 27.7
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "food": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-05-27",
-        "index": 32.9
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "medicine": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-05-28",
-        "index": 17.8
+        "date": "2026-07-17",
+        "index": 28.2
+      }
+    ],
+    "appliance": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-05-29",
-        "index": 23.9
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "tourism": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-05-30",
-        "index": 31.4
-      },
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "biotech": [
       {
-        "date": "2026-05-31",
-        "index": 32.5
-      },
-      {
-        "date": "2026-06-01",
-        "index": 31.2
-      },
-      {
-        "date": "2026-06-02",
-        "index": 30.6
-      },
-      {
-        "date": "2026-06-03",
-        "index": 33.7
-      },
-      {
-        "date": "2026-06-04",
+        "date": "2026-07-14",
         "index": 21.4
       },
       {
-        "date": "2026-06-05",
-        "index": 36.1
+        "date": "2026-07-15",
+        "index": 14.8
       },
       {
-        "date": "2026-06-06",
-        "index": 30.0
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-07",
-        "index": 26.2
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "consumer": [
+      {
+        "date": "2026-07-14",
+        "index": 24.6
       },
       {
-        "date": "2026-06-08",
-        "index": 27.5
+        "date": "2026-07-15",
+        "index": 0.0
       },
       {
-        "date": "2026-06-09",
-        "index": 33.9
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-10",
-        "index": 35.2
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "electronics": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-11",
-        "index": 39.3
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "computer": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-12",
-        "index": 37.9
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "communication": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-13",
-        "index": 39.5
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "media": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-14",
-        "index": 39.3
-      },
-      {
-        "date": "2026-06-15",
-        "index": 44.2
-      },
-      {
-        "date": "2026-06-16",
-        "index": 43.1
-      },
-      {
-        "date": "2026-06-17",
-        "index": 42.5
-      },
-      {
-        "date": "2026-06-18",
-        "index": 42.5
-      },
-      {
-        "date": "2026-06-19",
-        "index": 45.4
-      },
-      {
-        "date": "2026-06-20",
-        "index": 51.2
+        "date": "2026-07-17",
+        "index": 0.0
       }
     ],
     "cpo": [
       {
-        "date": "2026-05-21",
-        "index": 23.8
+        "date": "2026-06-21",
+        "index": 29.5
       },
       {
-        "date": "2026-05-22",
-        "index": 15.4
+        "date": "2026-07-09",
+        "index": 25.9
       },
       {
-        "date": "2026-05-23",
-        "index": 24.1
+        "date": "2026-07-10",
+        "index": 25.0
       },
       {
-        "date": "2026-05-24",
-        "index": 17.7
+        "date": "2026-07-14",
+        "index": 20.8
       },
       {
-        "date": "2026-05-25",
-        "index": 24.1
+        "date": "2026-07-15",
+        "index": 16.5
       },
       {
-        "date": "2026-05-26",
-        "index": 15
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-05-27",
-        "index": 20.3
-      },
-      {
-        "date": "2026-05-28",
-        "index": 15
-      },
-      {
-        "date": "2026-05-29",
-        "index": 15.8
-      },
-      {
-        "date": "2026-05-30",
-        "index": 17.2
-      },
-      {
-        "date": "2026-05-31",
-        "index": 21.1
-      },
-      {
-        "date": "2026-06-01",
-        "index": 29.9
-      },
-      {
-        "date": "2026-06-02",
-        "index": 21.8
-      },
-      {
-        "date": "2026-06-03",
-        "index": 18.1
-      },
-      {
-        "date": "2026-06-04",
-        "index": 21.1
-      },
-      {
-        "date": "2026-06-05",
-        "index": 30.2
-      },
-      {
-        "date": "2026-06-06",
-        "index": 29.2
-      },
-      {
-        "date": "2026-06-07",
-        "index": 26.3
-      },
-      {
-        "date": "2026-06-08",
-        "index": 29.9
-      },
-      {
-        "date": "2026-06-09",
-        "index": 27.0
-      },
-      {
-        "date": "2026-06-10",
-        "index": 34.3
-      },
-      {
-        "date": "2026-06-11",
-        "index": 40.6
-      },
-      {
-        "date": "2026-06-12",
-        "index": 38.6
-      },
-      {
-        "date": "2026-06-13",
-        "index": 41.2
-      },
-      {
-        "date": "2026-06-14",
-        "index": 43.7
-      },
-      {
-        "date": "2026-06-15",
-        "index": 48.0
-      },
-      {
-        "date": "2026-06-16",
-        "index": 50.7
-      },
-      {
-        "date": "2026-06-17",
-        "index": 50.9
-      },
-      {
-        "date": "2026-06-18",
-        "index": 54.5
-      },
-      {
-        "date": "2026-06-19",
-        "index": 56.1
-      },
-      {
-        "date": "2026-06-20",
-        "index": 57.1
+        "date": "2026-07-17",
+        "index": 0.0
       }
     ],
     "semiconductor": [
       {
-        "date": "2026-05-21",
-        "index": 29.0
+        "date": "2026-06-21",
+        "index": 28.5
       },
       {
-        "date": "2026-05-22",
-        "index": 27.8
+        "date": "2026-07-09",
+        "index": 29.6
       },
       {
-        "date": "2026-05-23",
-        "index": 26.0
+        "date": "2026-07-10",
+        "index": 29.7
       },
       {
-        "date": "2026-05-24",
-        "index": 28.8
-      },
-      {
-        "date": "2026-05-25",
-        "index": 23.8
-      },
-      {
-        "date": "2026-05-26",
-        "index": 22.2
-      },
-      {
-        "date": "2026-05-27",
-        "index": 22.2
-      },
-      {
-        "date": "2026-05-28",
-        "index": 23.5
-      },
-      {
-        "date": "2026-05-29",
-        "index": 29.0
-      },
-      {
-        "date": "2026-05-30",
+        "date": "2026-07-14",
         "index": 22.4
       },
       {
-        "date": "2026-05-31",
-        "index": 37.5
+        "date": "2026-07-15",
+        "index": 19.6
       },
       {
-        "date": "2026-06-01",
-        "index": 37.1
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-02",
-        "index": 31.4
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "nonferrous": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-03",
-        "index": 25.0
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "coal": [
+      {
+        "date": "2026-07-16",
+        "index": 11.2
       },
       {
-        "date": "2026-06-04",
-        "index": 31.0
+        "date": "2026-07-17",
+        "index": 11.2
+      }
+    ],
+    "chemical": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-05",
-        "index": 29.8
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "steel": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-06",
-        "index": 30.0
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "realestate": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-07",
-        "index": 35.6
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "infrastructure": [
+      {
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-08",
-        "index": 37.3
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "newenergy": [
+      {
+        "date": "2026-07-14",
+        "index": 18.4
       },
       {
-        "date": "2026-06-09",
-        "index": 30.5
+        "date": "2026-07-15",
+        "index": 17.4
       },
       {
-        "date": "2026-06-10",
-        "index": 33.6
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-11",
-        "index": 38.5
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "nasdaq": [
+      {
+        "date": "2026-06-21",
+        "index": 22.8
       },
       {
-        "date": "2026-06-12",
+        "date": "2026-07-09",
+        "index": 23.3
+      },
+      {
+        "date": "2026-07-10",
+        "index": 22.4
+      },
+      {
+        "date": "2026-07-14",
+        "index": 17.7
+      },
+      {
+        "date": "2026-07-15",
+        "index": 14.6
+      },
+      {
+        "date": "2026-07-16",
+        "index": 0.0
+      },
+      {
+        "date": "2026-07-17",
+        "index": 0.0
+      }
+    ],
+    "gold": [
+      {
+        "date": "2026-06-21",
         "index": 35.9
       },
       {
-        "date": "2026-06-13",
-        "index": 34.9
+        "date": "2026-07-09",
+        "index": 38.3
       },
       {
-        "date": "2026-06-14",
-        "index": 39.8
+        "date": "2026-07-10",
+        "index": 38.4
       },
       {
-        "date": "2026-06-15",
-        "index": 39.5
+        "date": "2026-07-14",
+        "index": 22.2
       },
       {
-        "date": "2026-06-16",
-        "index": 38.2
+        "date": "2026-07-15",
+        "index": 16.6
       },
       {
-        "date": "2026-06-17",
-        "index": 34.2
+        "date": "2026-07-16",
+        "index": 0.0
       },
       {
-        "date": "2026-06-18",
-        "index": 34.6
-      },
-      {
-        "date": "2026-06-19",
-        "index": 37.5
-      },
-      {
-        "date": "2026-06-20",
-        "index": 41.6
+        "date": "2026-07-17",
+        "index": 0.0
       }
     ]
   },
-  "record_count": 31
+  "record_count": 7,
+  "data_sources": {
+    "东方财富股吧": {
+      "name": "东方财富股吧",
+      "status": "partial",
+      "count": 0,
+      "error": "",
+      "duration": 115.35
+    },
+    "小红书": {
+      "name": "小红书",
+      "status": "skipped",
+      "count": 0,
+      "error": "未配置API Key",
+      "duration": 0.0
+    },
+    "Google News": {
+      "name": "Google News",
+      "status": "success",
+      "count": 565,
+      "error": "",
+      "duration": 103.12
+    },
+    "网易财经": {
+      "name": "网易财经",
+      "status": "failed",
+      "count": 0,
+      "error": "'insurance'",
+      "duration": 1.11
+    },
+    "东方财富资讯": {
+      "name": "东方财富资讯",
+      "status": "failed",
+      "count": 0,
+      "error": "'media'",
+      "duration": 0.72
+    },
+    "同花顺财经": {
+      "name": "同花顺财经",
+      "status": "partial",
+      "count": 0,
+      "error": "",
+      "duration": 3.36
+    },
+    "雪球社区": {
+      "name": "雪球社区",
+      "status": "partial",
+      "count": 0,
+      "error": "",
+      "duration": 424.53
+    },
+    "行情数据(AKShare)": {
+      "name": "行情数据(AKShare)",
+      "status": "success",
+      "count": 543,
+      "error": "",
+      "duration": 0.0
+    },
+    "市场异动数据(AKShare)": {
+      "name": "市场异动数据(AKShare)",
+      "status": "success",
+      "count": 3749,
+      "error": "",
+      "duration": 0.02
+    }
+  },
+  "generated_at": "2026-07-17T07:44:43.770478",
+  "is_real_data": true
 }
