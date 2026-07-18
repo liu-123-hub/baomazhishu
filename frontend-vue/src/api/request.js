@@ -64,7 +64,12 @@ request.interceptors.response.use(
   async (error) => {
     const config = error.config
 
-    if (!config || !config.retryCount) {
+    // axios 错误可能不带 config（如请求未发出），直接向上抛出
+    if (!config) {
+      return Promise.reject(error)
+    }
+
+    if (!config.retryCount) {
       config.retryCount = 0
     }
 

@@ -85,6 +85,47 @@ class AutoCollector:
             logger.warning("pipeline 返回数据中无最新板块记录，跳过数据库同步")
             return
 
+        provenance = dashboard.get("data_provenance") or {}
+        has_user_discussion = provenance.get("has_user_discussion", True)
+        if not has_user_discussion:
+            logger.warning(
+                "所有用户讨论源（股吧/小红书/雪球）均返回 0 条记录，"
+                "本次采集数据质量降级，跳过数据库同步以保留上次优质数据"
+            )
+            # 计算数据指纹，便于在审计日志中追溯本次降级采集批次
+            fingerprints = provenance.get("fingerprints", []) or []
+            import hashlib
+            import json as _json
+            fp_str = _json.dumps(
+                [{"s": f.get("source_name"), "r": f.get("record_count")} for f in fingerprints],
+                sort_keys=True,
+            )
+            degraded_fingerprint = hashlib.sha256(fp_str.encode()).hexdigest()[:16] if fingerprints else ""
+            await db.add_audit_log(
+                username="system",
+                action="data_sync_skipped",
+                endpoint="auto_collector",
+                status="degraded",
+                duration_ms=0,
+                data_fingerprint=degraded_fingerprint,
+                sector_count=len(sectors),
+                detail="所有用户讨论源（股吧/小红书/雪球）均返回 0 条记录，仅新闻源有数据",
+            )
+            return
+
+        fingerprints = provenance.get("fingerprints", [])
+        source_fingerprint = ""
+        if fingerprints:
+            import hashlib
+            import json
+            fp_str = json.dumps([{"s": f.get("source_name"), "r": f.get("record_count")} for f in fingerprints], sort_keys=True)
+            source_fingerprint = hashlib.sha256(fp_str.encode()).hexdigest()[:16]
+
+        all_sources_passed = all(f.get("passed", False) for f in fingerprints) if fingerprints else True
+        synced_count = 0
+        skipped_count = 0
+        failed_sectors: list = []
+
         for code, data in sectors.items():
             if code not in settings.SECTOR_NAMES:
                 continue
@@ -92,6 +133,7 @@ class AutoCollector:
             total_posts = details.get("total_posts", 0)
             if total_posts == 0:
                 logger.info(f"板块 [{code}] 无采集数据(total_posts=0)，跳过数据库写入")
+                skipped_count += 1
                 continue
             try:
                 await db.insert_sector_index({
@@ -103,9 +145,31 @@ class AutoCollector:
                     "newbie_ratio": details.get("newbie_ratio", 0),
                     "total_posts": total_posts,
                     "record_date": record_date,
+                    "data_source": "pipeline_multi_source",
+                    "data_fingerprint": source_fingerprint,
+                    "source_passed": all_sources_passed,
+                    "user_discussion_present": has_user_discussion,
                 })
+                synced_count += 1
             except Exception as e:
                 logger.error(f"同步板块 [{code}] 到数据库失败: {e}")
+                skipped_count += 1
+                failed_sectors.append(code)
+
+        await db.add_audit_log(
+            username="system",
+            action="data_sync_complete",
+            endpoint="auto_collector",
+            status="success" if not failed_sectors else "partial",
+            duration_ms=0,
+            data_fingerprint=source_fingerprint,
+            sector_count=synced_count,
+            detail=(
+                f"写入 {synced_count} 个板块，跳过 {skipped_count} 个"
+                + (f"，失败板块: {','.join(failed_sectors)}" if failed_sectors else "")
+            ),
+        )
+        logger.info(f"数据库同步完成: {synced_count}个板块写入, {skipped_count}个跳过")
 
     async def run_once(self, trigger: str = "scheduled"):
         """执行一次完整的自动采集流程。"""

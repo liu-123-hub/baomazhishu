@@ -8,6 +8,11 @@
           <span class="time-dot pulse"></span>
           更新于 {{ formatTime(overviewData.last_update_time) }}
         </span>
+        <!-- 数据真实性状态提示，让用户看到当前数据是否真实、新鲜 -->
+        <DataAuthStatus
+          :provenance="store.dataProvenance"
+          :freshness="store.dataFreshness"
+        />
       </div>
       <div class="toolbar-right">
         <el-radio-group
@@ -61,9 +66,9 @@
               <div
                 v-for="sector in category.children"
                 :key="sector.code"
-                :class="['sector-item', { active: activeSectors.includes(sector.code) }]"
+                :class="['sector-item', { active: activeSectors.includes(sector.code), 'no-data': isDataReady && getSectorIndex(sector.code) == null }]"
                 @click="toggleSector(sector.code)"
-                :title="activeSectors.length === 1 && activeSectors.includes(sector.code) ? '至少保留一个板块' : ''"
+                :title="activeSectors.length === 1 && activeSectors.includes(sector.code) ? '至少保留一个板块' : (getSectorIndex(sector.code) == null ? '该板块数据采集中' : '')"
               >
                 <span class="sector-color" :style="{ backgroundColor: sector.color }"></span>
                 <span class="sector-name">{{ sector.name }}</span>
@@ -71,7 +76,7 @@
                   class="sector-value"
                   :class="getIndexColorClass(getSectorIndex(sector.code))"
                 >
-                  {{ formatIndex(getSectorIndex(sector.code)) }}
+                  {{ isDataReady ? formatIndex(getSectorIndex(sector.code)) : '--' }}
                 </span>
               </div>
             </div>
@@ -113,20 +118,23 @@
             <div class="metric-card overview-card">
               <div class="metric-header">
                 <span class="metric-label">综合情绪指数</span>
-                <span class="metric-badge" :class="getIndexColorClass(overviewData?.avg_index || 0)">
-                  {{ getIndexLabel(overviewData?.avg_index || 0) }}
+                <span v-if="isDataReady && avgIndex != null" class="metric-badge" :class="getIndexColorClass(avgIndex)">
+                  {{ getIndexLabel(avgIndex) }}
                 </span>
               </div>
-              <div class="metric-value" :class="getIndexColorClass(overviewData?.avg_index || 0)">
-                {{ formatIndex(overviewData?.avg_index) }}
+              <div class="metric-value" :class="avgIndex != null ? getIndexColorClass(avgIndex) : ''">
+                {{ isDataReady && avgIndex != null ? formatIndex(avgIndex) : '--' }}
               </div>
               <div class="metric-sub">
-                覆盖 <strong>{{ overviewData?.sector_count || 0 }}</strong>/{{ allLeafSectorCodes.length }} 个子板块
+                覆盖 <strong>{{ isDataReady ? validSectorCount : '--' }}</strong>/{{ allLeafSectorCodes.length }} 个子板块
+                <span v-if="isDataReady && validSectorCount < allLeafSectorCodes.length" class="metric-note">
+                  （{{ allLeafSectorCodes.length - validSectorCount }}个板块数据收集中）
+                </span>
               </div>
             </div>
             <div class="metric-card gauge-card">
               <GaugeChart
-                :value="overviewData?.avg_index || 0"
+                :value="avgIndex"
                 name="市场热度"
                 :max="100"
                 height="200px"
@@ -220,6 +228,7 @@
               <div class="detail-name-wrap">
                 <span class="detail-dot" :style="{ backgroundColor: sector.color }"></span>
                 <span class="detail-name">{{ sector.name }}</span>
+                <el-tag v-if="sector.is_degraded" type="warning" size="small" effect="plain">数据降级</el-tag>
               </div>
               <span class="detail-index" :class="getIndexColorClass(sector.index)">
                 {{ formatIndex(sector.index) }}
@@ -258,6 +267,7 @@ import LineChart from '@/components/Chart/LineChart.vue'
 import BarChart from '@/components/Chart/BarChart.vue'
 import PieChart from '@/components/Chart/PieChart.vue'
 import GaugeChart from '@/components/Chart/GaugeChart.vue'
+import DataAuthStatus from '@/components/DataAuthStatus.vue'
 import { SECTOR_NAMES, SECTOR_COLORS, SECTOR_CATEGORIES } from '@/api/index'
 
 const store = useDashboardStore()
@@ -271,7 +281,9 @@ const allLeafSectorCodes = computed(() => {
   return codes
 })
 
-const activeSectors = ref([...allLeafSectorCodes.value])
+// 默认初始选中前 6 个板块，避免折线图初次渲染过于拥挤
+const DEFAULT_ACTIVE_SECTOR_COUNT = 6
+const activeSectors = ref(allLeafSectorCodes.value.slice(0, DEFAULT_ACTIVE_SECTOR_COUNT))
 const lineChartError = ref(false)
 
 // 父板块展开状态（默认全部展开）
@@ -297,6 +309,24 @@ const sectorList = computed(() => {
 // 从 store 获取数据
 const overviewData = computed(() => store.overviewData)
 const lineChartData = computed(() => store.lineChartData)
+
+const avgIndex = computed(() => {
+  const val = overviewData.value?.avg_index
+  return val != null ? val : null
+})
+
+const validSectorCount = computed(() => {
+  return overviewData.value?.valid_sector_count ?? 0
+})
+
+const isDataReady = computed(() => {
+  return !loading.value && !error.value && overviewData.value?.sectors != null && Object.keys(overviewData.value.sectors).length > 0
+})
+
+const hasAnyData = computed(() => {
+  const sectors = overviewData.value?.sectors
+  return sectors && Object.values(sectors).some(s => s?.index != null)
+})
 
 // 折线图系列名称映射为中文
 const lineChartSeries = computed(() => {
@@ -332,12 +362,17 @@ const sectorRankingData = computed(() => {
   if (!sectors) return []
   return Object.entries(sectors)
     .filter(([code]) => activeSectors.value.includes(code))
-    .map(([code, data]) => ({
-      code,
-      name: SECTOR_NAMES[code] || code,
-      value: data?.index ?? 0,
-      color: SECTOR_COLORS[code] || '#0ea5e9'
-    }))
+    .map(([code, data]) => {
+      const idx = data?.index
+      if (idx == null) return null
+      return {
+        code,
+        name: SECTOR_NAMES[code] || code,
+        value: idx,
+        color: SECTOR_COLORS[code] || '#0ea5e9'
+      }
+    })
+    .filter(Boolean)
     .sort((a, b) => b.value - a.value)
 })
 
@@ -357,24 +392,29 @@ const activeSectorDetails = computed(() => {
   return activeSectors.value
     .map(code => {
       const data = sectors[code]
-      if (!data) return null
+      if (!data || data.index == null) return null
       return {
         code,
         name: SECTOR_NAMES[code] || code,
-        index: data.index ?? 0,
+        index: data.index,
+        // post_count 兜底为 0 是因为该板块已被 data.index != null 过滤，
+        // 即后端已返回有效数据；若 post_count 缺失，0 是真实可信的（无帖子则不会有 index）。
         post_count: data.post_count ?? 0,
-        positive_ratio: data.positive_ratio ?? 0,
+        // positive_ratio 兜底为 null，让模板的 `?? '--'` 生效，
+        // 避免后端字段缺失时显示 0% 误导用户（业务约束：buy+sell=0 时由后端返回 50.0）
+        positive_ratio: data.positive_ratio ?? null,
         trend: data.trend ?? '平稳',
-        color: SECTOR_COLORS[code] || '#0ea5e9'
+        color: SECTOR_COLORS[code] || '#0ea5e9',
+        is_degraded: data.is_degraded ?? false
       }
     })
     .filter(Boolean)
 })
 
-// 获取板块指数
+// 获取板块指数；数据未加载或板块缺失时返回 null，避免渲染成 0.00
 function getSectorIndex(code) {
   const sector = overviewData.value?.sectors?.[code]
-  return sector?.index ?? 0
+  return sector?.index ?? null
 }
 
 // 指数颜色
@@ -478,8 +518,8 @@ async function refreshData() {
   lineChartError.value = false
   try {
     const days = timeRange.value === '7d' ? 7 : timeRange.value === '30d' ? 30 : 90
+    // fetchAll 内部已同时请求 overview 与折线图数据，避免重复调用 line-chart 接口
     await store.fetchAll(activeSectors.value, days)
-    await refreshLineChart()
   } catch (e) {
     error.value = e?.message || '数据加载失败，请检查后端服务是否运行'
     console.error('数据加载失败:', e)
@@ -495,14 +535,25 @@ watch(() => store.error, (newError) => {
   }
 })
 
+function handleCollectionSuccess() {
+  // 后端自动采集完成，自动刷新大屏数据以展示最新市场状态
+  refreshData()
+}
+
 onMounted(() => {
   refreshData()
+  if (typeof window !== 'undefined') {
+    window.addEventListener('collection-success', handleCollectionSuccess)
+  }
 })
 
 onUnmounted(() => {
   if (refreshLineChartTimer) {
     clearTimeout(refreshLineChartTimer)
     refreshLineChartTimer = null
+  }
+  if (typeof window !== 'undefined') {
+    window.removeEventListener('collection-success', handleCollectionSuccess)
   }
 })
 </script>
@@ -766,6 +817,17 @@ onUnmounted(() => {
     flex-shrink: 0;
   }
 
+  &.no-data {
+    opacity: 0.5;
+    .sector-name {
+      color: $color-text-tertiary;
+    }
+    .sector-value {
+      color: $color-text-tertiary !important;
+      font-weight: $font-weight-medium;
+    }
+  }
+
   @media (max-width: $breakpoint-lg) {
     margin-bottom: 0;
     white-space: nowrap;
@@ -919,6 +981,11 @@ onUnmounted(() => {
       strong {
         color: $color-text-primary;
         font-weight: $font-weight-semibold;
+      }
+
+      .metric-note {
+        color: $color-warning;
+        font-size: $font-size-xs;
       }
     }
   }

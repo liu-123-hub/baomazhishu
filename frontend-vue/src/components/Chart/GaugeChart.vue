@@ -1,5 +1,11 @@
 <template>
+  <!-- 当 value 为 null/undefined 时显示空态，避免强行渲染 0.00 误导用户 -->
+  <div v-if="isEmpty" class="gauge-empty" :style="{ width: width, height: height }">
+    <span class="gauge-empty-value">--</span>
+    <span class="gauge-empty-name">{{ name }}</span>
+  </div>
   <BaseChart
+    v-else
     :option="chartOption"
     :width="width"
     :height="height"
@@ -20,8 +26,8 @@ const GAUGE_COLORS = [
 
 const props = defineProps({
   value: {
-    type: Number,
-    default: 0
+    type: [Number, null],
+    default: null
   },
   name: {
     type: String,
@@ -41,8 +47,13 @@ const props = defineProps({
   }
 })
 
+// 空态判定：null / undefined / NaN 均视为无数据
+const isEmpty = computed(() => props.value == null || Number.isNaN(props.value))
+
 const chartOption = computed(() => {
-  const color = getGaugeColor(props.value)
+  if (isEmpty.value) return {}
+  const safeValue = Number(props.value) || 0
+  const color = getGaugeColor(safeValue)
 
   return {
     animationDuration: 800,
@@ -118,7 +129,7 @@ const chartOption = computed(() => {
         },
         data: [
           {
-            value: props.value,
+            value: safeValue,
             name: props.name
           }
         ]
@@ -135,3 +146,25 @@ function getGaugeColor(value) {
   return '#dc2626'
 }
 </script>
+
+<style lang="scss" scoped>
+.gauge-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+
+  .gauge-empty-value {
+    font-size: 30px;
+    font-weight: bold;
+    color: rgba(248, 250, 252, 0.4);
+    line-height: 1;
+  }
+
+  .gauge-empty-name {
+    font-size: 13px;
+    color: rgba(248, 250, 252, 0.6);
+  }
+}
+</style>

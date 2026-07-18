@@ -15,8 +15,8 @@ from collectors.netease_finance_collector import collect_all as collect_netease
 from collectors.xueqiu_collector import collect_all as collect_xueqiu
 from collectors.sina_finance_collector import collect_all as collect_sina
 from collectors.xueqiu_community_collector import collect_all as collect_xueqiu_community
-from collectors.market_data_collector import collect_all as collect_market_data
-from collectors.capital_flow_collector import collect_all as collect_capital_flow
+from collectors.market_data_collector import collect_all as collect_market_data, validate_market_data
+from collectors.capital_flow_collector import collect_all as collect_capital_flow, validate_capital_flow
 from collectors.data_validation import validate_source_posts
 from collectors.data_authenticator import (
     authenticate_collected_data,
@@ -272,6 +272,7 @@ def run_pipeline() -> Dict:
         print(f"  ❌ 雪球社区采集失败: {e}")
 
     print("\n  [8/9] 行情数据 (AKShare)")
+    market_data: Dict = {}
     market_start = time.time()
     try:
         market_data = collect_market_data()
@@ -291,6 +292,7 @@ def run_pipeline() -> Dict:
         print(f"  ❌ 行情数据采集失败: {e}")
 
     print("\n  [9/9] 市场异动数据 (AKShare)")
+    capital_flow_data: Dict = {}
     cf_start = time.time()
     try:
         capital_flow_data = collect_capital_flow()
@@ -367,10 +369,29 @@ def run_pipeline() -> Dict:
     
     dashboard["data_sources"] = status_tracker.sources
     dashboard["generated_at"] = datetime.now().isoformat()
-    dashboard["is_real_data"] = True
 
     total_records = sum(len(v) for v in all_posts.values())
     dashboard["data_provenance"] = build_data_provenance(auth_reports, total_records)
+    # is_real_data 必须来自 data_provenance 的真实校验结果，不能硬编码 True。
+    # 否则当所有用户讨论源（股吧/小红书/雪球）都返回 0 条、仅新闻源有数据时，
+    # 系统仍会声称"真实数据"，造成误导。
+    dashboard["is_real_data"] = dashboard["data_provenance"].get("is_real_data", False)
+
+    # 关键行情/市场异动数据质量校验（采集后立刻执行，结果写入 dashboard 供前端展示）
+    market_validation = validate_market_data(market_data)
+    capital_validation = validate_capital_flow(capital_flow_data)
+    dashboard["data_quality"] = {
+        "market_data": market_validation,
+        "capital_flow": capital_validation,
+        "checked_at": datetime.now().isoformat(),
+    }
+    # 若校验发现严重问题，打印告警但不阻断流程（网络波动可能导致单日异常）
+    total_quality_issues = (
+        len(market_validation.get("issues", [])) +
+        len(capital_validation.get("issues", []))
+    )
+    if total_quality_issues > 0:
+        print(f"\n  ⚠️ 数据质量校验发现 {total_quality_issues} 个问题（已记录，不阻断）")
 
     _write_dashboard_data(dashboard)
     

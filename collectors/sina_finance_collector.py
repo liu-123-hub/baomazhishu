@@ -139,6 +139,11 @@ def _to_post(item: Dict, sector: str) -> Dict:
     }
 
 
+def _empty_result() -> Dict[str, List[Dict]]:
+    """生成包含所有25个板块的空结果字典。"""
+    return {sector: [] for sector in SECTOR_KEYWORDS}
+
+
 def fetch_page(url: str, timeout: int = REQUEST_TIMEOUT) -> Optional[str]:
     """获取页面 HTML 文本，带重试机制。"""
     for attempt in range(MAX_RETRIES):
@@ -173,10 +178,7 @@ def fetch_page(url: str, timeout: int = REQUEST_TIMEOUT) -> Optional[str]:
 
 def collect_all() -> Dict[str, List[Dict]]:
     """采集所有新闻页面，按板块关键词分类后返回。"""
-    result: Dict[str, List[Dict]] = {
-        "nasdaq": [], "gold": [], "cpo": [], "semiconductor": [],
-        "bank": [], "securities": [], "biotech": [], "consumer": [], "newenergy": [],
-    }
+    result: Dict[str, List[Dict]] = _empty_result()
     seen_links: set = set()
 
     for page_url in NEWS_PAGES:

@@ -1,8 +1,11 @@
 """FastAPI 主应用，实时数据大屏后端服务。"""
 import asyncio
+import logging
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
 
 from .config import settings
 from .database import db
@@ -10,6 +13,8 @@ from .routers import api_router
 from .websocket import manager
 from .data_service import data_service
 from .auto_collector import auto_collector
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -52,14 +57,23 @@ async def lifespan(app: FastAPI):
 
 
 async def broadcast_data_loop():
-    try:
-        while True:
+    """定时广播大盘概览到所有 WebSocket 连接。
+    任何单次异常（DB 锁、JSON 解析失败等）都被捕获并记录，
+    避免推送循环静默停止导致前端不再收到更新。
+    """
+    while True:
+        try:
             if manager.connection_count > 0:
                 overview = await data_service._compute_dashboard_overview()
                 await manager.broadcast_data("dashboard", overview)
+        except asyncio.CancelledError:
+            raise
+        except Exception as e:
+            logger.exception(f"广播数据循环异常，将在下个周期重试: {e}")
+        try:
             await asyncio.sleep(settings.WS_BROADCAST_INTERVAL)
-    except asyncio.CancelledError:
-        pass
+        except asyncio.CancelledError:
+            raise
 
 
 def create_app() -> FastAPI:
@@ -77,6 +91,58 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    @app.exception_handler(RequestValidationError)
+    async def validation_exception_handler(request: Request, exc: RequestValidationError):
+        errors = []
+        for err in exc.errors():
+            field = ".".join(str(loc) for loc in err.get("loc", [])) if err.get("loc") else "unknown"
+            errors.append({"field": field, "message": err.get("msg", "参数验证失败")})
+        logger.warning(f"请求参数验证失败: {request.url.path} - {errors}")
+        return JSONResponse(
+            status_code=422,
+            content={
+                "code": 422,
+                "message": "请求参数验证失败",
+                "data": None,
+                "errors": errors
+            }
+        )
+
+    @app.exception_handler(404)
+    async def not_found_exception_handler(request: Request, exc):
+        return JSONResponse(
+            status_code=404,
+            content={
+                "code": 404,
+                "message": f"请求的资源不存在: {request.url.path}",
+                "data": None
+            }
+        )
+
+    @app.exception_handler(500)
+    async def internal_server_error_handler(request: Request, exc):
+        logger.error(f"服务器内部错误: {request.url.path}", exc_info=exc)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "code": 500,
+                "message": "服务器内部错误，请稍后重试",
+                "data": None
+            }
+        )
+
+    @app.exception_handler(Exception)
+    async def general_exception_handler(request: Request, exc: Exception):
+        logger.error(f"未处理的异常: {request.url.path} - {str(exc)}", exc_info=exc)
+        return JSONResponse(
+            status_code=500,
+            content={
+                "code": 500,
+                "message": "服务器内部错误，请稍后重试",
+                "data": None
+            }
+        )
 
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 

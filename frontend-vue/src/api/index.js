@@ -114,6 +114,26 @@ export function getHistoryTrend(code, days = 7) {
   return request.get('/dashboard/history', { params })
 }
 
+export function getMarketData(sector) {
+  const params = {}
+  if (sector) params.sector = sector
+  return request.get('/dashboard/market-data', { params })
+}
+
+export function getEtfCorrelation(sector, days = 30) {
+  return request.get('/dashboard/etf-correlation', { params: { sector, days } })
+}
+
+export function getCapitalFlowSummary() {
+  return request.get('/dashboard/capital-flow')
+}
+
+export function getCapitalFlowDetail(dataType, tradeDate) {
+  const params = { type: dataType }
+  if (tradeDate) params.date = tradeDate
+  return request.get('/dashboard/capital-flow/detail', { params })
+}
+
 export function getSystemHealth() {
   return request.get('/system/health')
 }
@@ -138,7 +158,11 @@ export const dashboardApi = {
   getOverview: getDashboardOverview,
   getLineChart: getLineChartData,
   getSectorDetail,
-  getHistory: getHistoryTrend
+  getHistory: getHistoryTrend,
+  getMarketData,
+  getEtfCorrelation,
+  getCapitalFlowSummary,
+  getCapitalFlowDetail
 }
 
 export const systemApi = {

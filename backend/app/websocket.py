@@ -1,7 +1,8 @@
 """WebSocket 连接管理。"""
 import asyncio
 import logging
-from typing import Set
+from datetime import datetime
+from typing import Set, Any
 from fastapi import WebSocket
 
 logger = logging.getLogger(__name__)
@@ -34,8 +35,13 @@ class ConnectionManager:
         for connection in disconnected:
             await self.disconnect(connection)
 
-    async def broadcast_data(self, data: dict):
-        await self.broadcast(data)
+    async def broadcast_data(self, msg_type: str, data: Any):
+        message = {
+            "type": msg_type,
+            "data": data,
+            "timestamp": datetime.now().isoformat()
+        }
+        await self.broadcast(message)
 
     async def send_personal_message(self, message: dict, websocket: WebSocket):
         try:

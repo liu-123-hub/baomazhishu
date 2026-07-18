@@ -217,17 +217,30 @@ def _classify_sector(title: str, content: str) -> Optional[str]:
     return None
 
 
+ALL_SECTORS = list(SEARCH_KEYWORDS.keys())
+
+
+def _empty_result() -> Dict[str, List[Dict]]:
+    return {s: [] for s in ALL_SECTORS}
+
+
 def collect_all() -> Dict[str, List[Dict]]:
     """采集所有板块雪球社区讨论，ETF关键词搜索+二次归类。"""
-    result: Dict[str, List[Dict]] = {
-        "nasdaq": [], "gold": [], "cpo": [], "semiconductor": [],
-        "bank": [], "securities": [], "biotech": [], "consumer": [], "newenergy": [],
-    }
+    result: Dict[str, List[Dict]] = _empty_result()
     seen_ids: set = set()
 
     print("  [雪球社区] 开始采集真实讨论数据...")
 
     session = _get_session()
+    if not session._ensure_cookie():
+        print("  [雪球社区] ⚠️ 无法获取Cookie，跳过采集（雪球WAF需要登录）")
+        return result
+
+    test_items = session.search("银行ETF", count=3)
+    if not test_items:
+        print("  [雪球社区] ⚠️ 搜索API被WAF拦截(400016)，需要登录账号，跳过采集")
+        return result
+
     total_count = 0
 
     for sector, keywords in SEARCH_KEYWORDS.items():

@@ -23,7 +23,25 @@ SEARCH_KEYWORDS = {
     "biotech":    ["创新药怎么买", "医药ETF新手", "创新药还能涨吗", "医药亏了"],
     "consumer":   ["消费ETF怎么买", "白酒新手", "消费股还能买吗", "消费亏了"],
     "newenergy":  ["新能源怎么买", "光伏新手", "新能源还能涨吗", "新能源亏了"],
+    "insurance":  ["保险怎么买", "保险股", "平安保险"],
+    "baijiu":     ["白酒基金", "白酒还能涨吗", "茅台股票"],
+    "food":       ["食品饮料基金", "消费基金怎么买"],
+    "medicine":   ["医药基金怎么买", "医疗基金", "医药还能涨吗"],
+    "appliance":  ["家电板块", "家电基金"],
+    "tourism":    ["旅游基金", "文旅板块", "免税概念"],
+    "electronics": ["消费电子基金", "电子ETF"],
+    "computer":   ["计算机ETF", "信创基金", "软件股"],
+    "communication": ["5G基金", "通信板块"],
+    "media":      ["游戏基金", "传媒ETF", "影视股"],
+    "nonferrous": ["有色金属基金", "铜价", "锂矿"],
+    "coal":       ["煤炭基金", "煤炭股", "煤价"],
+    "chemical":   ["化工基金", "化工板块"],
+    "steel":      ["钢铁板块", "钢铁ETF"],
+    "realestate": ["地产基金", "房地产板块", "楼市"],
+    "infrastructure": ["基建基金", "基建板块"],
 }
+
+ALL_SECTORS = list(SEARCH_KEYWORDS.keys())
 
 
 def _retry_request(func, *args, **kwargs):
@@ -142,18 +160,8 @@ def _parse_note(raw: Dict) -> Optional[Dict]:
 
 
 def _empty_sector_result() -> Dict[str, List[Dict]]:
-    """返回空的板块数据结构。"""
-    return {
-        "nasdaq": [],
-        "gold": [],
-        "cpo": [],
-        "semiconductor": [],
-        "bank": [],
-        "securities": [],
-        "biotech": [],
-        "consumer": [],
-        "newenergy": [],
-    }
+    """返回空的板块数据结构，覆盖全部25个板块。"""
+    return {s: [] for s in ALL_SECTORS}
 
 
 def collect_all() -> Dict[str, List[Dict]]:

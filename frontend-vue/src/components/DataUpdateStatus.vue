@@ -142,6 +142,10 @@ async function fetchStatus() {
       ElMessage.error(`数据更新失败${retryCount.value < maxRetries.value ? '，正在重试...' : ''}`)
     } else if (prevStatus === 'running' && status.value === 'success') {
       ElMessage.success('市场数据已更新')
+      // 通知数据大屏等页面自动刷新最新数据
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('collection-success'))
+      }
     }
   } catch (e) {
     // 状态查询失败不阻塞界面
@@ -154,7 +158,7 @@ let tickTimer = null
 
 onMounted(() => {
   fetchStatus()
-  // 每 3 秒轮询一次，配合 WebSocket 实时推送兜底
+  // 每 3 秒轮询一次，感知后端采集状态变化（前端无 WS 客户端，依赖轮询）
   timer = setInterval(fetchStatus, 3000)
   // 每秒触发 tick，刷新倒计时显示
   tickTimer = setInterval(() => { tick.value++ }, 1000)

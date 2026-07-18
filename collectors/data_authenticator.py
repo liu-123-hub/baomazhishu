@@ -11,9 +11,10 @@ MAX_FUTURE_SKEW_MINUTES = 10
 MIN_POSTS_PER_SECTOR = 1
 
 REQUIRED_PROVENANCE_FIELDS = (
-    "source_name",
+    # source_name 在 authenticate_collected_data 入参层面已校验，
+    # 帖子级别只需保证采集时间与原始链接可追溯。
     "collected_at",
-    "source_url",
+    ("source_url", "url"),  # 允许 source_url 或 url 作为溯源链接
 )
 
 LEGIT_SOURCE_NAMES = frozenset({
@@ -96,13 +97,16 @@ def verify_data_completeness(
                 val = post.get(field)
                 if val is None or (isinstance(val, str) and not val.strip()):
                     issues.append(f"{source_name}/{sector}/{post.get('id', f'#{i}')}: 缺少字段 {field}")
-            for field in REQUIRED_PROVENANCE_FIELDS:
-                if field not in post:
-                    if field == "collected_at":
+            for field_spec in REQUIRED_PROVENANCE_FIELDS:
+                # field_spec 可以是单个字段名，也可以是多个候选字段名的元组
+                candidate_fields = (field_spec,) if isinstance(field_spec, str) else field_spec
+                if not any(f in post for f in candidate_fields):
+                    display_field = candidate_fields[0]
+                    if display_field == "collected_at":
                         continue
                     issues.append(
                         f"{source_name}/{sector}/{post.get('id', f'#{i}')}: "
-                        f"缺少溯源字段 {field}（数据真实性要求）"
+                        f"缺少溯源字段 {display_field}（数据真实性要求）"
                     )
     return issues
 
@@ -123,7 +127,14 @@ def authenticate_collected_data(
     sector_data: Dict[str, List[Dict]],
     collected_at: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """对一次采集结果执行完整真实性校验。"""
+    """对一次采集结果执行完整真实性校验。
+
+    判定规则：
+    - passed=True 仅当无校验问题 **且** 采集到 >0 条记录。
+      空结果可能是被风控/限流/网络异常导致，不应视为"通过"，
+      否则会误导前端展示"6/6 源通过"而实际无用户讨论数据。
+    - record_count=0 时标记 passed=False 并追加 issue。
+    """
     if collected_at is None:
         collected_at = datetime.now().isoformat()
 
@@ -137,6 +148,14 @@ def authenticate_collected_data(
         len(posts) for posts in sector_data.values()
         if isinstance(posts, list)
     )
+
+    # 关键修复：0 条记录不应视为校验通过。
+    # 之前空结果也会 passed=True，导致 data_provenance 显示"6/6 源通过"
+    # 但实际所有用户讨论源都为空，前端会误认为数据正常。
+    if total_records == 0:
+        issues.append(
+            f"{source_name}: 采集记录数为 0，可能被风控/限流或网络异常，标记为未通过"
+        )
 
     fingerprint = compute_data_fingerprint({
         "source_name": source_name,
@@ -193,10 +212,32 @@ def build_data_provenance(
     total_records: int,
 ) -> Dict[str, Any]:
     passed = [r for r in auth_reports if r.get("passed")]
+    passed_with_data = [r for r in passed if r.get("record_count", 0) > 0]
+
+    # 用户讨论型数据源（用于判定"是否有人气数据"而非纯新闻流）
+    USER_DISCUSSION_SOURCES = frozenset({
+        "东方财富股吧", "小红书", "雪球社区",
+    })
+    user_discussion_reports = [
+        r for r in auth_reports if r.get("source_name") in USER_DISCUSSION_SOURCES
+    ]
+    user_discussion_passed = [
+        r for r in user_discussion_reports if r.get("passed") and r.get("record_count", 0) > 0
+    ]
+
+    # has_user_discussion: 是否有任一用户讨论源采集到 >0 条记录。
+    # 若为 False，说明仅采集到新闻/资讯，指数计算会因缺少小白语境失真，
+    # 前端应明确提示"缺少用户讨论数据"而非"真实数据"。
+    has_user_discussion = len(user_discussion_passed) > 0
+
     return {
-        "is_real_data": len(passed) > 0,
+        "is_real_data": len(passed_with_data) > 0,
+        "has_user_discussion": has_user_discussion,
+        "user_discussion_count": len(user_discussion_passed),
+        "user_discussion_total": len(user_discussion_reports),
         "source_count": len(auth_reports),
         "passed_count": len(passed),
+        "passed_with_data_count": len(passed_with_data),
         "total_records": total_records,
         "fingerprints": [
             {
@@ -204,6 +245,11 @@ def build_data_provenance(
                 "fingerprint": r["fingerprint"],
                 "record_count": r["record_count"],
                 "passed": r["passed"],
+                # 持久化 issues 字段，便于前端展示与后续诊断。
+                # 失败原因不再仅打印到控制台后丢弃。
+                "issues": r.get("issues", []),
+                "collected_at": r.get("collected_at"),
+                "checked_at": r.get("checked_at"),
             }
             for r in auth_reports
         ],
