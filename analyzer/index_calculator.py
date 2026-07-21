@@ -56,10 +56,7 @@ def _empty_details() -> Dict:
 
 
 def compute_sector_index(analysis_results: List) -> Dict:
-    """计算单个板块的宝妈指数(0-100)。
-
-    四个维度权重: 小白占比40%、小白强度25%、情绪极端度20%、热度信号15%
-    """
+    """计算单个板块的宝妈指数(0-100)，四个维度加权计算。"""
     if not analysis_results:
         return {
             "index": 0,

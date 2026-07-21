@@ -1,673 +1,214 @@
-// ==========================================
-// Global Styles - 全局样式 v4.0
-// ==========================================
-// 更新：现代深色大屏设计系统、页面级过渡动画、可访问性优化
-// ==========================================
+@use 'variables.scss' as *;
 
-@use './variables.scss' as *;
-
-// ==========================================
-// 0. CSS 自定义属性（运行时主题系统）
-// ==========================================
-:root {
-  // 色彩
-  --color-primary: #{$color-primary};
-  --color-primary-light: #{$color-primary-light};
-  --color-primary-dark: #{$color-primary-dark};
-  --color-success: #{$color-success};
-  --color-warning: #{$color-warning};
-  --color-danger: #{$color-danger};
-  --color-info: #{$color-info};
-
-  // 背景
-  --color-bg-base: #{$color-bg-base};
-  --color-bg-card: #{$color-bg-card};
-  --color-bg-card-fallback: #{$color-bg-card-fallback};
-  --color-bg-elevated: #{$color-bg-elevated};
-
-  // 文字
-  --color-text-primary: #{$color-text-primary};
-  --color-text-secondary: #{$color-text-secondary};
-  --color-text-tertiary: #{$color-text-tertiary};
-
-  // 边框
-  --color-border: #{$color-border};
-  --color-border-light: #{$color-border-light};
-
-  // 图表色板
-  --chart-color-0: #0ea5e9;
-  --chart-color-1: #22c55e;
-  --chart-color-2: #f59e0b;
-  --chart-color-3: #ef4444;
-  --chart-color-4: #06b6d4;
-  --chart-color-5: #a855f7;
-  --chart-color-6: #f472b6;
-  --chart-color-7: #fb923c;
-  --chart-color-8: #84cc16;
-
-  // 动画
-  --transition-fast: #{$transition-fast};
-  --transition-normal: #{$transition-normal};
-  --transition-slow: #{$transition-slow};
-
-  // 间距
-  --spacing-1: #{$spacing-1};
-  --spacing-2: #{$spacing-2};
-  --spacing-3: #{$spacing-3};
-  --spacing-4: #{$spacing-4};
-  --spacing-5: #{$spacing-5};
-  --spacing-6: #{$spacing-6};
-}
-
-// ------------------------------------------
-// 1. CSS Reset & 基础重置
-// ------------------------------------------
-
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
+* {
   margin: 0;
   padding: 0;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
-html,
-body,
-#app {
+html, body, #app {
   width: 100%;
-  min-height: 100vh;
-  min-height: 100dvh;
+  height: 100%;
+  overflow: hidden;
 }
 
 html {
-  -webkit-text-size-adjust: 100%;
-  -ms-text-size-adjust: 100%;
-  -webkit-tap-highlight-color: transparent;
-  scroll-behavior: smooth;
-
-  @include reduce-motion {
-    scroll-behavior: auto;
-  }
-}
-
-body {
-  font-family: $font-family-base;
-  font-size: $font-size-base;
-  font-weight: $font-weight-regular;
-  line-height: $line-height-normal;
-  color: $color-text-primary;
-  background-color: $color-bg-base;
+  font-family: var(--ios-font-family);
+  font-size: var(--ios-text-base);
+  line-height: var(--ios-leading-normal);
+  color: var(--ios-label-primary);
+  background: var(--ios-bg-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
 }
 
-// 将固定背景提升到独立合成层，避免滚动时整个视口重绘
-body::before {
-  content: '';
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  background-color: $color-bg-base;
-  background-image: $color-bg-base-gradient;
-  background-size: cover;
-  transform: translateZ(0);
-  backface-visibility: hidden;
-  pointer-events: none;
+body {
+  @include ios-scrollbar;
+  overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
 }
 
-#app {
-  display: flex;
-  flex-direction: column;
+#app { position: relative; }
+
+a {
+  color: var(--ios-blue);
+  text-decoration: none;
+  transition: opacity var(--ios-duration-fast) var(--ios-ease);
+
+  &:hover { opacity: 0.8; }
 }
 
-// 选中文字样式
-::selection {
-  background-color: $color-primary-500;
-  color: $color-text-primary;
-}
-
-// 滚动条样式（跨浏览器）
-* {
-  scrollbar-width: thin;
-  scrollbar-color: rgba($color-primary, 0.25) transparent;
-}
-
-::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: transparent;
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgba($color-primary, 0.25);
-  border-radius: 3px;
-  transition: background $transition-fast;
-
-  &:hover {
-    background: rgba($color-primary, 0.45);
-  }
-
-  &:active {
-    background: rgba($color-primary, 0.6);
-  }
-}
-
-::-webkit-scrollbar-corner {
-  background: transparent;
-}
-
-// v-cloak 防止闪屏
-[v-cloak] {
-  display: none !important;
-}
-
-// ------------------------------------------
-// 2. 工具类 Utilities
-// ------------------------------------------
-
-// 文字颜色
-.text-primary { color: $color-primary; }
-.text-secondary { color: $color-text-secondary; }
-.text-tertiary { color: $color-text-tertiary; }
-.text-muted { color: $color-text-tertiary; }
-.text-success { color: $color-success; }
-.text-warning { color: $color-warning; }
-.text-danger { color: $color-danger; }
-
-// Flex 布局
-.flex { display: flex; }
-.flex-col { display: flex; flex-direction: column; }
-.flex-center { @include flex-center; }
-.flex-between { @include flex-between; }
-.flex-1 { flex: 1; min-width: 0; min-height: 0; }
-.flex-shrink-0 { flex-shrink: 0; }
-.flex-grow-0 { flex-grow: 0; }
-
-// 宽高
-.w-full { width: 100%; }
-.h-full { height: 100%; }
-.min-h-full { min-height: 100%; }
-
-// 字体
-.font-mono { font-family: $font-family-mono; }
-.font-numeric { @include numeric-font; }
-.font-bold { font-weight: $font-weight-bold; }
-.font-medium { font-weight: $font-weight-medium; }
-
-// 单行省略
-.ellipsis { @include ellipsis; }
-
-// 间距
-.gap-1 { gap: $spacing-1; }
-.gap-2 { gap: $spacing-2; }
-.gap-3 { gap: $spacing-3; }
-.gap-4 { gap: $spacing-4; }
-
-// 指针
-.cursor-pointer { cursor: pointer; }
-.cursor-default { cursor: default; }
-
-// 可见性
-.visible { visibility: visible; }
-.invisible { visibility: hidden; }
-.hidden { display: none !important; }
-
-// ------------------------------------------
-// 3. 骨架屏 Skeleton
-// ------------------------------------------
-.skeleton {
-  @include skeleton-loading;
-  border-radius: $radius-md;
-}
-
-.skeleton-text {
-  @include skeleton-loading;
-  height: 14px;
-  border-radius: $radius-sm;
-  margin-bottom: $spacing-2;
-}
-
-.skeleton-card {
-  @include skeleton-loading;
-  border-radius: $radius-lg;
-  min-height: 120px;
-}
-
-// ------------------------------------------
-// 4. Element Plus 主题定制
-// ------------------------------------------
-
-// 按钮
-.el-button {
-  font-weight: $font-weight-medium;
-  // 避免 transition: all 导致浏览器为所有属性准备动画资源
-  transition: color $transition-fast, background-color $transition-fast,
-    border-color $transition-fast, box-shadow $transition-fast;
-  border-radius: $radius-md;
-
-  &:focus-visible {
-    @include focus-ring;
-  }
-}
-
-.el-button--primary {
-  --el-button-bg-color: #{$color-primary};
-  --el-button-border-color: #{$color-primary};
-  --el-button-hover-bg-color: #{$color-primary-light};
-  --el-button-hover-border-color: #{$color-primary-light};
-  --el-button-active-bg-color: #{$color-primary-dark};
-  --el-button-active-border-color: #{$color-primary-dark};
-  --el-button-disabled-bg-color: #{$color-primary-300};
-  --el-button-disabled-border-color: #{$color-primary-300};
-  color: $color-text-inverse;
-
-  &:hover {
-    box-shadow: 0 4px 14px rgba(14, 165, 233, 0.35);
-  }
-}
-
-.el-button--success { color: $color-text-inverse; }
-.el-button--warning { color: $color-text-inverse; }
-.el-button--danger { color: $color-text-inverse; }
-
-// 默认按钮暗色适配
-.el-button--default {
-  --el-button-bg-color: rgba(248, 250, 252, 0.06);
-  --el-button-border-color: #{$color-border};
-  --el-button-text-color: #{$color-text-primary};
-  --el-button-hover-bg-color: rgba(248, 250, 252, 0.1);
-  --el-button-hover-border-color: #{$color-border-light};
-  --el-button-hover-text-color: #{$color-text-primary};
-  --el-button-active-bg-color: rgba(248, 250, 252, 0.12);
-  --el-button-active-border-color: #{$color-border};
-  --el-button-disabled-bg-color: rgba(248, 250, 252, 0.04);
-  --el-button-disabled-border-color: #{$color-border-lighter};
-  --el-button-disabled-text-color: #{$color-text-disabled};
-}
-
-// 卡片 - 毛玻璃渐进增强
-.el-card {
-  --el-card-bg-color: transparent;
-  --el-card-border-color: #{$color-border};
-  --el-card-text-color: #{$color-text-primary};
-  @include glass-effect(16px, $color-bg-card, $color-bg-card-fallback);
-  border-radius: $radius-lg;
-  box-shadow: $shadow-md;
-}
-
-// 表格
-.el-table {
-  --el-table-bg-color: transparent;
-  --el-table-tr-bg-color: transparent;
-  --el-table-header-bg-color: #{$color-primary-100};
-  --el-table-border-color: #{$color-border-light};
-  --el-table-text-color: #{$color-text-primary};
-  --el-table-header-text-color: #{$color-primary};
-  --el-table-row-hover-bg-color: #{$color-primary-50};
-  --el-table-row-key-bg-color: #{$color-primary-50};
-  --el-table-stripe-bg-color: rgba(248, 250, 252, 0.02);
-  font-size: $font-size-sm;
-}
-
-// 输入框
-.el-input__wrapper {
-  background-color: $color-bg-input;
-  box-shadow: 0 0 0 1px $color-border inset;
-  border-radius: $radius-md;
-  transition: box-shadow $transition-fast;
-
-  &:hover {
-    box-shadow: 0 0 0 1px $color-primary-500 inset;
-  }
-
-  &.is-focus {
-    box-shadow: 0 0 0 1px $color-primary inset, 0 0 0 3px $color-primary-200;
-  }
-}
-
-.el-input__inner {
-  color: $color-text-primary;
-  font-size: $font-size-base;
-}
-
-.el-input__placeholder {
-  color: $color-text-disabled;
-}
-
-.el-input__prefix,
-.el-input__suffix {
-  color: $color-text-tertiary;
-}
-
-// 选择器
-.el-select {
-  --el-select-input-color: #{$color-text-primary};
-  --el-select-disabled-color: #{$color-text-disabled};
-  --el-select-border-color-hover: #{$color-primary-500};
-  --el-select-font-size: #{$font-size-base};
-}
-
-// Tag 标签
-.el-tag {
-  border-radius: $radius-md;
-  font-size: $font-size-xs;
-}
-
-// 对话框 - 毛玻璃渐进增强
-.el-dialog {
-  --el-dialog-bg-color: #{$color-bg-elevated};
-  --el-dialog-border-color: #{$color-border};
-  --el-dialog-title-color: #{$color-text-primary};
-  --el-dialog-footer-border-color: #{$color-border-light};
-  --el-dialog-radius: #{$radius-xl};
-  @include glass-effect(20px, $color-bg-elevated, $color-bg-card-fallback);
-  box-shadow: $shadow-xl;
-}
-
-.el-overlay-dialog {
-  background-color: $color-bg-overlay;
-  @supports (backdrop-filter: blur(4px)) or (-webkit-backdrop-filter: blur(4px)) {
-    backdrop-filter: blur(4px);
-    -webkit-backdrop-filter: blur(4px);
-  }
-}
-
-// 下拉菜单 - 毛玻璃渐进增强
-.el-dropdown-menu {
-  --el-dropdown-menu-bg-color: #{$color-bg-elevated};
-  --el-dropdown-menu-item-color: #{$color-text-primary};
-  --el-dropdown-menu-item-hover-bg-color: #{$color-primary-100};
-  --el-dropdown-menu-item-hover-color: #{$color-primary};
-  border: 1px solid $color-border;
-  @include glass-effect(16px, $color-bg-elevated, $color-bg-card-fallback);
-  box-shadow: $shadow-lg;
-  border-radius: $radius-md;
-}
-
-// 消息提示 - 毛玻璃渐进增强
-.el-message {
-  --el-message-bg-color: #{$color-bg-elevated};
-  --el-message-text-color: #{$color-text-primary};
-  --el-message-border-color: #{$color-border};
-  border: 1px solid $color-border;
-  @include glass-effect(16px, $color-bg-elevated, $color-bg-card-fallback);
-  box-shadow: $shadow-lg;
-  border-radius: $radius-md;
-}
-
-// Tooltip - 毛玻璃渐进增强
-.el-tooltip__popper {
-  --el-tooltip-bg-color: #{$color-bg-elevated};
-  --el-tooltip-text-color: #{$color-text-primary};
-  --el-tooltip-border-color: #{$color-border};
-  border: 1px solid $color-border;
-  @include glass-effect(16px, $color-bg-elevated, $color-bg-card-fallback);
-  box-shadow: $shadow-lg;
-  border-radius: $radius-md;
-}
-
-// 数字输入框
-.el-input-number {
-  --el-input-number-border-color: #{$color-border};
-  --el-input-number-bg-color: #{$color-bg-input};
-  --el-input-text-color: #{$color-text-primary};
-}
-
-// Switch 开关
-.el-switch {
-  --el-switch-on-color: #{$color-primary};
-  --el-switch-off-color: #{$color-border};
-}
-
-// 对话框内边距
-.el-dialog__header { padding-bottom: $spacing-3; }
-.el-dialog__body { padding-top: $spacing-4; }
-.el-dialog__footer { padding-top: $spacing-3; }
-
-// 分页
-.el-pagination {
-  --el-pagination-bg-color: transparent;
-  --el-pagination-text-color: #{$color-text-secondary};
-  --el-pagination-hover-text-color: #{$color-primary};
-  --el-pagination-button-bg-color: #{$color-bg-input};
-  --el-pagination-button-disabled-bg-color: #{$color-bg-input};
-  --el-pagination-button-off-color: #{$color-text-tertiary};
-}
-
-// 表单
-.el-form-item__label {
-  color: $color-text-secondary;
-  font-size: $font-size-sm;
-}
-
-.el-form-item__error {
-  font-size: $font-size-xs;
-}
-
-// Empty 组件
-.el-empty {
-  --el-empty-text-color: #{$color-text-tertiary};
-}
-
-// 单选按钮组
-.el-radio-button__inner {
-  background: rgba(248, 250, 252, 0.04);
-  border-color: $color-border;
-  color: $color-text-secondary;
-}
-
-.el-radio-button__original-radio:checked + .el-radio-button__inner {
-  background-color: $color-primary;
-  border-color: $color-primary;
-  color: $color-text-inverse;
-  box-shadow: -1px 0 0 0 $color-primary;
-}
-
-// ------------------------------------------
-// 5. 全局动画关键帧
-// ------------------------------------------
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-12px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes slideInLeft {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    opacity: 0;
-    transform: translateX(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
-@keyframes skeleton-shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
-}
-
-@keyframes scaleIn {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes glow-pulse {
-  0%, 100% {
-    box-shadow: 0 0 8px rgba(14, 165, 233, 0.25);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
-  }
-}
-
-@keyframes page-enter {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-// 减少动效适配
-@include reduce-motion {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
-}
-
-// ------------------------------------------
-// 6. 页面级过渡动画
-// ------------------------------------------
-.page-enter-active,
-.page-leave-active {
-  transition: opacity 180ms cubic-bezier(0.4, 0, 0.2, 1),
-    transform 180ms cubic-bezier(0.4, 0, 0.2, 1);
-  will-change: opacity, transform;
-  backface-visibility: hidden;
-}
-
-// 离开阶段脱离文档流，避免过渡期间触发重排
-.page-leave-active {
-  position: absolute;
-  width: 100%;
-}
-
-.page-enter-from {
-  opacity: 0;
-  transform: translateY(10px);
-}
-
-.page-leave-to {
-  opacity: 0;
-  transform: translateY(-6px);
-}
-
-// ------------------------------------------
-// 7. 可访问性优化
-// ------------------------------------------
-
-// 键盘聚焦可见
-:focus-visible {
-  outline: 2px solid $color-primary;
-  outline-offset: 2px;
-  border-radius: $radius-sm;
-}
-
-// 跳过链接
-.sr-only {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+button {
+  font-family: inherit;
+  font-size: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: inherit;
   padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border-width: 0;
 }
 
-.skip-link {
-  position: absolute;
-  top: -40px;
-  left: 0;
-  padding: 8px 16px;
-  background: $color-primary;
-  color: $color-text-inverse;
-  z-index: $z-index-toast;
-  transition: transform $transition-fast;
-  transform: translateY(0);
-
-  &:focus {
-    transform: translateY(40px);
-  }
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
 }
 
-// ------------------------------------------
-// 8. 减少动画偏好（可访问性 + 性能）
-// ------------------------------------------
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-    scroll-behavior: auto !important;
-  }
+img { max-width: 100%; height: auto; display: block; }
+svg { display: block; }
+
+::selection { background: rgba(0, 122, 255, 0.2); }
+
+.ios-container {
+  width: 100%;
+  height: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 0 var(--ios-spacing-lg);
+
+  @include mobile { padding: 0 var(--ios-spacing-md); }
 }
 
-// ------------------------------------------
-// 9. 打印样式
-// ------------------------------------------
+.ios-content-area {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  @include ios-scrollbar;
+  @include ios-safe-bottom;
+}
 
-@media print {
-  body {
-    background: white;
-    color: black;
-  }
+.ios-section { margin-bottom: var(--ios-spacing-xl); }
+
+.ios-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ios-spacing-lg) 0 var(--ios-spacing-md);
+  font-size: var(--ios-text-sm);
+  font-weight: 600;
+  color: var(--ios-label-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.ios-label { font-size: var(--ios-text-sm); color: var(--ios-label-secondary); font-weight: 500; }
+.ios-value { font-size: var(--ios-text-lg); font-weight: 600; color: var(--ios-label-primary); font-variant-numeric: tabular-nums; }
+.ios-caption { font-size: var(--ios-text-xs); color: var(--ios-label-tertiary); }
+
+.ios-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px var(--ios-spacing-sm);
+  border-radius: var(--ios-radius-full);
+  font-size: var(--ios-text-xs);
+  font-weight: 600;
+  background: var(--ios-fill-primary);
+  color: var(--ios-label-secondary);
+}
+
+.ios-badge-success { background: rgba(52, 199, 89, 0.15); color: var(--ios-green); }
+.ios-badge-warning { background: rgba(255, 149, 0, 0.15); color: var(--ios-orange); }
+.ios-badge-danger { background: rgba(255, 59, 48, 0.15); color: var(--ios-red); }
+.ios-badge-info { background: rgba(0, 122, 255, 0.15); color: var(--ios-blue); }
+
+.ios-divider {
+  height: 1px;
+  background: var(--ios-separator);
+  margin: var(--ios-spacing-md) 0;
+}
+
+.ios-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid var(--ios-fill-secondary);
+  border-top-color: var(--ios-blue);
+  border-radius: 50%;
+  animation: ios-spin 0.8s linear infinite;
+}
+
+@keyframes ios-spin { to { transform: rotate(360deg); } }
+@keyframes ios-fade-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes ios-scale-in { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+@keyframes ios-skeleton { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+.ios-animate-fade { animation: ios-fade-in var(--ios-duration-normal) var(--ios-ease-out); }
+.ios-animate-scale { animation: ios-scale-in var(--ios-duration-normal) var(--ios-spring); }
+
+.ios-glass-bar {
+  @include ios-glass(0.85);
+  border-bottom: 1px solid var(--ios-separator);
+  :root.dark &, [data-theme="dark"] & { @include ios-glass-dark(0.8); }
+}
+
+.ios-grid {
+  display: grid;
+  gap: var(--ios-spacing-lg);
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  @include mobile { grid-template-columns: 1fr; gap: var(--ios-spacing-md); }
+}
+
+.ios-flex { display: flex; }
+.ios-flex-col { flex-direction: column; }
+.ios-items-center { align-items: center; }
+.ios-justify-center { justify-content: center; }
+.ios-justify-between { justify-content: space-between; }
+
+.ios-gap-xs { gap: var(--ios-spacing-xs); }
+.ios-gap-sm { gap: var(--ios-spacing-sm); }
+.ios-gap-md { gap: var(--ios-spacing-md); }
+.ios-gap-lg { gap: var(--ios-spacing-lg); }
+
+.ios-p-sm { padding: var(--ios-spacing-sm); }
+.ios-p-md { padding: var(--ios-spacing-md); }
+.ios-p-lg { padding: var(--ios-spacing-lg); }
+
+.ios-text-center { text-align: center; }
+.ios-text-right { text-align: right; }
+.ios-text-positive { color: var(--ios-red); }
+.ios-text-negative { color: var(--ios-green); }
+.ios-text-blue { color: var(--ios-blue); }
+.ios-text-muted { color: var(--ios-label-secondary); }
+
+.ios-skeleton {
+  background: linear-gradient(90deg, var(--ios-fill-primary) 25%, var(--ios-fill-secondary) 50%, var(--ios-fill-primary) 75%);
+  background-size: 200% 100%;
+  animation: ios-skeleton 1.5s ease-in-out infinite;
+  border-radius: var(--ios-radius-sm);
+}
+
+.ios-pressable {
+  cursor: pointer;
+  transition: transform var(--ios-duration-fast) var(--ios-spring), background var(--ios-duration-fast) var(--ios-ease);
+
+  @media (hover: hover) { &:hover { background: var(--ios-fill-primary); } }
+  &:active { transform: scale(0.98); background: var(--ios-fill-secondary); }
+}
+
+.ios-desktop-only { @include mobile { display: none !important; } }
+.ios-mobile-only { @include desktop { display: none !important; } }
+
+.ios-window-controls { display: flex; gap: var(--ios-spacing-sm); }
+
+.ios-window-btn {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: filter var(--ios-duration-fast) var(--ios-ease);
+  &:hover { filter: brightness(0.9); }
+  &:active { filter: brightness(0.8); }
+}
+
+.ios-window-btn-close { background: #FF5F57; }
+.ios-window-btn-minimize { background: #FEBC2E; }
+.ios-window-btn-maximize { background: #28C840; }
+
+.ios-touch-target {
+  min-width: 44px;
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }

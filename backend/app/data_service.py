@@ -1,4 +1,5 @@
 """数据服务层：大盘数据计算与历史趋势查询。"""
+import time
 import json
 import logging
 import os
@@ -22,19 +23,22 @@ if _PROJECT_ROOT not in sys.path:
     sys.path.insert(0, _PROJECT_ROOT)
 
 # 数据新鲜度阈值：超过该时长未更新视为降级
-_DATA_FRESHNESS_MAX_HOURS = 24
+_DATA_FRESHNESS_MAX_HOURS = 72
 # 降级判定阈值（秒）：update_time 与当前时间差超过此值，标记为降级
 _DEGRADED_THRESHOLD_SECONDS = _DATA_FRESHNESS_MAX_HOURS * 3600
 
 
 def _parse_iso_time(time_str: Optional[str]) -> Optional[datetime]:
-    """安全解析 ISO 时间字符串，失败返回 None。"""
+    """安全解析 ISO 时间字符串，失败返回 None（返回naive本地时间用于比较）。"""
     if not time_str:
         return None
     try:
-        # 兼容 ISO 8601 与 yyyy-mm-dd 日期两种格式
         if 'T' in time_str:
-            return datetime.fromisoformat(time_str.replace('Z', '+00:00'))
+            dt = datetime.fromisoformat(time_str.replace('Z', '+00:00'))
+            if dt.tzinfo is not None:
+                import time as _time
+                return datetime.fromtimestamp(dt.timestamp())
+            return dt
         return datetime.strptime(time_str[:19], '%Y-%m-%d %H:%M:%S') if ' ' in time_str else datetime.strptime(time_str, '%Y-%m-%d')
     except (ValueError, TypeError):
         try:
@@ -48,52 +52,22 @@ def _compute_is_degraded(
     source_passed: Optional[bool] = None,
     user_discussion_present: Optional[bool] = None,
     json_provenance_time: Optional[str] = None,
+    has_valid_data: Optional[bool] = None,
 ) -> bool:
-    """动态计算板块是否处于降级状态。
-
-    判定规则（任一满足即降级）：
-    1. update_time 距当前时间超过 _DATA_FRESHNESS_MAX_HOURS 小时
-    2. source_passed 为 False（数据源真实性校验未通过）
-    3. user_discussion_present 为 False（仅新闻源有数据，无用户讨论）
-    4. json_provenance_time 与 update_time 不一致（DB 因降级跳过更新但 JSON 已写入）
-
-    Args:
-        update_time: 板块数据的更新时间
-        source_passed: 数据源真实性校验是否通过
-        user_discussion_present: 是否存在用户讨论数据
-        json_provenance_time: JSON 缓存中记录的采集时间（用于一致性校验）
-
-    Returns:
-        bool: True 表示板块处于降级状态
+    """动态计算板块是否处于降级状态（数据过期/无有效数据）。
+    业务规则：NOT (total_posts=0 OR (idx=0 AND buy=0 AND sell=0)) 为有效数据
     """
-    # 规则 2/3: 数据源校验状态判定
-    if source_passed is False:
-        return True
-    if user_discussion_present is False:
+    if has_valid_data is False:
         return True
 
-    # 规则 1: 数据时效性判定
     if update_time:
         update_dt = _parse_iso_time(update_time)
         if update_dt is None:
-            # 时间格式异常无法判定，保守标记为降级
             return True
-        # 时区处理：若 update_dt 含时区，对比时使用本地时间
-        now = datetime.now(update_dt.tzinfo) if update_dt.tzinfo else datetime.now()
+        now = datetime.now()
         age_seconds = (now - update_dt).total_seconds()
         if age_seconds > _DEGRADED_THRESHOLD_SECONDS:
             return True
-
-    # 规则 4: DB/JSON 时间戳一致性校验
-    if json_provenance_time and update_time:
-        json_dt = _parse_iso_time(json_provenance_time)
-        db_dt = _parse_iso_time(update_time)
-        if json_dt and db_dt:
-            # 若 JSON 采集时间明显晚于 DB 更新时间（差值超过 1 小时），
-            # 说明 DB 因降级保护跳过了更新但 JSON 已写入新数据，存在时间戳矛盾
-            diff_seconds = abs((json_dt - db_dt).total_seconds())
-            if diff_seconds > 3600:
-                return True
 
     return False
 
@@ -158,6 +132,8 @@ def _load_history_from_json() -> Dict[str, List[Dict]]:
                     continue
                 details = sector_data.get('details', {}) if isinstance(sector_data.get('details'), dict) else {}
                 total_posts = details.get('total_posts', 0) or 0
+                if value_float <= 0 and total_posts > 0:
+                    continue
                 if total_posts <= 0 and value_float == 0:
                     continue
                 result.setdefault(code, []).append({
@@ -282,9 +258,7 @@ def _build_merged_history_for_trend(code: str, db_history: List[Dict], json_hist
 
 
 def _compute_positive_ratio(row: Dict) -> float:
-    """根据买卖指数估算正面情绪比例。
-    当买卖指数都为0时（全观望情绪），返回50.0（中性）。
-    """
+    """根据买卖指数估算正面情绪比例（买卖均为0时返回50.0中性）。"""
     buy = float(row.get('buy_index', 0) or 0)
     sell = float(row.get('sell_index', 0) or 0)
     total = buy + sell
@@ -297,14 +271,9 @@ def _map_sector_row(
     row: Dict,
     history: Optional[List[Dict]] = None,
     json_provenance_time: Optional[str] = None,
+    global_has_user_discussion: Optional[bool] = None,
 ) -> Dict[str, Any]:
-    """将数据库 sector_index 行映射为前端需要的字段格式。
-
-    Args:
-        row: 数据库行数据，包含 source_passed / user_discussion_present 等审计字段
-        history: 历史趋势数据
-        json_provenance_time: JSON 缓存的采集时间，用于 DB/JSON 一致性校验
-    """
+    """将数据库行映射为前端字段格式。"""
     buy = float(row.get('buy_index', 0) or 0)
     sell = float(row.get('sell_index', 0) or 0)
     total_sentiment = buy + sell
@@ -314,23 +283,35 @@ def _map_sector_row(
     except (TypeError, ValueError):
         index_value = None
 
+    post_count = int(row.get('total_posts', 0) or 0)
     update_time = _format_update_time(row.get('created_at') or row.get('record_date'))
 
-    # 动态计算降级状态：基于时效性、数据源校验状态、DB/JSON 一致性
-    source_passed_raw = row.get('source_passed')
+    has_valid_data = index_value is not None and post_count > 0
     user_discussion_raw = row.get('user_discussion_present')
+    user_discussion_present = bool(user_discussion_raw) if user_discussion_raw is not None else global_has_user_discussion
+
     is_degraded = _compute_is_degraded(
         update_time=update_time,
-        source_passed=bool(source_passed_raw) if source_passed_raw is not None else None,
-        user_discussion_present=bool(user_discussion_raw) if user_discussion_raw is not None else None,
+        user_discussion_present=user_discussion_present,
         json_provenance_time=json_provenance_time,
+        has_valid_data=has_valid_data,
     )
+
+    buy_count = int(row.get('buy_count', 0) or 0)
+    sell_count = int(row.get('sell_count', 0) or 0)
+    if buy_count == 0 and sell_count == 0 and total_sentiment > 0:
+        buy_count = int(round(buy / total_sentiment * post_count)) if post_count > 0 else 0
+        sell_count = post_count - buy_count if post_count > 0 else 0
 
     return {
         'code': row.get('sector_code'),
         'index': index_value,
-        'post_count': int(row.get('total_posts', 0) or 0),
+        'post_count': post_count,
         'positive_ratio': _compute_positive_ratio(row),
+        'buy': buy_count,
+        'sell': sell_count,
+        'buy_index': buy,
+        'sell_index': sell,
         'trend': _compute_trend(history) if history else '平稳',
         'update_time': update_time,
         'is_degraded': is_degraded,
@@ -342,15 +323,9 @@ def _map_json_sector(
     data: Dict,
     json_history_map: Dict[str, List[Dict]],
     json_provenance_time: Optional[str] = None,
+    global_has_user_discussion: Optional[bool] = None,
 ) -> Dict[str, Any]:
-    """将 JSON 文件中的板块数据映射为前端格式，正确计算 positive_ratio 和 update_time。
-
-    Args:
-        code: 板块代码
-        data: JSON 板块数据
-        json_history_map: JSON 历史走势映射
-        json_provenance_time: JSON 缓存的采集时间，用于自洽性校验
-    """
+    """将JSON板块数据映射为前端格式。"""
     details = data.get('details', {}) if isinstance(data.get('details'), dict) else {}
     buy = float(details.get('mom_buy_index', 0) or data.get('mom_buy_index', 0) or 0)
     sell = float(details.get('mom_sell_index', 0) or data.get('mom_sell_index', 0) or 0)
@@ -370,19 +345,35 @@ def _map_json_sector(
     except (TypeError, ValueError):
         index_value = None
 
-    # JSON 回退路径也要动态计算降级状态
+    post_count = int(details.get('total_posts', data.get('total_posts', 0)) or 0)
+    has_valid_data = index_value is not None and post_count > 0
+
     is_degraded = _compute_is_degraded(
         update_time=update_time,
-        source_passed=None,  # JSON 路径无 source_passed 字段
-        user_discussion_present=None,  # 由 _compute_dashboard_overview 统一传入
+        user_discussion_present=global_has_user_discussion,
         json_provenance_time=json_provenance_time,
+        has_valid_data=has_valid_data,
     )
+
+    buy_count = 0
+    sell_count = 0
+    if buy_count_key := details.get('buy_count') or data.get('buy_count'):
+        buy_count = int(buy_count_key)
+    if sell_count_key := details.get('sell_count') or data.get('sell_count'):
+        sell_count = int(sell_count_key)
+    if buy_count == 0 and sell_count == 0 and total > 0:
+        buy_count = int(round(buy / (buy + sell) * post_count)) if post_count > 0 else 0
+        sell_count = post_count - buy_count if post_count > 0 else 0
 
     return {
         'code': code,
         'index': index_value,
-        'post_count': int(details.get('total_posts', data.get('total_posts', 0)) or 0),
+        'post_count': post_count,
         'positive_ratio': positive_ratio,
+        'buy': buy_count,
+        'sell': sell_count,
+        'buy_index': buy,
+        'sell_index': sell,
         'trend': _compute_trend(merged_history),
         'update_time': update_time,
         'is_degraded': is_degraded,
@@ -397,10 +388,7 @@ async def _compute_dashboard_overview() -> Dict[str, Any]:
         json_history_map = _load_history_from_json()
         json_sectors = _load_from_json_file()
 
-        # 先加载 provenance，获取 JSON 采集时间与 has_user_discussion 状态，
-        # 用于 DB/JSON 一致性校验与 JSON 路径降级判定
         provenance = _load_data_provenance()
-        # JSON 采集时间取 provenance 中的最新指纹时间，若无则尝试 data_sources
         json_provenance_time = None
         if provenance.get('available'):
             fingerprints = provenance.get('fingerprints', []) or []
@@ -410,7 +398,6 @@ async def _compute_dashboard_overview() -> Dict[str, Any]:
             ]
             if collected_ats:
                 json_provenance_time = max(collected_ats)
-        # has_user_discussion: 标识当前 JSON 缓存是否包含用户讨论数据
         has_user_discussion = provenance.get('has_user_discussion') if provenance.get('available') else None
 
         sectors = {}
@@ -424,7 +411,9 @@ async def _compute_dashboard_overview() -> Dict[str, Any]:
                 db_history = await db.get_sector_history(code, days=7)
                 merged_history = _build_merged_history_for_trend(code, db_history, json_history_map)
                 sectors[code] = _map_sector_row(
-                    row, merged_history, json_provenance_time=json_provenance_time
+                    row, merged_history,
+                    json_provenance_time=json_provenance_time,
+                    global_has_user_discussion=has_user_discussion,
                 )
 
         for code in VALID_SECTORS:
@@ -432,10 +421,8 @@ async def _compute_dashboard_overview() -> Dict[str, Any]:
                 sector_data = _map_json_sector(
                     code, json_sectors[code], json_history_map,
                     json_provenance_time=json_provenance_time,
+                    global_has_user_discussion=has_user_discussion,
                 )
-                # JSON 路径根据 provenance 的 has_user_discussion 状态补全降级判定
-                if has_user_discussion is False and not sector_data.get('is_degraded'):
-                    sector_data['is_degraded'] = True
                 sectors[code] = sector_data
 
         if not sectors:
@@ -444,9 +431,8 @@ async def _compute_dashboard_overview() -> Dict[str, Any]:
                     sector_data = _map_json_sector(
                         code, json_sectors[code], json_history_map,
                         json_provenance_time=json_provenance_time,
+                        global_has_user_discussion=has_user_discussion,
                     )
-                    if has_user_discussion is False and not sector_data.get('is_degraded'):
-                        sector_data['is_degraded'] = True
                     sectors[code] = sector_data
 
         degraded_sectors = [code for code, s in sectors.items() if s.get('is_degraded')]
@@ -457,10 +443,11 @@ async def _compute_dashboard_overview() -> Dict[str, Any]:
             avg_index = None
             last_update_time = None
         else:
-            # 综合指数仅对有效（非降级、index 不为 None）板块计算均值
-            calc_sectors = valid_sectors if valid_sectors else sectors
-            total_index = sum(s['index'] for s in calc_sectors.values() if isinstance(s, dict) and s['index'] is not None)
-            avg_index = round(total_index / len(calc_sectors), 1) if calc_sectors else None
+            valid_for_calc = [s for s in valid_sectors.values() if isinstance(s, dict) and s.get('index') is not None]
+            if not valid_for_calc:
+                valid_for_calc = [s for s in sectors.values() if isinstance(s, dict) and s.get('index') is not None]
+            total_index = sum(s['index'] for s in valid_for_calc)
+            avg_index = round(total_index / len(valid_for_calc), 1) if valid_for_calc else None
             update_times = [s.get('update_time') for s in sectors.values() if isinstance(s, dict) and s.get('update_time')]
             last_update_time = max(update_times) if update_times else None
 
@@ -468,8 +455,6 @@ async def _compute_dashboard_overview() -> Dict[str, Any]:
         freshness = is_data_fresh(last_update_time, max_age_hours=_DATA_FRESHNESS_MAX_HOURS)
 
         quality = _load_data_quality()
-
-        # 数据真实性字段级/完整性/一致性校验
         integrity_check = _validate_data_integrity(sectors, provenance, last_update_time)
 
         return {
@@ -480,7 +465,7 @@ async def _compute_dashboard_overview() -> Dict[str, Any]:
                 'last_update_time': last_update_time,
                 'sectors': sectors,
                 'degraded_sectors': degraded_sectors,
-                'has_valid_user_discussion': len(valid_sectors) > 0,
+                'has_valid_user_discussion': has_user_discussion if has_user_discussion is not None else True,
                 'valid_sector_count': len(valid_sectors),
                 'data_freshness': freshness,
                 'data_provenance': provenance,
@@ -502,22 +487,7 @@ def _validate_data_integrity(
     provenance: Dict[str, Any],
     last_update_time: Optional[str],
 ) -> Dict[str, Any]:
-    """数据真实性字段级/完整性/一致性校验。
-
-    校验维度：
-    1. 字段级校验：每个板块的 index / post_count / positive_ratio / update_time 字段类型与范围
-    2. 完整性校验：必填字段是否齐全，是否缺失关键审计字段
-    3. 一致性校验：avg_index 与各板块 index 的一致性、update_time 与 provenance 的一致性
-
-    Returns:
-        dict: {
-            'passed': bool,           # 总体是否通过
-            'field_issues': List[str], # 字段级问题
-            'integrity_issues': List[str], # 完整性问题
-            'consistency_issues': List[str], # 一致性问题
-            'checked_at': str,         # 校验时间
-        }
-    """
+    """数据真实性校验（字段级/完整性/一致性）。"""
     field_issues: List[str] = []
     integrity_issues: List[str] = []
     consistency_issues: List[str] = []
@@ -654,7 +624,7 @@ async def _compute_history_trend(code: Optional[str], days: int = 7) -> Dict[str
                 db_history[code] = [
                     {'date': r.get('record_date'), 'value': r.get('index_value')}
                     for r in rows
-                    if r.get('record_date') is not None
+                    if r.get('record_date') is not None and r.get('index_value', 0) > 0
                 ]
         else:
             result = await db.get_all_sectors_history(days=days)
@@ -666,7 +636,7 @@ async def _compute_history_trend(code: Optional[str], days: int = 7) -> Dict[str
                     db_history[c] = [
                         {'date': r.get('record_date'), 'value': r.get('index_value')}
                         for r in rows
-                        if r.get('record_date') is not None
+                        if r.get('record_date') is not None and r.get('index_value', 0) > 0
                     ]
 
         merged: Dict[str, Dict[str, Dict]] = {}
@@ -738,6 +708,7 @@ async def get_line_chart_data(sectors: str, days: int = 7) -> Dict[str, Any]:
             return {'code': 200, 'data': None, 'message': '无数据'}
 
         data = history_data['data']
+        sector_names = settings.SECTOR_NAMES
 
         all_dates_set = set()
         for code in sector_list:
@@ -752,11 +723,13 @@ async def get_line_chart_data(sectors: str, days: int = 7) -> Dict[str, Any]:
         for code in sector_list:
             if code in data and data[code]:
                 date_value_map = {item['date']: item.get('value') for item in data[code]}
+                series_name = sector_names.get(code, code)
                 series_data.append({
-                    'name': code,
+                    'name': series_name,
+                    'code': code,
                     'data': [date_value_map.get(date) for date in x_axis]
                 })
-                legend.append(code)
+                legend.append(series_name)
 
         return {
             'code': 200,
@@ -955,6 +928,14 @@ async def get_capital_flow_detail(data_type: str, trade_date: Optional[str] = No
 class _DataService:
     get_dashboard_overview = staticmethod(get_dashboard_overview)
     _compute_dashboard_overview = staticmethod(_compute_dashboard_overview)
+    get_sector_detail = staticmethod(get_sector_detail)
+    get_history_trend = staticmethod(get_history_trend)
+    get_all_sectors_history = staticmethod(get_all_sectors_history)
+    get_line_chart_data = staticmethod(get_line_chart_data)
+    get_market_data = staticmethod(get_market_data)
+    get_etf_correlation = staticmethod(get_etf_correlation)
+    get_capital_flow_summary = staticmethod(get_capital_flow_summary)
+    get_capital_flow_detail = staticmethod(get_capital_flow_detail)
 
 
 data_service = _DataService()

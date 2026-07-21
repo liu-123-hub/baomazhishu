@@ -29,38 +29,45 @@ async def lifespan(app: FastAPI):
     await db.init_database()
     print("   ✅ 数据库就绪")
 
-    print("[2/4] 初始化数据服务...")
-    _ = await data_service.get_dashboard_overview()
-    print("   ✅ 数据服务就绪")
+    print("[2/4] 启动数据服务预热（后台执行）...")
+    warmup_task = asyncio.create_task(_warmup_data_service())
+    print("   ✅ 数据服务预热已在后台启动")
 
     print("[3/4] 启动实时数据推送...")
     broadcast_task = asyncio.create_task(broadcast_data_loop())
     print("   ✅ 实时推送已启动")
 
-    print("[4/4] 启动自动数据采集...")
-    await auto_collector.start()
+    print("[4/4] 启动自动数据采集（延迟5秒后首次执行）...")
+    await auto_collector.start(delayed_start=True)
     print("   ✅ 自动采集已启动")
 
     print("\n" + "=" * 65)
     print(f"   ✅ 系统已启动")
     print(f"   🌐 API 服务: http://{settings.HOST}:{settings.PORT}")
     print(f"   📡 API 文档: http://{settings.HOST}:{settings.PORT}/docs")
-    print(f"   🔌 WebSocket: ws://{settings.HOST}:{settings.PORT}/api/v1/ws-test/ws")
     print("=" * 65 + "\n")
 
     yield
 
     print("\n⏹️  正在关闭系统...")
     broadcast_task.cancel()
+    warmup_task.cancel()
     await auto_collector.close()
     print("   ✅ 系统已关闭")
 
 
+async def _warmup_data_service():
+    """后台预热数据服务，不阻塞应用启动。"""
+    try:
+        await asyncio.sleep(0.5)
+        await data_service.get_dashboard_overview()
+        logger.info("数据服务预热完成")
+    except Exception as e:
+        logger.warning(f"数据服务预热异常（不影响使用）: {e}")
+
+
 async def broadcast_data_loop():
-    """定时广播大盘概览到所有 WebSocket 连接。
-    任何单次异常（DB 锁、JSON 解析失败等）都被捕获并记录，
-    避免推送循环静默停止导致前端不再收到更新。
-    """
+    """定时广播大盘概览到所有WebSocket连接，捕获异常避免循环中断。"""
     while True:
         try:
             if manager.connection_count > 0:

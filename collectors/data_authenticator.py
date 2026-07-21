@@ -11,10 +11,8 @@ MAX_FUTURE_SKEW_MINUTES = 10
 MIN_POSTS_PER_SECTOR = 1
 
 REQUIRED_PROVENANCE_FIELDS = (
-    # source_name 在 authenticate_collected_data 入参层面已校验，
-    # 帖子级别只需保证采集时间与原始链接可追溯。
     "collected_at",
-    ("source_url", "url"),  # 允许 source_url 或 url 作为溯源链接
+    ("source_url", "url"),
 )
 
 LEGIT_SOURCE_NAMES = frozenset({
@@ -126,14 +124,17 @@ def authenticate_collected_data(
     source_name: str,
     sector_data: Dict[str, List[Dict]],
     collected_at: Optional[str] = None,
+    duration_ms: Optional[float] = None,
+    http_latency_ms: Optional[float] = None,
 ) -> Dict[str, Any]:
-    """对一次采集结果执行完整真实性校验。
-
-    判定规则：
-    - passed=True 仅当无校验问题 **且** 采集到 >0 条记录。
-      空结果可能是被风控/限流/网络异常导致，不应视为"通过"，
-      否则会误导前端展示"6/6 源通过"而实际无用户讨论数据。
-    - record_count=0 时标记 passed=False 并追加 issue。
+    """对采集结果执行真实性校验，0条记录不视为通过。
+    
+    Args:
+        source_name: 数据源名称
+        sector_data: 按板块分类的帖子数据
+        collected_at: 采集时间戳
+        duration_ms: 整个采集流程耗时（毫秒）
+        http_latency_ms: HTTP请求平均延迟（毫秒，来自健康检查）
     """
     if collected_at is None:
         collected_at = datetime.now().isoformat()
@@ -149,9 +150,6 @@ def authenticate_collected_data(
         if isinstance(posts, list)
     )
 
-    # 关键修复：0 条记录不应视为校验通过。
-    # 之前空结果也会 passed=True，导致 data_provenance 显示"6/6 源通过"
-    # 但实际所有用户讨论源都为空，前端会误认为数据正常。
     if total_records == 0:
         issues.append(
             f"{source_name}: 采集记录数为 0，可能被风控/限流或网络异常，标记为未通过"
@@ -171,6 +169,8 @@ def authenticate_collected_data(
         "record_count": total_records,
         "collected_at": collected_at,
         "checked_at": datetime.now().isoformat(),
+        "duration_ms": round(duration_ms, 1) if duration_ms is not None else None,
+        "http_latency_ms": round(http_latency_ms, 1) if http_latency_ms is not None else None,
     }
 
 
@@ -210,11 +210,12 @@ def is_data_fresh(latest_update_time: Optional[str], max_age_hours: int = 24) ->
 def build_data_provenance(
     auth_reports: List[Dict[str, Any]],
     total_records: int,
+    source_durations: Optional[Dict[str, float]] = None,
+    health_check_latencies: Optional[Dict[str, float]] = None,
 ) -> Dict[str, Any]:
     passed = [r for r in auth_reports if r.get("passed")]
     passed_with_data = [r for r in passed if r.get("record_count", 0) > 0]
 
-    # 用户讨论型数据源（用于判定"是否有人气数据"而非纯新闻流）
     USER_DISCUSSION_SOURCES = frozenset({
         "东方财富股吧", "小红书", "雪球社区",
     })
@@ -225,10 +226,20 @@ def build_data_provenance(
         r for r in user_discussion_reports if r.get("passed") and r.get("record_count", 0) > 0
     ]
 
-    # has_user_discussion: 是否有任一用户讨论源采集到 >0 条记录。
-    # 若为 False，说明仅采集到新闻/资讯，指数计算会因缺少小白语境失真，
-    # 前端应明确提示"缺少用户讨论数据"而非"真实数据"。
     has_user_discussion = len(user_discussion_passed) > 0
+
+    durations = [r.get("duration_ms") for r in auth_reports if r.get("duration_ms") is not None]
+    latencies = [r.get("http_latency_ms") for r in auth_reports if r.get("http_latency_ms") is not None]
+    
+    performance_stats = {}
+    if durations:
+        performance_stats["total_collection_duration_ms"] = round(sum(durations), 1)
+        performance_stats["avg_source_duration_ms"] = round(sum(durations) / len(durations), 1)
+        performance_stats["max_source_duration_ms"] = round(max(durations), 1)
+        performance_stats["min_source_duration_ms"] = round(min(durations), 1)
+    if latencies:
+        performance_stats["avg_http_latency_ms"] = round(sum(latencies) / len(latencies), 1)
+        performance_stats["max_http_latency_ms"] = round(max(latencies), 1)
 
     return {
         "is_real_data": len(passed_with_data) > 0,
@@ -239,17 +250,18 @@ def build_data_provenance(
         "passed_count": len(passed),
         "passed_with_data_count": len(passed_with_data),
         "total_records": total_records,
+        "performance_stats": performance_stats,
         "fingerprints": [
             {
                 "source_name": r["source_name"],
                 "fingerprint": r["fingerprint"],
                 "record_count": r["record_count"],
                 "passed": r["passed"],
-                # 持久化 issues 字段，便于前端展示与后续诊断。
-                # 失败原因不再仅打印到控制台后丢弃。
                 "issues": r.get("issues", []),
                 "collected_at": r.get("collected_at"),
                 "checked_at": r.get("checked_at"),
+                "duration_ms": r.get("duration_ms"),
+                "http_latency_ms": r.get("http_latency_ms"),
             }
             for r in auth_reports
         ],

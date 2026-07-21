@@ -51,6 +51,7 @@ data/backup_*/
 # 前端依赖与构建产物
 frontend-vue/node_modules/
 frontend-vue/dist/
+frontend-vue/release/
 
 # 旧版前端目录
 frontend/

@@ -84,7 +84,7 @@ class AntiDetection:
         }
 
     def human_delay(self, min_s: float = 0.5, max_s: float = 3.0) -> float:
-        """高斯分布模拟真人延迟，每10次长停5-15s，每50次停30-60s。"""
+        """模拟真人浏览延迟（高斯分布+周期性长停）。"""
         mean = (min_s + max_s) / 2
         std = (max_s - min_s) / 4
         delay = random.gauss(mean, std)

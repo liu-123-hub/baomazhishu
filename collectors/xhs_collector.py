@@ -165,11 +165,7 @@ def _empty_sector_result() -> Dict[str, List[Dict]]:
 
 
 def collect_all() -> Dict[str, List[Dict]]:
-    """采集所有板块的小红书真实数据。
-
-    已配置 API Key: 从 rnote.dev 真实 API 获取数据
-    未配置 API Key: 返回空数据，提示用户配置
-    """
+    """采集所有板块的小红书真实数据，未配置API Key时返回空数据。"""
     result = _empty_sector_result()
     
     if not API_KEY:

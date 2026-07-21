@@ -1,4 +1,8 @@
-"""宝妈指数 LLM 分析引擎，多维度分类与判定。"""
+"""宝妈指数规则引擎分析器，基于关键词的多维度情绪与小白程度判定。
+
+说明：本模块使用基于规则的关键词匹配方法，无外部LLM API调用，
+确保分析结果可复现、无幻觉风险、响应速度快。
+"""
 from typing import Dict, List, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -187,7 +191,7 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
     total_newbie = sum(s[2] for s in matched_newbie) + extra_score
     total_pro = abs(sum(s[2] for s in matched_pro))
     
-    is_news_platform = post.get("platform", "") in ("guba", "google_news", "netease", "eastmoney", "sina", "tonghuashun")
+    is_news_platform = post.get("platform", "") in ("guba", "google_news", "netease", "eastmoney", "sina", "tonghuashun", "ths_finance")
     pro_penalty = total_pro * (0.4 if is_news_platform else 0.8)
     
     raw_score = total_newbie - pro_penalty

@@ -1,0 +1,52 @@
+{
+  "appId": "com.momindex.app",
+  "appName": "宝妈指数",
+  "webDir": "dist-mobile",
+  "bundledWebRuntime": false,
+  "npmClient": "npm",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": true,
+    "hostname": "app.momindex.local"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true,
+    "buildOptions": {
+      "keystorePath": null,
+      "keystorePassword": null,
+      "keystoreAlias": null,
+      "keystoreAliasPassword": null,
+      "releaseType": "APK"
+    }
+  },
+  "ios": {
+    "contentInset": "always",
+    "limitsNavigationsToAppBoundDomains": false,
+    "scheme": "MomIndex",
+    "backgroundColor": "#F2F2F7"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "launchAutoHide": true,
+      "backgroundColor": "#F2F2F7",
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "splashFullScreen": true,
+      "splashImmersive": true
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "backgroundColor": "#F2F2F7",
+      "overlaysWebView": false
+    },
+    "LocalNotifications": {
+      "smallIcon": "ic_stat_icon",
+      "iconColor": "#007AFF",
+      "sound": "beep.wav"
+    }
+  }
+}

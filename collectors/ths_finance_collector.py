@@ -1,4 +1,7 @@
-"""同花顺财经新闻采集器，HTML 解析公开新闻并按板块分类。"""
+"""同花顺财经新闻采集器，HTML 解析公开新闻并按板块分类。
+
+数据源：同花顺(10jqka.com.cn)公开新闻页面，真实公开财经资讯。
+"""
 import hashlib
 import html
 import re

@@ -1,8 +1,4 @@
-"""东方财富股吧/ETF讨论采集器 — 使用 AKShare stock_news_em 获取真实ETF相关新闻/讨论。
-
-之前的HTML爬虫被东财反爬验证（CAPTCHA/JS校验）拦截，返回"身份核实"页面。
-改为使用 AKShare 封装的东财ETF新闻接口，稳定可靠、覆盖全部25个板块。
-"""
+"""东方财富股吧/ETF讨论采集器，使用AKShare获取ETF相关新闻。"""
 import time
 import hashlib
 from datetime import datetime

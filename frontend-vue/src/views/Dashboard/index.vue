@@ -1,445 +1,196 @@
 <template>
-  <div class="dashboard-page">
-    <!-- 页面工具栏 -->
-    <header class="dashboard-toolbar">
-      <div class="toolbar-left">
-        <h1 class="page-title">数据大屏</h1>
-        <span class="update-time" v-if="overviewData?.last_update_time">
-          <span class="time-dot pulse"></span>
-          更新于 {{ formatTime(overviewData.last_update_time) }}
-        </span>
-        <!-- 数据真实性状态提示，让用户看到当前数据是否真实、新鲜 -->
-        <DataAuthStatus
-          :provenance="store.dataProvenance"
-          :freshness="store.dataFreshness"
-        />
+  <div class="dashboard-view ios-animate-fade">
+    <div class="dashboard-container">
+      <header class="dashboard-header">
+        <div class="header-left">
+          <h1 class="page-title">数据看板</h1>
+          <span v-if="lastUpdateTime" class="update-time">
+            <span class="time-dot"></span>
+            更新于 {{ formatTime(lastUpdateTime) }}
+          </span>
+        </div>
+        <div class="header-right">
+          <IOSSegmentControl v-model="timeRange" :options="timeOptions" @update:modelValue="handleTimeRangeChange" />
+        </div>
+      </header>
+
+      <div v-if="loading && !overviewData" class="loading-state">
+        <div class="ios-spinner"></div>
+        <span class="loading-text">加载中...</span>
       </div>
-      <div class="toolbar-right">
-        <el-radio-group
-          v-model="timeRange"
-          size="small"
-          @change="handleTimeRangeChange"
-          class="time-range-group"
-        >
-          <el-radio-button value="7d">近7天</el-radio-button>
-          <el-radio-button value="30d">近30天</el-radio-button>
-          <el-radio-button value="90d">近90天</el-radio-button>
-        </el-radio-group>
-        <el-button
-          type="primary"
-          size="small"
-          :loading="loading"
-          @click="refreshData"
-          class="refresh-btn"
-        >
-          <el-icon><Refresh /></el-icon>
-          刷新
-        </el-button>
+
+      <div v-else-if="error" class="error-state">
+        <span class="error-icon">{{ errorIcon }}</span>
+        <p class="error-text">{{ error }}</p>
+        <button class="ios-button ios-button-primary" @click="refreshData">重新加载</button>
       </div>
-    </header>
 
-    <!-- 主内容区 -->
-    <main class="dashboard-content">
-      <!-- 左侧面板：板块导航 -->
-      <aside class="panel sectors-panel" aria-label="板块导航">
-        <div class="panel-header">
-          <span class="panel-title">板块导航</span>
-          <span class="panel-count">已选 {{ activeSectors.length }}/{{ allLeafSectorCodes.length }} 板块</span>
+      <template v-else>
+        <div class="metrics-grid">
+          <IOSMetricCard
+            title="综合情绪指数"
+            :value="avgIndex"
+            :subValue="indexChange"
+            :color="indexColor"
+            icon="📊"
+            :trend="indexTrend"
+          />
+          <IOSMetricCard
+            title="有效板块"
+            :value="validSectorCount"
+            :subValue="`/ ${sectorCount} 个板块`"
+            color="blue"
+            icon="📈"
+          />
+          <IOSMetricCard
+            title="数据状态"
+            value="正常"
+            :subValue="dataQualityText"
+            :color="dataQualityColor"
+            icon="✅"
+          />
         </div>
-        <div class="sector-list">
-          <div
-            v-for="category in sectorList"
-            :key="category.code"
-            class="sector-category"
-          >
-            <div
-              class="category-header"
-              @click="toggleCategory(category.code)"
-            >
-              <el-icon :size="12" class="category-arrow" :class="{ expanded: expandedCategories[category.code] }">
-                <ArrowRight />
-              </el-icon>
-              <span class="category-name">{{ category.name }}</span>
-              <span class="category-count">{{ category.children.filter(c => activeSectors.includes(c.code)).length }}/{{ category.children.length }}</span>
+
+        <div class="chart-section ios-section">
+          <div class="section-header">
+            <h2 class="section-title">情绪走势</h2>
+            <span class="section-subtitle">{{ chartSubtitle }}</span>
+          </div>
+          <IOSCard elevated>
+            <IOSLineChart v-if="lineChartData" :data="lineChartData" height="440px" />
+            <div v-else class="chart-placeholder">
+              <span class="placeholder-text">暂无图表数据</span>
             </div>
-            <div v-show="expandedCategories[category.code]" class="category-children">
-              <div
-                v-for="sector in category.children"
-                :key="sector.code"
-                :class="['sector-item', { active: activeSectors.includes(sector.code), 'no-data': isDataReady && getSectorIndex(sector.code) == null }]"
-                @click="toggleSector(sector.code)"
-                :title="activeSectors.length === 1 && activeSectors.includes(sector.code) ? '至少保留一个板块' : (getSectorIndex(sector.code) == null ? '该板块数据采集中' : '')"
-              >
-                <span class="sector-color" :style="{ backgroundColor: sector.color }"></span>
-                <span class="sector-name">{{ sector.name }}</span>
-                <span
-                  class="sector-value"
-                  :class="getIndexColorClass(getSectorIndex(sector.code))"
-                >
-                  {{ isDataReady ? formatIndex(getSectorIndex(sector.code)) : '--' }}
-                </span>
-              </div>
+          </IOSCard>
+        </div>
+
+        <div class="content-grid">
+          <div class="sectors-section ios-section">
+            <div class="section-header">
+              <h2 class="section-title">板块排行</h2>
             </div>
+            <IOSSectorList
+              v-model="selectedSectors"
+              :sectors="sectorRankingData"
+              title=""
+              @update:modelValue="handleSectorSelect"
+            />
           </div>
         </div>
-      </aside>
-
-      <!-- 中间面板：图表区 -->
-      <section class="panel charts-panel" aria-label="数据图表">
-        <!-- 骨架屏 -->
-        <template v-if="loading && !overviewData">
-          <div class="loading-overlay">
-            <div class="skeleton-grid">
-              <div class="skeleton-card metric-skeleton"></div>
-              <div class="skeleton-card metric-skeleton"></div>
-              <div class="skeleton-card chart-skeleton main-chart"></div>
-              <div class="skeleton-card chart-skeleton"></div>
-              <div class="skeleton-card chart-skeleton"></div>
-            </div>
-          </div>
-        </template>
-
-        <!-- 错误状态 -->
-        <template v-else-if="error">
-          <div class="error-state">
-            <div class="error-icon">
-              <el-icon :size="56"><WarningFilled /></el-icon>
-            </div>
-            <h3 class="error-title">数据加载失败</h3>
-            <p class="error-text">{{ error }}</p>
-            <el-button type="primary" @click="refreshData">重新加载</el-button>
-          </div>
-        </template>
-
-        <!-- 图表内容 -->
-        <template v-else>
-          <!-- 顶部指标卡片 -->
-          <div class="metrics-row">
-            <div class="metric-card overview-card">
-              <div class="metric-header">
-                <span class="metric-label">综合情绪指数</span>
-                <span v-if="isDataReady && avgIndex != null" class="metric-badge" :class="getIndexColorClass(avgIndex)">
-                  {{ getIndexLabel(avgIndex) }}
-                </span>
-              </div>
-              <div class="metric-value" :class="avgIndex != null ? getIndexColorClass(avgIndex) : ''">
-                {{ isDataReady && avgIndex != null ? formatIndex(avgIndex) : '--' }}
-              </div>
-              <div class="metric-sub">
-                覆盖 <strong>{{ isDataReady ? validSectorCount : '--' }}</strong>/{{ allLeafSectorCodes.length }} 个子板块
-                <span v-if="isDataReady && validSectorCount < allLeafSectorCodes.length" class="metric-note">
-                  （{{ allLeafSectorCodes.length - validSectorCount }}个板块数据收集中）
-                </span>
-              </div>
-            </div>
-            <div class="metric-card gauge-card">
-              <GaugeChart
-                :value="avgIndex"
-                name="市场热度"
-                :max="100"
-                height="200px"
-              />
-            </div>
-          </div>
-
-          <!-- 折线图 -->
-          <div class="chart-card main-chart">
-            <div class="chart-header">
-              <div class="chart-title-wrap">
-                <span class="chart-title">情绪走势</span>
-                <span class="chart-subtitle">{{ chartSubtitle }}</span>
-              </div>
-              <span v-if="lineChartError" class="chart-error-tag">
-                <el-tag type="danger" size="small" effect="plain">加载失败</el-tag>
-                <el-button type="primary" size="small" link @click="refreshLineChart">重试</el-button>
-              </span>
-            </div>
-            <div class="chart-body">
-              <LineChart
-                v-if="lineChartSeries && lineChartSeries.length > 0"
-                :xAxisData="lineChartData.x_axis"
-                :seriesData="lineChartSeries"
-                :legendData="lineChartLegend"
-                :nameMap="SECTOR_NAMES"
-                :showArea="true"
-                height="320px"
-              />
-              <div v-else-if="lineChartError" class="chart-empty">
-                <el-empty description="数据加载失败" :image-size="80" />
-              </div>
-              <div v-else class="chart-empty">
-                <el-empty description="暂无数据" :image-size="80" />
-              </div>
-            </div>
-          </div>
-
-          <!-- 底部两个图表 -->
-          <div class="bottom-charts">
-            <div class="chart-card">
-              <div class="chart-header">
-                <span class="chart-title">板块排行</span>
-              </div>
-              <div class="chart-body">
-                <BarChart
-                  v-if="sectorRankingData && sectorRankingData.length > 0"
-                  :categories="sectorRankingData.map(d => d.name)"
-                  :seriesData="[{ name: '情绪指数', data: sectorRankingData.map(d => d.value), itemStyle: { borderRadius: [6, 6, 0, 0] } }]"
-                  :horizontal="true"
-                  height="240px"
-                />
-                <div v-else class="chart-empty">
-                  <el-empty description="暂无数据" :image-size="64" />
-                </div>
-              </div>
-            </div>
-            <div class="chart-card">
-              <div class="chart-header">
-                <span class="chart-title">板块占比</span>
-              </div>
-              <div class="chart-body">
-                <PieChart
-                  v-if="pieChartData && pieChartData.length > 0"
-                  :data="pieChartData"
-                  height="240px"
-                  :radius="['40%', '70%']"
-                />
-                <div v-else class="chart-empty">
-                  <el-empty description="暂无数据" :image-size="64" />
-                </div>
-              </div>
-            </div>
-          </div>
-        </template>
-      </section>
-
-      <!-- 右侧面板：板块详情 -->
-      <aside class="panel details-panel" aria-label="板块详情">
-        <div class="panel-header">
-          <span class="panel-title">板块详情</span>
-        </div>
-        <div class="sector-detail-list">
-          <div
-            v-for="sector in activeSectorDetails"
-            :key="sector.code"
-            class="detail-card"
-            :style="{ '--sector-color': sector.color }"
-          >
-            <div class="detail-header">
-              <div class="detail-name-wrap">
-                <span class="detail-dot" :style="{ backgroundColor: sector.color }"></span>
-                <span class="detail-name">{{ sector.name }}</span>
-                <el-tag v-if="sector.is_degraded" type="warning" size="small" effect="plain">数据降级</el-tag>
-              </div>
-              <span class="detail-index" :class="getIndexColorClass(sector.index)">
-                {{ formatIndex(sector.index) }}
-              </span>
-            </div>
-            <div class="detail-meta">
-              <div class="meta-item">
-                <span class="meta-label">帖子数</span>
-                <span class="meta-value">{{ formatNumber(sector.post_count) }}</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">正面率</span>
-                <span class="meta-value positive">{{ sector.positive_ratio ?? '--' }}%</span>
-              </div>
-              <div class="meta-item">
-                <span class="meta-label">趋势</span>
-                <span :class="['meta-value', 'trend-value', getTrendClass(sector.trend)]">
-                  {{ sector.trend || '平稳' }}
-                </span>
-              </div>
-            </div>
-          </div>
-          <el-empty v-if="activeSectorDetails.length === 0" description="请选择板块" :image-size="64" />
-        </div>
-      </aside>
-    </main>
+      </template>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useDashboardStore } from '@/stores/dashboard'
-import { ElMessage } from 'element-plus'
-import { Refresh, WarningFilled, ArrowRight } from '@element-plus/icons-vue'
-import LineChart from '@/components/Chart/LineChart.vue'
-import BarChart from '@/components/Chart/BarChart.vue'
-import PieChart from '@/components/Chart/PieChart.vue'
-import GaugeChart from '@/components/Chart/GaugeChart.vue'
-import DataAuthStatus from '@/components/DataAuthStatus.vue'
-import { SECTOR_NAMES, SECTOR_COLORS, SECTOR_CATEGORIES } from '@/api/index'
+import { useSystemStore } from '@/stores/system'
+import IOSMetricCard from '@/components/ios/IOSMetricCard.vue'
+import IOSCard from '@/components/ios/IOSCard.vue'
+import IOSLineChart from '@/components/ios/IOSLineChart.vue'
+import IOSSectorList from '@/components/ios/IOSSectorList.vue'
+import IOSSegmentControl from '@/components/ios/IOSSegmentControl.vue'
+import { SECTOR_NAMES, SECTOR_COLORS, SECTOR_CATEGORIES } from '@/core/constants'
 
 const store = useDashboardStore()
-const loading = ref(false)
-const error = ref('')
-const timeRange = ref('7d')
-// 所有叶子板块代码
+const systemStore = useSystemStore()
+
+const timeRange = ref('近7天')
+const timeOptions = ['近7天', '近30天', '近90天']
+const timeRangeDays = { '近7天': 7, '近30天': 30, '近90天': 90 }
+
 const allLeafSectorCodes = computed(() => {
   const codes = []
   SECTOR_CATEGORIES.forEach(cat => codes.push(...cat.children))
   return codes
 })
 
-// 默认初始选中前 6 个板块，避免折线图初次渲染过于拥挤
-const DEFAULT_ACTIVE_SECTOR_COUNT = 6
-const activeSectors = ref(allLeafSectorCodes.value.slice(0, DEFAULT_ACTIVE_SECTOR_COUNT))
-const lineChartError = ref(false)
+const selectedSectors = ref([...allLeafSectorCodes.value])
+let refreshTimer = null
 
-// 父板块展开状态（默认全部展开）
-const expandedCategories = ref(
-  Object.fromEntries(SECTOR_CATEGORIES.map(cat => [cat.code, true]))
-)
-
-// 板块列表（按父板块分组）
-const sectorList = computed(() => {
-  return SECTOR_CATEGORIES.map(cat => ({
-    code: cat.code,
-    name: cat.name,
-    isCategory: true,
-    children: cat.children.map(code => ({
-      code,
-      name: SECTOR_NAMES[code] || code,
-      color: SECTOR_COLORS[code] || '#0ea5e9',
-      category: cat.code
-    }))
-  }))
+const loading = computed(() => store.loading)
+const error = computed(() => {
+  // 网络断开时优先显示网络错误，而非API错误
+  if (!systemStore.isOnline) {
+    return '网络连接已断开，请检查网络连接'
+  }
+  return store.error
 })
-
-// 从 store 获取数据
+const errorIcon = computed(() => {
+  if (!systemStore.isOnline) return '📡'
+  return '⚠️'
+})
 const overviewData = computed(() => store.overviewData)
 const lineChartData = computed(() => store.lineChartData)
 
-const avgIndex = computed(() => {
-  const val = overviewData.value?.avg_index
-  return val != null ? val : null
+const avgIndex = computed(() => overviewData.value?.avg_index ?? null)
+const sectorCount = computed(() => overviewData.value?.sector_count ?? 0)
+const validSectorCount = computed(() => overviewData.value?.valid_sector_count ?? 0)
+const lastUpdateTime = computed(() => overviewData.value?.last_update_time ?? null)
+const dataQuality = computed(() => overviewData.value?.data_quality ?? null)
+
+const indexChange = computed(() => {
+  return null
 })
 
-const validSectorCount = computed(() => {
-  return overviewData.value?.valid_sector_count ?? 0
+const indexColor = computed(() => {
+  const val = avgIndex.value
+  if (val == null) return null
+  if (val >= 60) return 'red'
+  if (val >= 40) return 'orange'
+  if (val >= 20) return 'blue'
+  return 'gray'
 })
 
-const isDataReady = computed(() => {
-  return !loading.value && !error.value && overviewData.value?.sectors != null && Object.keys(overviewData.value.sectors).length > 0
+const indexTrend = computed(() => {
+  return 'flat'
 })
 
-const hasAnyData = computed(() => {
-  const sectors = overviewData.value?.sectors
-  return sectors && Object.values(sectors).some(s => s?.index != null)
+const dataQualityText = computed(() => {
+  if (!dataQuality.value) return '实时更新'
+  const dq = dataQuality.value
+  if (dq.available === false) return dq.reason || '数据校验中'
+  const marketIssues = dq.market_data?.issues?.length || 0
+  const capitalIssues = dq.capital_flow?.issues?.length || 0
+  if (marketIssues === 0 && capitalIssues === 0) return '数据校验通过'
+  return `${marketIssues + capitalIssues} 个待处理项`
 })
 
-// 折线图系列名称映射为中文
-const lineChartSeries = computed(() => {
-  const data = lineChartData.value?.series_data
-  if (!data) return []
-  return data.map(item => ({
-    ...item,
-    name: SECTOR_NAMES[item.name] || item.name
-  }))
+const dataQualityColor = computed(() => {
+  if (!dataQuality.value) return 'green'
+  const dq = dataQuality.value
+  if (dq.available === false) return 'orange'
+  const marketIssues = dq.market_data?.issues?.length || 0
+  const capitalIssues = dq.capital_flow?.issues?.length || 0
+  if (marketIssues === 0 && capitalIssues === 0) return 'green'
+  return 'orange'
 })
 
-const lineChartLegend = computed(() => {
-  return lineChartSeries.value.map(item => item.name)
-})
-
-const activeSectorNames = computed(() => {
-  return activeSectors.value.map(code => SECTOR_NAMES[code] || code)
-})
-
-// 折线图副标题：全选时显示"全部板块"，超过4个时显示前3个+"等N个板块"
-const chartSubtitle = computed(() => {
-  const count = activeSectorNames.value.length
-  const total = allLeafSectorCodes.value.length
-  if (count === 0) return '全部板块'
-  if (count === total) return `全部板块（${count}）`
-  if (count <= 4) return activeSectorNames.value.join(' / ')
-  return `${activeSectorNames.value.slice(0, 3).join(' / ')} 等${count}个板块`
-})
-
-// 板块排行数据
 const sectorRankingData = computed(() => {
   const sectors = overviewData.value?.sectors
   if (!sectors) return []
   return Object.entries(sectors)
-    .filter(([code]) => activeSectors.value.includes(code))
     .map(([code, data]) => {
       const idx = data?.index
-      if (idx == null) return null
       return {
         code,
         name: SECTOR_NAMES[code] || code,
         value: idx,
-        color: SECTOR_COLORS[code] || '#0ea5e9'
+        color: SECTOR_COLORS[code] || '#007AFF'
       }
     })
-    .filter(Boolean)
-    .sort((a, b) => b.value - a.value)
+    .filter(s => s.value != null)
+    .sort((a, b) => (b.value || 0) - (a.value || 0))
 })
 
-// 饼图数据
-const pieChartData = computed(() => {
-  return sectorRankingData.value.map(item => ({
-    name: item.name,
-    value: item.value,
-    itemStyle: { color: item.color }
-  }))
+const chartSubtitle = computed(() => {
+  const count = selectedSectors.value.length
+  const total = allLeafSectorCodes.value.length
+  if (count === 0 || count === total) return `全部板块（${total}）`
+  return `已选 ${count} 个板块`
 })
 
-// 活跃板块详情
-const activeSectorDetails = computed(() => {
-  const sectors = overviewData.value?.sectors
-  if (!sectors) return []
-  return activeSectors.value
-    .map(code => {
-      const data = sectors[code]
-      if (!data || data.index == null) return null
-      return {
-        code,
-        name: SECTOR_NAMES[code] || code,
-        index: data.index,
-        // post_count 兜底为 0 是因为该板块已被 data.index != null 过滤，
-        // 即后端已返回有效数据；若 post_count 缺失，0 是真实可信的（无帖子则不会有 index）。
-        post_count: data.post_count ?? 0,
-        // positive_ratio 兜底为 null，让模板的 `?? '--'` 生效，
-        // 避免后端字段缺失时显示 0% 误导用户（业务约束：buy+sell=0 时由后端返回 50.0）
-        positive_ratio: data.positive_ratio ?? null,
-        trend: data.trend ?? '平稳',
-        color: SECTOR_COLORS[code] || '#0ea5e9',
-        is_degraded: data.is_degraded ?? false
-      }
-    })
-    .filter(Boolean)
-})
-
-// 获取板块指数；数据未加载或板块缺失时返回 null，避免渲染成 0.00
-function getSectorIndex(code) {
-  const sector = overviewData.value?.sectors?.[code]
-  return sector?.index ?? null
-}
-
-// 指数颜色
-function getIndexColorClass(value) {
-  if (value >= 60) return 'index-hot'
-  if (value >= 40) return 'index-warm'
-  if (value >= 20) return 'index-cool'
-  return 'index-cold'
-}
-
-function getIndexLabel(value) {
-  if (value >= 60) return '过热'
-  if (value >= 40) return '活跃'
-  if (value >= 20) return '温和'
-  return '冷清'
-}
-
-// 趋势颜色
-function getTrendClass(trend) {
-  if (trend === '上涨') return 'trend-up'
-  if (trend === '下跌') return 'trend-down'
-  return 'trend-flat'
-}
-
-// 时间格式化
 function formatTime(timeStr) {
   if (!timeStr) return '--'
   try {
@@ -456,104 +207,63 @@ function formatTime(timeStr) {
   }
 }
 
-// 数字格式化
-function formatNumber(num) {
-  if (num === null || num === undefined) return '--'
-  return num.toLocaleString('zh-CN')
-}
-
-// 情绪指数统一格式化为两位小数
-function formatIndex(num) {
-  if (num === null || num === undefined || num === '') return '--'
-  const value = Number(num)
-  if (Number.isNaN(value)) return '--'
-  return value.toFixed(2)
-}
-
-// 切换板块
-function toggleSector(code) {
-  const idx = activeSectors.value.indexOf(code)
-  if (idx >= 0) {
-    // 至少保留一个板块
-    if (activeSectors.value.length <= 1) {
-      ElMessage.warning('至少保留一个板块')
-      return
-    }
-    activeSectors.value.splice(idx, 1)
-  } else {
-    activeSectors.value.push(code)
-    if (activeSectors.value.length > 6) {
-      activeSectors.value.shift()
-    }
+async function fetchData() {
+  // 网络断开时不发起请求，避免无意义的超时等待
+  if (!systemStore.isOnline) {
+    return
   }
-  refreshLineChart()
+  try {
+    const days = timeRangeDays[timeRange.value] || 7
+    await store.fetchAll(selectedSectors.value, days)
+  } catch (e) {
+    console.error('数据加载失败:', e)
+  }
 }
 
-// 时间范围切换
+async function refreshLineChart() {
+  try {
+    const days = timeRangeDays[timeRange.value] || 7
+    await store.fetchLineChart(selectedSectors.value, days)
+  } catch (e) {
+    console.error('折线图加载失败:', e)
+  }
+}
+
+function refreshData() {
+  fetchData()
+}
+
 function handleTimeRangeChange() {
   refreshLineChart()
 }
 
-let refreshLineChartTimer = null
-
-// 刷新折线图（防抖 150ms，避免快速切换板块时连续请求与图表重绘）
-async function refreshLineChart() {
-  if (refreshLineChartTimer) clearTimeout(refreshLineChartTimer)
-  refreshLineChartTimer = setTimeout(async () => {
-    lineChartError.value = false
-    try {
-      const days = timeRange.value === '7d' ? 7 : timeRange.value === '30d' ? 30 : 90
-      await store.fetchLineChart(activeSectors.value, days)
-    } catch (e) {
-      lineChartError.value = true
-      console.error('折线图数据加载失败:', e)
-    }
-  }, 150)
+function handleSectorSelect() {
+  refreshLineChart()
 }
 
-// 刷新所有数据
-async function refreshData() {
-  loading.value = true
-  error.value = ''
-  lineChartError.value = false
-  try {
-    const days = timeRange.value === '7d' ? 7 : timeRange.value === '30d' ? 30 : 90
-    // fetchAll 内部已同时请求 overview 与折线图数据，避免重复调用 line-chart 接口
-    await store.fetchAll(activeSectors.value, days)
-  } catch (e) {
-    error.value = e?.message || '数据加载失败，请检查后端服务是否运行'
-    console.error('数据加载失败:', e)
-  } finally {
-    loading.value = false
-  }
-}
-
-// 监听 store 错误
-watch(() => store.error, (newError) => {
-  if (newError) {
-    error.value = newError
-  }
-})
-
-function handleCollectionSuccess() {
-  // 后端自动采集完成，自动刷新大屏数据以展示最新市场状态
-  refreshData()
+function startAutoRefresh() {
+  if (refreshTimer) clearInterval(refreshTimer)
+  refreshTimer = setInterval(() => {
+    fetchData()
+  }, 30000)
 }
 
 onMounted(() => {
-  refreshData()
-  if (typeof window !== 'undefined') {
-    window.addEventListener('collection-success', handleCollectionSuccess)
+  fetchData()
+  startAutoRefresh()
+})
+
+// 网络恢复后自动重新加载数据
+watch(() => systemStore.isOnline, (online) => {
+  if (online && !overviewData.value) {
+    fetchData()
   }
 })
 
 onUnmounted(() => {
-  if (refreshLineChartTimer) {
-    clearTimeout(refreshLineChartTimer)
-    refreshLineChartTimer = null
-  }
-  if (typeof window !== 'undefined') {
-    window.removeEventListener('collection-success', handleCollectionSuccess)
+  if (refreshTimer) {
+    clearInterval(refreshTimer)
+    refreshTimer = null
   }
 })
 </script>
@@ -561,625 +271,177 @@ onUnmounted(() => {
 <style lang="scss" scoped>
 @use '@/styles/variables.scss' as *;
 
-.dashboard-page {
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-  padding: $spacing-5 $spacing-6 $spacing-6;
-  gap: $spacing-5;
+.dashboard-view {
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  @include ios-scrollbar;
+  @include ios-safe-bottom;
+}
 
-  @media (max-width: $breakpoint-md) {
-    padding: $spacing-4 $spacing-4 calc($spacing-4 + 60px);
-    gap: $spacing-4;
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--ios-spacing-xl) var(--ios-spacing-lg);
+  padding-top: calc(var(--ios-nav-height) + env(safe-area-inset-top, 0px) + var(--ios-spacing-xl));
+
+  @include mobile {
+    padding: var(--ios-spacing-lg) var(--ios-spacing-md);
+    padding-top: calc(var(--ios-nav-height) + env(safe-area-inset-top, 0px) + var(--ios-spacing-lg));
   }
 }
 
-// 工具栏
-.dashboard-toolbar {
-  @include flex-between;
-  flex-shrink: 0;
-  gap: $spacing-3;
+.dashboard-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ios-spacing-xl);
+  gap: var(--ios-spacing-lg);
+  flex-wrap: wrap;
 
-  .toolbar-left {
-    display: flex;
-    align-items: baseline;
-    gap: $spacing-4;
-  }
-
-  .page-title {
-    font-size: $font-size-2xl;
-    font-weight: $font-weight-bold;
-    color: $color-text-primary;
-    letter-spacing: -0.02em;
-  }
-
-  .update-time {
-    display: flex;
-    align-items: center;
-    gap: $spacing-2;
-    font-size: $font-size-sm;
-    color: $color-text-tertiary;
-
-    .time-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background-color: $color-success;
-      animation: pulse 2s ease-in-out infinite;
-    }
-  }
-
-  .toolbar-right {
-    display: flex;
-    align-items: center;
-    gap: $spacing-3;
-    flex-wrap: wrap;
-    justify-content: flex-end;
-  }
-
-  @media (max-width: $breakpoint-md) {
+  @include mobile {
     flex-direction: column;
-    align-items: flex-start;
-
-    .toolbar-left {
-      width: 100%;
-    }
-
-    .toolbar-right {
-      width: 100%;
-      justify-content: space-between;
-    }
-
-    .update-time {
-      display: none;
-    }
+    align-items: stretch;
+    gap: var(--ios-spacing-md);
+    margin-bottom: var(--ios-spacing-lg);
   }
 }
 
-// 主内容网格
-.dashboard-content {
-  flex: 1;
-  display: grid;
-  grid-template-columns: 220px 1fr 280px;
-  gap: $spacing-5;
-  min-height: 0;
-
-  @media (max-width: $breakpoint-xl) {
-    grid-template-columns: 200px 1fr 260px;
-    gap: $spacing-4;
-  }
-
-  @media (max-width: $breakpoint-lg) {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto 1fr auto;
-    overflow-y: auto;
-    // 避免滚动链导致整页抖动，开启硬件滚动
-    overscroll-behavior: contain;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    gap: $spacing-3;
-  }
-}
-
-.panel {
-  @include card-style;
-  padding: $spacing-4;
+.header-left {
   display: flex;
-  flex-direction: column;
-  min-height: 0;
-  overflow: hidden;
+  align-items: center;
+  gap: var(--ios-spacing-md);
 }
 
-.panel-header {
-  @include flex-between;
-  margin-bottom: $spacing-4;
+.page-title {
+  font-size: var(--ios-text-3xl);
+  font-weight: 700;
+  color: var(--ios-label-primary);
+  letter-spacing: -0.02em;
+}
+
+.update-time {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--ios-spacing-xs);
+  font-size: var(--ios-text-sm);
+  color: var(--ios-label-secondary);
+}
+
+.time-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ios-green);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.6; transform: scale(0.9); }
+}
+
+.header-right {
   flex-shrink: 0;
-
-  .panel-title {
-    font-size: $font-size-sm;
-    font-weight: $font-weight-semibold;
-    color: $color-text-primary;
-    letter-spacing: 0.02em;
-  }
-
-  .panel-count {
-    font-size: $font-size-xs;
-    color: $color-text-tertiary;
-    font-weight: $font-weight-medium;
-  }
 }
 
-// 左侧面板
-.sectors-panel {
-  @media (max-width: $breakpoint-lg) {
-    max-height: 160px;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    max-height: none;
-    padding: $spacing-3;
-  }
-}
-
-.sector-list {
-  flex: 1;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  @include custom-scrollbar(4px);
-
-  @media (max-width: $breakpoint-lg) {
-    display: flex;
-    flex-wrap: wrap;
-    gap: $spacing-2;
-    overflow-x: auto;
-    overflow-y: hidden;
-  }
-}
-
-.sector-category {
-  margin-bottom: $spacing-2;
-
-  &:last-child {
-    margin-bottom: 0;
-  }
-}
-
-.category-header {
-  display: flex;
-  align-items: center;
-  gap: $spacing-2;
-  padding: $spacing-2 $spacing-3;
-  border-radius: $radius-md;
-  cursor: pointer;
-  color: $color-text-secondary;
-  font-size: $font-size-sm;
-  font-weight: $font-weight-semibold;
-  user-select: none;
-
-  &:hover {
-    background: $color-bg-hover;
-  }
-
-  .category-arrow {
-    transition: transform $transition-fast;
-    transform: rotate(0deg);
-
-    &.expanded {
-      transform: rotate(90deg);
-    }
-  }
-
-  .category-name {
-    flex: 1;
-  }
-
-  .category-count {
-    font-size: $font-size-xs;
-    color: $color-text-tertiary;
-    font-weight: $font-weight-medium;
-  }
-}
-
-.category-children {
-  // v-show 切换无过渡，避免 height 动画带来的布局抖动
-  contain: layout;
-}
-
-.sector-item {
-  display: flex;
-  align-items: center;
-  gap: $spacing-3;
-  padding: $spacing-2 $spacing-3;
-  margin-bottom: $spacing-2;
-  border-radius: $radius-md;
-  cursor: pointer;
-  // 仅对 transform 做过渡；背景与边框变化即时生效，避免重绘
-  transition: transform $transition-fast;
-  border-left: 3px solid transparent;
-  backface-visibility: hidden;
-  // 限制单元素绘制范围，提升长列表滚动性能
-  contain: layout paint;
-
-  &:hover {
-    background: $color-bg-hover;
-    transform: translateX(2px);
-    will-change: transform;
-  }
-
-  &.active {
-    background: $color-primary-100;
-    border-left-color: $color-primary;
-  }
-
-  .sector-color {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-
-  .sector-name {
-    flex: 1;
-    color: $color-text-secondary;
-    font-size: $font-size-sm;
-    font-weight: $font-weight-medium;
-    min-width: 0;
-    @include ellipsis;
-  }
-
-  .sector-value {
-    @include numeric-font;
-    font-size: $font-size-xs;
-    font-weight: $font-weight-bold;
-    flex-shrink: 0;
-  }
-
-  &.no-data {
-    opacity: 0.5;
-    .sector-name {
-      color: $color-text-tertiary;
-    }
-    .sector-value {
-      color: $color-text-tertiary !important;
-      font-weight: $font-weight-medium;
-    }
-  }
-
-  @media (max-width: $breakpoint-lg) {
-    margin-bottom: 0;
-    white-space: nowrap;
-    flex: 0 0 auto;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    padding: $spacing-1 $spacing-2;
-  }
-}
-
-// 中间图表面板
-.charts-panel {
-  gap: $spacing-4;
-  padding: $spacing-4;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  @include custom-scrollbar(6px);
-
-  @media (max-width: $breakpoint-md) {
-    padding: $spacing-3;
-    gap: $spacing-3;
-    overflow-y: visible;
-  }
-}
-
-.loading-overlay {
-  display: flex;
-  flex-direction: column;
-  gap: $spacing-4;
-}
-
-.skeleton-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-4;
-
-  .metric-skeleton {
-    height: 160px;
-  }
-
-  .main-chart {
-    grid-column: 1 / -1;
-    height: 320px;
-  }
-
-  .chart-skeleton {
-    height: 240px;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    grid-template-columns: 1fr;
-
-    .main-chart,
-    .chart-skeleton,
-    .metric-skeleton {
-      grid-column: 1 / -1;
-      height: 220px;
-    }
-
-    .metric-skeleton {
-      height: 140px;
-    }
-  }
-}
-
+.loading-state,
 .error-state {
-  @include flex-center;
-  flex-direction: column;
-  gap: $spacing-4;
-  padding: $spacing-12;
-  color: $color-danger;
-  text-align: center;
-
-  .error-icon {
-    padding: $spacing-5;
-    border-radius: 50%;
-    background: $color-danger-100;
-  }
-
-  .error-title {
-    color: $color-text-primary;
-    font-size: $font-size-xl;
-    font-weight: $font-weight-semibold;
-  }
-
-  .error-text {
-    color: $color-text-secondary;
-    font-size: $font-size-base;
-    max-width: 480px;
-  }
-}
-
-.metrics-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-4;
-  flex-shrink: 0;
-
-  @media (max-width: $breakpoint-md) {
-    grid-template-columns: 1fr;
-  }
-}
-
-.metric-card {
-  @include card-style;
-  padding: $spacing-5;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: center;
-
-  &.overview-card {
-    .metric-header {
-      @include flex-between;
-      margin-bottom: $spacing-4;
-    }
-
-    .metric-label {
-      font-size: $font-size-sm;
-      color: $color-text-secondary;
-      font-weight: $font-weight-medium;
-    }
-
-    .metric-badge {
-      font-size: $font-size-xs;
-      font-weight: $font-weight-bold;
-      padding: 2px 8px;
-      border-radius: $radius-full;
-      background: currentColor;
-      color: $color-text-inverse;
-
-      &.index-hot { background: $color-danger; }
-      &.index-warm { background: $color-warning; }
-      &.index-cool { background: $color-primary; }
-      &.index-cold { background: $color-text-tertiary; }
-    }
-
-    .metric-value {
-      @include numeric-font;
-      font-size: $font-size-5xl;
-      font-weight: $font-weight-bold;
-      line-height: 1;
-      margin-bottom: $spacing-3;
-    }
-
-    .metric-sub {
-      font-size: $font-size-sm;
-      color: $color-text-tertiary;
-
-      strong {
-        color: $color-text-primary;
-        font-weight: $font-weight-semibold;
-      }
-
-      .metric-note {
-        color: $color-warning;
-        font-size: $font-size-xs;
-      }
-    }
-  }
-
-  &.gauge-card {
-    padding: $spacing-3;
-    min-width: 0;
-  }
-
-  @media (max-width: $breakpoint-md) {
-    &.overview-card .metric-value {
-      font-size: $font-size-4xl;
-    }
-  }
+  padding: var(--ios-spacing-3xl) var(--ios-spacing-lg);
+  gap: var(--ios-spacing-lg);
 }
 
-.index-hot { color: $color-danger; }
-.index-warm { color: $color-warning; }
-.index-cool { color: $color-primary; }
-.index-cold { color: $color-text-tertiary; }
-
-.chart-card {
-  @include card-style;
-  padding: $spacing-4;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-
-  .chart-header {
-    @include flex-between;
-    margin-bottom: $spacing-3;
-    flex-shrink: 0;
-    gap: $spacing-3;
-  }
-
-  .chart-title-wrap {
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-  }
-
-  .chart-title {
-    font-size: $font-size-base;
-    font-weight: $font-weight-semibold;
-    color: $color-text-primary;
-  }
-
-  .chart-subtitle {
-    font-size: $font-size-xs;
-    color: $color-text-tertiary;
-    // 超长副标题截断，避免换行挤压图表
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 400px;
-  }
-
-  .chart-error-tag {
-    display: flex;
-    align-items: center;
-    gap: $spacing-2;
-  }
-
-  .chart-body {
-    flex: 1;
-    min-height: 0;
-  }
-
-  .chart-empty {
-    @include flex-center;
-    flex: 1;
-    min-height: 150px;
-  }
+.loading-text {
+  font-size: var(--ios-text-base);
+  color: var(--ios-label-secondary);
 }
 
-.bottom-charts {
+.error-icon {
+  font-size: 48px;
+}
+
+.error-text {
+  font-size: var(--ios-text-base);
+  color: var(--ios-label-secondary);
+  text-align: center;
+}
+
+.metrics-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: $spacing-4;
-  flex-shrink: 0;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--ios-spacing-lg);
+  margin-bottom: var(--ios-spacing-xl);
 
-  @media (max-width: $breakpoint-md) {
+  @include mobile {
     grid-template-columns: 1fr;
+    gap: var(--ios-spacing-md);
+    margin-bottom: var(--ios-spacing-lg);
   }
 }
 
-// 右侧面板
-.details-panel {
-  @media (max-width: $breakpoint-lg) {
-    max-height: 360px;
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ios-spacing-md);
+}
+
+.section-title {
+  font-size: var(--ios-text-lg);
+  font-weight: 600;
+  color: var(--ios-label-primary);
+}
+
+.section-subtitle {
+  font-size: var(--ios-text-sm);
+  color: var(--ios-label-secondary);
+}
+
+.chart-section {
+  margin-bottom: var(--ios-spacing-xl);
+
+  @include mobile {
+    margin-bottom: var(--ios-spacing-lg);
   }
 }
 
-.sector-detail-list {
-  flex: 1;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  @include custom-scrollbar(4px);
+.chart-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 440px;
 }
 
-.detail-card {
-  position: relative;
-  background: $color-bg-input;
-  border-radius: $radius-md;
-  padding: $spacing-3;
-  margin-bottom: $spacing-3;
-  overflow: hidden;
-  // 仅过渡 transform，颜色变化即时生效，避免重绘
-  transition: transform $transition-fast;
-  backface-visibility: hidden;
-  // 限制单卡片绘制范围，提升长列表滚动性能
-  contain: layout paint;
-
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 4px;
-    height: 100%;
-    background: var(--sector-color);
-  }
-
-  &:hover {
-    background: $color-bg-hover;
-    transform: translateX(2px);
-    will-change: transform;
-  }
+.placeholder-text {
+  color: var(--ios-label-tertiary);
+  font-size: var(--ios-text-base);
 }
 
-.detail-header {
-  @include flex-between;
-  margin-bottom: $spacing-3;
-
-  .detail-name-wrap {
-    display: flex;
-    align-items: center;
-    gap: $spacing-2;
-  }
-
-  .detail-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-  }
-
-  .detail-name {
-    font-size: $font-size-base;
-    font-weight: $font-weight-semibold;
-    color: $color-text-primary;
-  }
-
-  .detail-index {
-    @include numeric-font;
-    font-size: $font-size-xl;
-    font-weight: $font-weight-bold;
-  }
-}
-
-.detail-meta {
+.content-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: $spacing-2;
+  grid-template-columns: 1fr;
+  gap: var(--ios-spacing-lg);
+}
 
-  .meta-item {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+.sectors-section {
+  margin-bottom: var(--ios-spacing-xl);
 
-  .meta-label {
-    font-size: $font-size-xs;
-    color: $color-text-tertiary;
-  }
-
-  .meta-value {
-    font-size: $font-size-sm;
-    color: $color-text-secondary;
-    @include numeric-font;
-    font-weight: $font-weight-medium;
-
-    &.positive {
-      color: $color-success;
-    }
-  }
-
-  .trend-value {
-    font-weight: $font-weight-semibold;
+  @include mobile {
+    margin-bottom: var(--ios-spacing-lg);
   }
 }
 
-.trend-up { color: $color-danger; }
-.trend-down { color: $color-success; }
-.trend-flat { color: $color-text-tertiary; }
+.ios-button {
+  @include ios-button;
+}
+
+.ios-button-primary {
+  @include ios-button-primary;
+}
 </style>

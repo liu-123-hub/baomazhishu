@@ -1,0 +1,75 @@
+{
+  "$schema": "https://schema.tauri.app/config/2.0.0",
+  "productName": "宝妈指数",
+  "version": "2.0.0",
+  "identifier": "com.momindex.app",
+  "build": {
+    "beforeDevCommand": "npm run dev -- --mode tauri",
+    "beforeBuildCommand": "npm run build -- --mode tauri",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "宝妈指数",
+        "width": 1280,
+        "height": 800,
+        "minWidth": 375,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false,
+        "decorations": true,
+        "transparent": false,
+        "center": true,
+        "titleBarStyle": "Visible",
+        "theme": null
+      }
+    ],
+    "security": {
+      "csp": null,
+      "capabilities": [
+        "default"
+      ]
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "certificateThumbprint": null,
+      "digestAlgorithm": "sha256",
+      "timestampUrl": ""
+    },
+    "macOS": {
+      "minimumSystemVersion": "12.0",
+      "exceptionDomain": "",
+      "frameworks": [],
+      "providerShortName": null,
+      "signingIdentity": null
+    },
+    "linux": {
+      "deb": {
+        "depends": []
+      },
+      "appimage": {
+        "bundleMediaFramework": false
+      }
+    },
+    "longDescription": "宝妈指数 - 跨平台金融市场情绪分析系统",
+    "shortDescription": "金融市场情绪分析",
+    "resources": [],
+    "externalBin": [],
+    "copyright": "Copyright (c) 2024 宝妈指数. All rights reserved.",
+    "category": "Finance",
+    "fileAssociations": []
+  },
+  "plugins": {}
+}

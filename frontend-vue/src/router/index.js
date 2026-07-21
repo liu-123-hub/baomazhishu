@@ -9,10 +9,9 @@ const routes = [
     path: '/dashboard',
     name: 'Dashboard',
     component: () => import('@/views/Dashboard/index.vue'),
-    meta: { title: '数据大屏' }
-  },
+    meta: { title: 'MOM指数' }
+  }
 ]
-
 
 const router = createRouter({
   history: createWebHashHistory(),
@@ -20,7 +19,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title ? `${to.meta.title} - 实时数据大屏` : '实时数据大屏'
+  document.title = to.meta.title ? `${to.meta.title}` : 'MOM指数'
   next()
 })
 

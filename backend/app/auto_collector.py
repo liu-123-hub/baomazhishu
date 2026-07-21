@@ -291,8 +291,14 @@ class AutoCollector:
             logger.info("定时采集触发，开始执行增量+全量数据拉取...")
             await self.run_with_retry(trigger="scheduled")
 
-    async def start(self):
-        self._startup_task = asyncio.create_task(self.run_with_retry(trigger="startup"))
+    async def start(self, delayed_start: bool = False, delay_seconds: float = 5.0):
+        if delayed_start:
+            async def _delayed_startup():
+                await asyncio.sleep(delay_seconds)
+                await self.run_with_retry(trigger="startup")
+            self._startup_task = asyncio.create_task(_delayed_startup())
+        else:
+            self._startup_task = asyncio.create_task(self.run_with_retry(trigger="startup"))
         self._periodic_task = asyncio.create_task(self._periodic_loop())
 
     async def close(self):
