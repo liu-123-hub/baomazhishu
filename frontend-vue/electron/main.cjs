@@ -120,7 +120,8 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
       contextIsolation: true,
-      sandbox: false,
+      // 启用渲染进程沙箱：即使发生 Chromium 漏洞逃逸也限制其权限范围
+      sandbox: true,
       webSecurity: true,
       devTools: isDev
     },
@@ -147,7 +148,18 @@ function createWindow() {
   mainWindow.on('closed', () => { mainWindow = null })
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    shell.openExternal(url)
+    // 仅允许 http/https 协议通过外部浏览器打开；file://、smb://、自定义协议等
+    // 会被 shell.openExternal 交给系统处理，可能执行任意本地程序（CVE 常见模式）
+    try {
+      const parsed = new URL(url)
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        shell.openExternal(url)
+      } else {
+        console.warn(`[Security] 拒绝打开非 http(s) 协议链接: ${url}`)
+      }
+    } catch (e) {
+      console.warn(`[Security] 无效 URL 被拒绝: ${url}`)
+    }
     return { action: 'deny' }
   })
 }
@@ -207,7 +219,19 @@ function setupIPC() {
     }
     return false
   })
-  ipcMain.handle('open-external', (_, url) => { shell.openExternal(url) })
+  ipcMain.handle('open-external', (_, url) => {
+    // open-external 同样需要协议白名单校验，防止渲染进程注入恶意协议
+    try {
+      const parsed = new URL(url)
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        shell.openExternal(url)
+      } else {
+        console.warn(`[Security] open-external 拒绝非 http(s) 协议: ${url}`)
+      }
+    } catch (e) {
+      console.warn(`[Security] open-external 无效 URL: ${url}`)
+    }
+  })
   ipcMain.handle('save-file', async (_, { defaultPath, data }) => {
     const result = await dialog.showSaveDialog(mainWindow, { defaultPath })
     if (result.filePath) {

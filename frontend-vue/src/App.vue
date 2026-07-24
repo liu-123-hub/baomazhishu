@@ -1,6 +1,6 @@
 <template>
   <div id="app-root" class="app-root">
-    <IOSNavBar title="MOM指数" />
+    <IOSNavBar :title="navTitle" :showBack="showBack" :backLabel="'看板'" />
     <main class="app-main ios-content-area">
       <router-view v-slot="{ Component }">
         <transition name="page-transition" mode="out-in">
@@ -12,19 +12,30 @@
 </template>
 
 <script setup>
-import { onMounted } from 'vue'
+import { computed } from 'vue'
+import { useRoute } from 'vue-router'
 import IOSNavBar from '@/components/ios/IOSNavBar.vue'
 import { useThemeStore } from '@/stores/theme'
 import { useSystemStore } from '@/stores/system'
 import platform from '@/platform/core'
 import { initApi } from '@/core/api'
+import { SECTOR_NAMES } from '@/core/constants'
 
+const route = useRoute()
 const themeStore = useThemeStore()
 const systemStore = useSystemStore()
 
+const showBack = computed(() => route.meta?.showBack || false)
+const navTitle = computed(() => {
+  if (route.name === 'SectorDetail' && route.params.code) {
+    const code = route.params.code
+    return SECTOR_NAMES[code] || code
+  }
+  return route.meta?.title || 'MOM指数'
+})
+
+import { onMounted } from 'vue'
 onMounted(async () => {
-  // 必须 await：platform.init() 内部通过动态 import 加载原生 API，
-  // 若不等待，platform.apis 会返回 fallback 空操作，导致窗口按钮失效
   await platform.init()
 
   systemStore.setPlatformInfo({
@@ -35,7 +46,6 @@ onMounted(async () => {
     apis: platform.apis
   })
 
-  // 初始化真实网络状态检测
   systemStore.initNetworkStatus()
 
   themeStore.initTheme()
@@ -73,11 +83,11 @@ onMounted(async () => {
 
 .page-transition-enter-from {
   opacity: 0;
-  transform: translateY(8px);
+  transform: translateX(20px);
 }
 
 .page-transition-leave-to {
   opacity: 0;
-  transform: translateY(-8px);
+  transform: translateX(-20px);
 }
 </style>

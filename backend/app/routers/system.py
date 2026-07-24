@@ -75,6 +75,8 @@ async def collection_status():
 
 @router.post("/collect/trigger")
 async def trigger_collection():
+    import asyncio
+
     status = await auto_collector.get_status()
     if status["status"] == auto_collector.STATUS_RUNNING:
         return {
@@ -88,8 +90,10 @@ async def trigger_collection():
         endpoint="/api/v1/system/collect/trigger",
         status="success",
     )
-    import asyncio
-    asyncio.create_task(auto_collector.run_with_retry(trigger="manual"))
+    # 保持任务引用，避免被 GC 回收且异常不可追溯
+    task = asyncio.create_task(auto_collector.run_with_retry(trigger="manual"))
+    task.add_done_callback(_collect_task_done)
+    _collect_tasks.add(task)
     return {
         "code": 200,
         "message": "采集任务已启动",
@@ -97,6 +101,21 @@ async def trigger_collection():
             "triggered_at": datetime.now().isoformat(),
         },
     }
+
+
+# 手动触发的采集任务集合，防止任务被 GC 且便于追溯异常
+_collect_tasks: set = set()
+
+
+def _collect_task_done(task):
+    """采集任务完成回调：记录异常并从集合移除。"""
+    _collect_tasks.discard(task)
+    if task.cancelled():
+        return
+    exc = task.exception()
+    if exc is not None:
+        import logging
+        logging.getLogger(__name__).error(f"手动采集任务异常: {exc}", exc_info=exc)
 
 
 @router.get("/source-health")

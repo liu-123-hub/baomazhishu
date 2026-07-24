@@ -83,6 +83,28 @@ const chartOption = computed(() => {
   const legend = props.data?.legend || []
   const seriesData = props.data?.series_data || []
 
+  function formatDateLabel(dateStr) {
+    if (!dateStr) return ''
+    const parts = String(dateStr).split('-')
+    if (parts.length === 3) {
+      return `${parts[1]}-${parts[2]}`
+    }
+    return String(dateStr).slice(-5)
+  }
+
+  function formatTooltipDate(dateStr) {
+    if (!dateStr) return ''
+    return String(dateStr)
+  }
+
+  const dataCount = xAxis.length
+  // 密集数据（>14个点）时旋转标签，避免重叠
+  const isDense = dataCount > 14
+  const rotate = isDense ? 35 : 0
+  // 旋转模式下需要更大的底部空间
+  const bottomMargin = isDense ? 90 : 72
+  const labelInterval = dataCount <= 7 ? 0 : dataCount <= 14 ? 1 : Math.floor(dataCount / 7)
+
   const series = seriesData.map((item, index) => ({
     name: legend[index] || item.name || `Series ${index + 1}`,
     type: 'line',
@@ -158,34 +180,51 @@ const chartOption = computed(() => {
         },
         z: 0
       },
-      valueFormatter: (value) => value != null ? value.toFixed(1) : '--'
+      formatter: function(params) {
+        if (!params || !params.length) return ''
+        const dateStr = formatTooltipDate(params[0].axisValue)
+        let html = `<div style="font-weight:600;margin-bottom:8px;font-size:13px;color:${textColor}">${dateStr}</div>`
+        params.forEach(p => {
+          const val = p.value != null ? Number(p.value).toFixed(1) : '--'
+          html += `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:12px">
+            <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${p.color}"></span>
+            <span style="color:${subTextColor};flex:1">${p.seriesName}</span>
+            <span style="color:${textColor};font-weight:600">${val}</span>
+          </div>`
+        })
+        return html
+      }
     },
     legend: {
       data: legend,
-      bottom: 8,
-      left: 12,
-      right: 12,
+      bottom: 4,
+      left: 'center',
       icon: 'circle',
-      itemWidth: 8,
-      itemHeight: 8,
-      itemGap: 12,
+      itemWidth: 7,
+      itemHeight: 7,
+      itemGap: 14,
       symbolKeepAspect: true,
-      padding: [4, 4, 4, 4],
+      padding: [2, 8, 2, 8],
       textStyle: {
         color: subTextColor,
         fontSize: 11,
         fontWeight: 400,
         lineHeight: 16
       },
-      type: 'plain',
-      width: 'auto',
-      lineHeight: 18
+      type: 'scroll',
+      orient: 'horizontal',
+      pageButtonItemGap: 4,
+      pageIconSize: 10,
+      pageTextStyle: {
+        color: subTextColor,
+        fontSize: 10
+      }
     },
     grid: {
-      top: 24,
-      left: 16,
+      top: 20,
+      left: 48,
       right: 20,
-      bottom: 96,
+      bottom: bottomMargin,
       containLabel: true
     },
     xAxis: {
@@ -193,7 +232,11 @@ const chartOption = computed(() => {
       data: xAxis,
       boundaryGap: false,
       axisLine: {
-        show: false
+        show: true,
+        lineStyle: {
+          color: gridColor,
+          width: 1
+        }
       },
       axisTick: {
         show: false
@@ -205,8 +248,10 @@ const chartOption = computed(() => {
         showMaxLabel: true,
         showMinLabel: true,
         hideOverlap: true,
-        interval: 'auto',
-        align: 'center'
+        interval: labelInterval,
+        align: isDense ? 'right' : 'center',
+        rotate: rotate,
+        formatter: formatDateLabel
       }
     },
     yAxis: {
@@ -303,7 +348,11 @@ watch(
 )
 
 onMounted(() => {
-  initChart()
+  nextTick(() => {
+    requestAnimationFrame(() => {
+      initChart()
+    })
+  })
 
   if (window.ResizeObserver && chartRef.value) {
     resizeObserver = new ResizeObserver(() => {

@@ -27,6 +27,10 @@ class Database:
         conn = await aiosqlite.connect(self.db_path)
         conn.row_factory = aiosqlite.Row
         try:
+            # WAL 模式提升并发读写能力；busy_timeout 避免写锁冲突时立即失败
+            await conn.execute("PRAGMA journal_mode=WAL")
+            await conn.execute("PRAGMA busy_timeout=5000")
+            await conn.execute("PRAGMA synchronous=NORMAL")
             yield conn
             await conn.commit()
         except Exception:
@@ -99,7 +103,6 @@ class Database:
                 )
             """)
 
-            # 审计日志表扩展字段，逐字段添加（已存在则跳过）
             for col_def in (
                 ("data_fingerprint", "TEXT DEFAULT ''"),
                 ("sector_code", "TEXT DEFAULT ''"),

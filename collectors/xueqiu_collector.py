@@ -187,8 +187,11 @@ def fetch_page(url: str, timeout: int = REQUEST_TIMEOUT) -> Optional[str]:
             if isinstance(status, int) and 400 <= status < 500:
                 print(f"    [东方财富资讯] HTTP {status} 客户端错误，跳过: {url}")
                 break
+            # 5xx 服务端错误：最后一次重试仍失败时必须打印日志，避免静默吞掉
             if attempt < MAX_RETRIES - 1:
                 time.sleep(RETRY_DELAY_BASE * (attempt + 1))
+            else:
+                print(f"    [东方财富资讯] HTTP {status} 服务端错误，已重试 {MAX_RETRIES} 次仍失败: {url}")
 
     return None
 

@@ -18,11 +18,15 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
         "http://localhost:5174",
         "http://127.0.0.1:5174",
+        "http://localhost:5175",
+        "http://127.0.0.1:5175",
         "http://localhost:4173",
         "http://127.0.0.1:4173",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
     ]
+
+    CORS_ALLOW_LOCALHOST_REGEX: bool = True
 
     PROJECT_ROOT: Path = Path(__file__).resolve().parent.parent.parent
     DATA_DIR: Path = PROJECT_ROOT / "data"
@@ -31,6 +35,8 @@ class Settings(BaseSettings):
 
     CACHE_TTL: int = 300
     CACHE_MAX_SIZE: int = 500
+    DASHBOARD_CACHE_TTL: int = 30
+    DASHBOARD_CACHE_MAX_SIZE: int = 100
 
     WS_HEARTBEAT_INTERVAL: int = 30
     WS_BROADCAST_INTERVAL: int = 5
@@ -39,6 +45,13 @@ class Settings(BaseSettings):
     COLLECTOR_RETRY_TIMES: int = 3
     PLAYWRIGHT_HEADLESS: bool = True
     AUTO_COLLECT_INTERVAL: int = 1800
+    # 单次采集运行的最长允许耗时（秒），必须严格小于 AUTO_COLLECT_INTERVAL，
+    # 避免单次卡死导致后续周期运行无限堆积。超时后放弃当前运行并重置执行器。
+    COLLECTOR_RUN_DEADLINE: int = 1500
+    # 看门狗检查间隔（秒）：周期性检测漏触发/卡死的采集周期并发出告警日志。
+    WATCHDOG_CHECK_INTERVAL: int = 300
+    # 看门狗告警宽限期（秒）：超过 interval + deadline + grace 仍无成功运行则告警。
+    WATCHDOG_GRACE: int = 60
 
     SECTOR_CATEGORIES: list = [
         {

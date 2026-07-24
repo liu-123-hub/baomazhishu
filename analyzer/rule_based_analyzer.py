@@ -1,8 +1,4 @@
-"""宝妈指数规则引擎分析器，基于关键词的多维度情绪与小白程度判定。
-
-说明：本模块使用基于规则的关键词匹配方法，无外部LLM API调用，
-确保分析结果可复现、无幻觉风险、响应速度快。
-"""
+"""基于关键词规则的宝妈指数分析器，无LLM依赖、结果可复现。"""
 from typing import Dict, List, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime

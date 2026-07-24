@@ -25,75 +25,20 @@ classifiers = [
 dependencies = [
     "fastapi==0.115.0",
     "uvicorn[standard]==0.30.6",
-    "websockets==13.1",
     "pydantic==2.9.2",
     "pydantic-settings==2.5.2",
-    "python-multipart==0.0.12",
     "httpx==0.27.2",
     "requests==2.32.3",
     "akshare>=1.12.0",
     "aiosqlite==0.20.0",
-    "python-dateutil==2.9.0.post0",
-    "PyQt6==6.6.1",
-    "PyQt6-Charts==6.6.0",
 ]
-
-[project.scripts]
-mom-index = "frontend_pyqt.main:run_app"
-
-[tool.briefcase]
-project-name = "宝妈指数"
-bundle = "com.momindex"
-formal-name = "宝妈指数 - 市场情绪监控"
-description = "基于多源真实数据的市场情绪监控与可视化系统"
-long-description = """宝妈指数通过采集财经社区、新闻媒体、行情数据等9个真实数据源，
-利用LLM情感分析技术实时计算25个板块的情绪指数，为投资者提供直观的市场情绪参考。"""
-classifiers = [
-    "Development Status :: 5 - Production/Stable",
-    "Intended Audience :: End Users/Desktop",
-    "Topic :: Office/Business :: Financial :: Investment",
-]
-# icon = "resources/icon"
-license = {text = "MIT"}
-url = "https://github.com/liu-123-hub/baomazhishu"
-
-[tool.briefcase.app.mom-index]
-formal-name = "宝妈指数"
-description = "市场情绪实时监控系统"
-long-description = "宝妈指数桌面客户端 - 多源数据采集·实时情绪分析·可视化大屏"
-sources = [
-    "backend/",
-    "collectors/",
-    "analyzer/",
-    "frontend_pyqt/",
-    "data/",
-    "pipeline.py",
-    "run.py",
-]
-requires = [
-    "fastapi==0.115.0",
-    "uvicorn[standard]==0.30.6",
-    "websockets==13.1",
-    "pydantic==2.9.2",
-    "pydantic-settings==2.5.2",
-    "python-multipart==0.0.12",
-    "httpx==0.27.2",
-    "requests==2.32.3",
-    "akshare>=1.12.0",
-    "aiosqlite==0.20.0",
-    "python-dateutil==2.9.0.post0",
-    "PyQt6==6.6.1",
-    "PyQt6-Charts==6.6.0",
-]
-
-[tool.briefcase.app.mom-index.macOS]
-app-category = "public.app-category.finance"
-
-[tool.briefcase.app.mom-index.windows]
-app-publisher = "MOM Index Team"
-
-[tool.briefcase.app.mom-index.linux]
-system-requirements = ["libgl1-mesa-glx", "libglib2.0-0"]
 
 [tool.setuptools]
-packages = ["frontend_pyqt", "frontend_pyqt.widgets", "backend", "backend.app", "backend.app.routers", "collectors", "analyzer"]
+packages = ["backend", "backend.app", "backend.app.routers", "collectors", "analyzer"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+]

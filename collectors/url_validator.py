@@ -1,9 +1,4 @@
-"""新闻URL抽样可达性验证模块。
-
-功能：对采集到的帖子/新闻URL进行抽样HEAD请求验证，
-确保链接真实可访问，防止死链或伪造链接混入数据。
-采用抽样策略（默认每个数据源最多验证5个URL），避免对目标站点造成压力。
-"""
+"""新闻URL抽样可达性验证，确保链接真实可访问。"""
 import random
 import time
 from typing import Dict, List, Any, Optional, Tuple

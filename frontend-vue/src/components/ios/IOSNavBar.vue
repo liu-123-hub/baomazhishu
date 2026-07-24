@@ -1,12 +1,18 @@
 <template>
   <nav class="ios-nav-bar" :class="{ 'nav-dark': themeStore.isDark }">
     <div class="nav-left">
+      <button v-if="showBack" class="nav-back ios-touch-target" @click="goBack">
+        <svg width="12" height="20" viewBox="0 0 12 20" fill="none">
+          <path d="M10 2L2 10L10 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <span class="back-label">{{ backLabel }}</span>
+      </button>
       <div v-if="systemStore.isDesktop && systemStore.os === 'macos'" class="window-controls">
         <button class="ios-window-btn ios-window-btn-close" @click="handleClose" title="关闭"></button>
         <button class="ios-window-btn ios-window-btn-minimize" @click="handleMinimize" title="最小化"></button>
         <button class="ios-window-btn ios-window-btn-maximize" @click="handleMaximize" title="最大化"></button>
       </div>
-      <div class="nav-title">
+      <div class="nav-title" :class="{ 'nav-title-with-back': showBack }">
         <span class="title-text">{{ title }}</span>
       </div>
     </div>
@@ -30,21 +36,39 @@
 </template>
 
 <script setup>
+import { useRouter } from 'vue-router'
 import { useThemeStore } from '@/stores/theme'
 import { useSystemStore } from '@/stores/system'
 
-defineProps({
+const props = defineProps({
   title: {
     type: String,
     default: 'MOM指数'
+  },
+  showBack: {
+    type: Boolean,
+    default: false
+  },
+  backLabel: {
+    type: String,
+    default: '返回'
   }
 })
 
+const router = useRouter()
 const themeStore = useThemeStore()
 const systemStore = useSystemStore()
 
 function toggleTheme() {
   themeStore.toggleTheme()
+}
+
+function goBack() {
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    router.push('/dashboard')
+  }
 }
 
 function handleMinimize() {
@@ -94,12 +118,43 @@ function handleClose() {
 .nav-left {
   display: flex;
   align-items: center;
-  gap: var(--ios-spacing-lg);
+  gap: var(--ios-spacing-sm);
   min-width: 0;
   flex: 1;
 
   @include mobile {
-    gap: var(--ios-spacing-md);
+    gap: var(--ios-spacing-xs);
+  }
+}
+
+.nav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: var(--ios-spacing-xs) var(--ios-spacing-sm);
+  margin-left: calc(var(--ios-spacing-xs) * -1);
+  border: none;
+  background: none;
+  color: var(--ios-blue);
+  font-size: var(--ios-text-base);
+  cursor: pointer;
+  border-radius: var(--ios-radius-md);
+  transition: all var(--ios-duration-fast) var(--ios-ease);
+  flex-shrink: 0;
+
+  svg {
+    flex-shrink: 0;
+  }
+
+  .back-label {
+    font-size: var(--ios-text-base);
+    @include mobile {
+      display: none;
+    }
+  }
+
+  &:active {
+    opacity: 0.5;
   }
 }
 
@@ -109,6 +164,10 @@ function handleClose() {
   align-items: center;
   justify-content: center;
   min-width: 0;
+
+  &.nav-title-with-back {
+    margin-right: 60px;
+  }
 }
 
 .title-text {

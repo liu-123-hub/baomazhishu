@@ -19,6 +19,11 @@
         <span class="sector-value" :class="getValueClass(sector.value)">
           {{ formatValue(sector.value) }}
         </span>
+        <button v-if="navigable" class="sector-chevron ios-touch-target" @click.stop="handleNavigate(sector)">
+          <svg width="8" height="14" viewBox="0 0 8 14" fill="none">
+            <path d="M1 1L7 7L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
       </div>
     </div>
   </div>
@@ -43,10 +48,14 @@ const props = defineProps({
   multiple: {
     type: Boolean,
     default: true
+  },
+  navigable: {
+    type: Boolean,
+    default: false
   }
 })
 
-const emit = defineEmits(['update:modelValue', 'select'])
+const emit = defineEmits(['update:modelValue', 'select', 'navigate'])
 
 function isSelected(sector) {
   const code = sector.code || sector.name
@@ -68,6 +77,10 @@ function handleSelect(sector) {
   }
   emit('update:modelValue', newValue)
   emit('select', sector)
+}
+
+function handleNavigate(sector) {
+  emit('navigate', sector)
 }
 
 function formatValue(value) {
@@ -184,6 +197,35 @@ function getValueClass(value) {
   &.cool { color: var(--ios-blue); }
   &.cold { color: var(--ios-label-secondary); }
   &.neutral { color: var(--ios-label-tertiary); }
+}
+
+.sector-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  margin-left: var(--ios-spacing-xs);
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--ios-label-tertiary);
+  cursor: pointer;
+  border-radius: var(--ios-radius-md);
+  flex-shrink: 0;
+  transition: all var(--ios-duration-fast) var(--ios-ease);
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--ios-fill-primary);
+      color: var(--ios-label-secondary);
+    }
+  }
+
+  &:active {
+    background: var(--ios-fill-secondary);
+    transform: scale(0.9);
+  }
 }
 
 @include mobile {

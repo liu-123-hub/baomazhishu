@@ -175,6 +175,8 @@ def fetch_page(url: str, timeout: int = REQUEST_TIMEOUT) -> Optional[str]:
                 break
             if attempt < MAX_RETRIES - 1:
                 time.sleep(RETRY_DELAY_BASE * (attempt + 1))
+            else:
+                print(f"    [同花顺] HTTP {status} 服务端错误，已重试 {MAX_RETRIES} 次仍失败: {url}")
 
     return None
 

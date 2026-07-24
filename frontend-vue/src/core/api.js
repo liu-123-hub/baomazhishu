@@ -1,12 +1,11 @@
-/**
- * 三端通用API层 - 统一网络请求与错误处理
- */
 import axios from 'axios'
 import platform from '@/platform/core.js'
 import { APP_CONFIG } from './constants.js'
 
 let backendPort = 8000
 let apiClient = null
+// Electron backend-port 监听器的取消订阅函数，避免重复注册堆积
+let unsubscribeBackendPort = null
 
 function getApiBaseUrl() {
   if (platform.isElectron && window.electronAPI) {
@@ -24,7 +23,11 @@ export async function initApi() {
     try {
       const portInfo = await window.electronAPI.getBackendPort()
       backendPort = portInfo.port || 8000
-      window.electronAPI.onBackendPort((info) => {
+      // onBackendPort 现在返回取消订阅函数，避免重复注册导致监听器堆积
+      if (typeof unsubscribeBackendPort === 'function') {
+        unsubscribeBackendPort()
+      }
+      unsubscribeBackendPort = window.electronAPI.onBackendPort((info) => {
         backendPort = info.port || 8000
         updateApiClient()
       })
@@ -70,9 +73,6 @@ function updateApiClient() {
     (error) => {
       if (error.code === 'ERR_NETWORK' || !error.response) {
         error.isNetworkError = true
-        // 区分"真实无网络"与"后端服务不可达"
-        // navigator.onLine 反映浏览器/系统的网络连接状态
-        // 为 true 时说明网络正常，是后端服务未启动或不可达
         const isActuallyOnline = typeof navigator !== 'undefined' ? navigator.onLine : true
         if (isActuallyOnline) {
           error.errorType = 'backend_unreachable'
@@ -110,11 +110,11 @@ export const dashboardApi = {
   getOverview() {
     return request({ url: '/dashboard/overview', method: 'GET' })
   },
-  getLineChart(sectors, days = 7) {
+  getLineChart(sectors, days = 7, opts = {}) {
     const params = {}
     if (sectors) params.sectors = Array.isArray(sectors) ? sectors.join(',') : sectors
     if (days) params.days = days
-    return request({ url: '/dashboard/line-chart', method: 'GET', params })
+    return request({ url: '/dashboard/line-chart', method: 'GET', params, signal: opts.signal })
   },
   getSectorDetail(code) {
     return request({ url: '/dashboard/sector-detail', method: 'GET', params: { code } })

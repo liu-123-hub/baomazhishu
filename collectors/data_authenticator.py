@@ -96,7 +96,6 @@ def verify_data_completeness(
                 if val is None or (isinstance(val, str) and not val.strip()):
                     issues.append(f"{source_name}/{sector}/{post.get('id', f'#{i}')}: 缺少字段 {field}")
             for field_spec in REQUIRED_PROVENANCE_FIELDS:
-                # field_spec 可以是单个字段名，也可以是多个候选字段名的元组
                 candidate_fields = (field_spec,) if isinstance(field_spec, str) else field_spec
                 if not any(f in post for f in candidate_fields):
                     display_field = candidate_fields[0]
@@ -127,15 +126,7 @@ def authenticate_collected_data(
     duration_ms: Optional[float] = None,
     http_latency_ms: Optional[float] = None,
 ) -> Dict[str, Any]:
-    """对采集结果执行真实性校验，0条记录不视为通过。
-    
-    Args:
-        source_name: 数据源名称
-        sector_data: 按板块分类的帖子数据
-        collected_at: 采集时间戳
-        duration_ms: 整个采集流程耗时（毫秒）
-        http_latency_ms: HTTP请求平均延迟（毫秒，来自健康检查）
-    """
+    """对采集结果执行真实性校验，0条记录不视为通过。"""
     if collected_at is None:
         collected_at = datetime.now().isoformat()
 

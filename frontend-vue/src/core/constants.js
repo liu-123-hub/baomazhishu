@@ -1,7 +1,3 @@
-/**
- * 三端通用常量定义
- */
-
 export const PLATFORM = {
   WEB: 'web',
   TAURI: 'tauri',

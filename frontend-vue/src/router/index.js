@@ -10,6 +10,12 @@ const routes = [
     name: 'Dashboard',
     component: () => import('@/views/Dashboard/index.vue'),
     meta: { title: 'MOM指数' }
+  },
+  {
+    path: '/sector/:code',
+    name: 'SectorDetail',
+    component: () => import('@/views/SectorDetail/index.vue'),
+    meta: { title: '板块详情', showBack: true }
   }
 ]
 

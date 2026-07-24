@@ -6,13 +6,13 @@
   "npmClient": "npm",
   "server": {
     "androidScheme": "https",
-    "cleartext": true,
+    "cleartext": false,
     "hostname": "app.momindex.local"
   },
   "android": {
-    "allowMixedContent": true,
+    "allowMixedContent": false,
     "captureInput": true,
-    "webContentsDebuggingEnabled": true,
+    "webContentsDebuggingEnabled": false,
     "buildOptions": {
       "keystorePath": null,
       "keystorePassword": null,

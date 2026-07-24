@@ -36,8 +36,19 @@ const electronAPI = {
 
   getBackendPort: () => ipcRenderer.invoke('get-backend-port'),
 
-  onRefreshData: (callback) => { ipcRenderer.on('refresh-data', callback) },
-  onBackendPort: (callback) => { ipcRenderer.on('backend-port', (event, data) => callback(data)) }
+  onRefreshData: (callback) => {
+    // 先移除旧监听器避免重复注册堆积，返回取消订阅函数
+    ipcRenderer.removeAllListeners('refresh-data')
+    const wrapped = (event, data) => callback(data)
+    ipcRenderer.on('refresh-data', wrapped)
+    return () => ipcRenderer.removeListener('refresh-data', wrapped)
+  },
+  onBackendPort: (callback) => {
+    ipcRenderer.removeAllListeners('backend-port')
+    const wrapped = (event, data) => callback(data)
+    ipcRenderer.on('backend-port', wrapped)
+    return () => ipcRenderer.removeListener('backend-port', wrapped)
+  }
 }
 
 contextBridge.exposeInMainWorld('electronAPI', electronAPI)

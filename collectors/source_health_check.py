@@ -75,7 +75,7 @@ async def _probe_http_head(name: str, url: str, timeout: float, expected_status)
         async with httpx.AsyncClient(
             timeout=timeout,
             follow_redirects=True,
-            verify=False,
+            verify=True,
         ) as client:
             resp = await client.head(url, headers={"User-Agent": "mom-index-healthcheck/1.0"})
         latency = round((time.time() - start) * 1000, 1)
@@ -90,7 +90,8 @@ async def _probe_http_head(name: str, url: str, timeout: float, expected_status)
             }
         return {
             "name": name,
-            "status": "reachable",
+            # 状态码不在预期集合内应标记为 unreachable，避免 pipeline 误判数据源可用
+            "status": "unreachable",
             "latency_ms": latency,
             "http_status": resp.status_code,
             "error": f"非预期状态码 {resp.status_code}（预期 {expected_status}）",

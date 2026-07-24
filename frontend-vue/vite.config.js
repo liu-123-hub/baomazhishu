@@ -87,8 +87,12 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': {
           target: env.VITE_API_TARGET || 'http://localhost:8000',
-          changeOrigin: true,
-          ws: true
+          changeOrigin: true
+        },
+        '/ws': {
+          target: env.VITE_API_TARGET || 'http://localhost:8000',
+          ws: true,
+          changeOrigin: true
         }
       }
     },
@@ -99,8 +103,12 @@ export default defineConfig(({ mode }) => {
       proxy: {
         '/api': {
           target: env.VITE_API_TARGET || 'http://localhost:8000',
-          changeOrigin: true,
-          ws: true
+          changeOrigin: true
+        },
+        '/ws': {
+          target: env.VITE_API_TARGET || 'http://localhost:8000',
+          ws: true,
+          changeOrigin: true
         }
       }
     },

@@ -38,6 +38,8 @@ _archive_*/
 # 临时验证脚本
 verify_*.py
 execute_rectification.py
+_check_db.py
+_fix_db.py
 
 # 数据报告文件
 data/*_report.json

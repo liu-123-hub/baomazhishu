@@ -1,8 +1,11 @@
 """FastAPI 主应用，实时数据大屏后端服务。"""
 import asyncio
 import logging
+import os
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request
+from datetime import datetime
+from logging.handlers import RotatingFileHandler
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
@@ -13,6 +16,39 @@ from .routers import api_router
 from .websocket import manager
 from .data_service import data_service
 from .auto_collector import auto_collector
+
+
+def _configure_logging() -> None:
+    """配置全局日志：控制台+滚动文件双输出，不覆盖uvicorn已有配置。"""
+    root_logger = logging.getLogger()
+    if root_logger.handlers:
+        return
+
+    log_dir = os.path.join(settings.BACKEND_DIR, "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, "app.log")
+
+    formatter = logging.Formatter(
+        fmt="%(asctime)s | %(levelname)-7s | %(name)s | %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+
+    console_handler = logging.StreamHandler()
+    console_handler.setLevel(logging.INFO)
+    console_handler.setFormatter(formatter)
+
+    file_handler = RotatingFileHandler(
+        log_file, maxBytes=10 * 1024 * 1024, backupCount=3, encoding="utf-8"
+    )
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(formatter)
+
+    root_logger.setLevel(logging.INFO)
+    root_logger.addHandler(console_handler)
+    root_logger.addHandler(file_handler)
+
+
+_configure_logging()
 
 logger = logging.getLogger(__name__)
 
@@ -67,11 +103,11 @@ async def _warmup_data_service():
 
 
 async def broadcast_data_loop():
-    """定时广播大盘概览到所有WebSocket连接，捕获异常避免循环中断。"""
+    """定时广播大盘概览到所有WebSocket连接，使用缓存降低数据库压力。"""
     while True:
         try:
             if manager.connection_count > 0:
-                overview = await data_service._compute_dashboard_overview()
+                overview = await data_service.get_dashboard_overview()
                 await manager.broadcast_data("dashboard", overview)
         except asyncio.CancelledError:
             raise
@@ -91,13 +127,15 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
 
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.CORS_ORIGINS,
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
+    cors_kwargs = {
+        "allow_origins": settings.CORS_ORIGINS,
+        "allow_credentials": True,
+        "allow_methods": ["*"],
+        "allow_headers": ["*"],
+    }
+    if settings.CORS_ALLOW_LOCALHOST_REGEX:
+        cors_kwargs["allow_origin_regex"] = r"https?://(localhost|127\.0\.0\.1):\d+"
+    app.add_middleware(CORSMiddleware, **cors_kwargs)
 
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -161,6 +199,37 @@ def create_app() -> FastAPI:
             "docs": "/docs",
             "api_prefix": settings.API_V1_PREFIX,
         }
+
+    @app.websocket("/ws")
+    async def websocket_endpoint(websocket: WebSocket):
+        connected = await manager.connect(websocket)
+        if not connected:
+            return
+        try:
+            try:
+                overview = await data_service.get_dashboard_overview()
+                await manager.send_personal_message(
+                    {"type": "dashboard", "data": overview, "timestamp": datetime.now().isoformat()},
+                    websocket,
+                )
+            except Exception as e:
+                logger.warning(f"WebSocket 初始推送失败: {e}")
+
+            while True:
+                try:
+                    msg = await websocket.receive_text()
+                    if msg == "ping":
+                        await manager.send_personal_message(
+                            {"type": "pong"}, websocket
+                        )
+                except WebSocketDisconnect:
+                    break
+        except WebSocketDisconnect:
+            pass
+        except Exception as e:
+            logger.warning(f"WebSocket 连接异常: {e}")
+        finally:
+            await manager.disconnect(websocket)
 
     return app
 

@@ -94,7 +94,9 @@ class XueqiuSession:
     def _ensure_cookie(self) -> bool:
         """确保 session 持有有效 Cookie（30 分钟内复用）。"""
         if self._cookie_obtained and self._cookie_time:
-            if (datetime.now() - self._cookie_time).seconds < 1800:
+            # 必须使用 total_seconds()：timedelta.seconds 只返回秒分量（0-86399），
+            # 超过 1 天的时间差 .seconds 会回绕到 0，导致过期 Cookie 被误判为新鲜
+            if (datetime.now() - self._cookie_time).total_seconds() < 1800:
                 return True
         try:
             resp = self.session.get(

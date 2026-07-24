@@ -1,5 +1,5 @@
 <template>
-  <div class="ios-segment-control">
+  <div class="ios-segment-control" :class="{ 'many-items': resolvedOptions.length > 4 }">
     <button
       v-for="(option, index) in resolvedOptions"
       :key="index"
@@ -15,7 +15,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed } from 'vue'
 
 const props = defineProps({
   options: {
@@ -25,6 +25,10 @@ const props = defineProps({
   modelValue: {
     type: [String, Number],
     default: null
+  },
+  full: {
+    type: Boolean,
+    default: false
   }
 })
 
@@ -79,8 +83,15 @@ function handleSelect(option) {
   gap: 0;
   user-select: none;
   -webkit-user-select: none;
-  min-width: 240px;
+  min-width: 200px;
   flex-shrink: 0;
+  overflow: hidden;
+
+  &.many-items {
+    min-width: 0;
+    width: 100%;
+    max-width: 100%;
+  }
 }
 
 .segment-item {
@@ -91,7 +102,7 @@ function handleSelect(option) {
   align-items: center;
   justify-content: center;
   height: 30px;
-  padding: 0 12px;
+  padding: 0 10px;
   border-radius: calc(var(--ios-radius-md) - 2px);
   font-size: var(--ios-text-sm);
   font-weight: 500;
@@ -100,6 +111,7 @@ function handleSelect(option) {
   cursor: pointer;
   white-space: nowrap;
   min-width: 0;
+  overflow: hidden;
   background: transparent;
   border: none;
   outline: none;
@@ -120,13 +132,21 @@ function handleSelect(option) {
   }
 }
 
+.many-items .segment-item {
+  padding: 0 4px;
+  font-size: 12px;
+  height: 32px;
+}
+
 .segment-label {
   overflow: hidden;
-  text-overflow: clip;
+  text-overflow: ellipsis;
   flex-shrink: 1;
   min-width: 0;
-  line-height: 1;
+  max-width: 100%;
+  line-height: 1.2;
   white-space: nowrap;
+  text-align: center;
 }
 
 .segment-indicator {
@@ -144,13 +164,37 @@ function handleSelect(option) {
 
 @include mobile {
   .ios-segment-control {
-    min-width: 220px;
+    min-width: 180px;
+  }
+
+  .ios-segment-control.many-items {
+    min-width: 0;
+    width: 100%;
   }
 
   .segment-item {
     height: 32px;
-    font-size: var(--ios-text-base);
-    padding: 0 10px;
+    font-size: var(--ios-text-sm);
+    padding: 0 8px;
+  }
+
+  .many-items .segment-item {
+    padding: 0 3px;
+    font-size: 11px;
+    height: 32px;
+  }
+}
+
+// 超小屏幕（<=360px）进一步缩小字体和间距
+@media (max-width: 360px) {
+  .many-items .segment-item {
+    padding: 0 2px;
+    font-size: 10px;
+    height: 30px;
+  }
+
+  .segment-label {
+    letter-spacing: -0.02em;
   }
 }
 </style>

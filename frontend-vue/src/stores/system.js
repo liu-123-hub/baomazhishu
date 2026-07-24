@@ -24,18 +24,24 @@ export const useSystemStore = defineStore('system', () => {
     isMaximized.value = value
   }
 
-  /**
-   * 初始化真实网络状态检测
-   * 使用 navigator.onLine + online/offline 事件，准确反映网络连接情况
-   * 与后端服务是否可用无关
-   */
   function initNetworkStatus() {
     if (typeof navigator !== 'undefined') {
       isOnline.value = navigator.onLine
     }
     if (typeof window !== 'undefined') {
+      // 先移除旧监听器，避免 HMR 或重复挂载导致监听器堆积
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
       window.addEventListener('online', handleOnline)
       window.addEventListener('offline', handleOffline)
+    }
+  }
+
+  // 显式清理网络监听器，供组件 onUnmounted 调用
+  function cleanupNetworkStatus() {
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('online', handleOnline)
+      window.removeEventListener('offline', handleOffline)
     }
   }
 
@@ -78,6 +84,7 @@ export const useSystemStore = defineStore('system', () => {
     setPlatformInfo,
     setMaximized,
     initNetworkStatus,
+    cleanupNetworkStatus,
     minimizeWindow,
     maximizeWindow,
     closeWindow

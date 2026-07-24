@@ -76,6 +76,68 @@ def validate_post(post: Dict, source_name: str, sector: str) -> List[str]:
     return errors
 
 
+def validate_dashboard_for_sync(dashboard: Dict) -> Tuple[bool, List[str]]:
+    """校验dashboard数据合法性，仅通过校验才允许覆盖本地数据。"""
+    issues: List[str] = []
+
+    if not isinstance(dashboard, dict):
+        return (False, ["dashboard 数据不是字典结构，拒绝同步"])
+
+    for key in ("latest", "record_count", "data_provenance"):
+        if key not in dashboard:
+            issues.append(f"dashboard 缺少顶层字段: {key}")
+
+    if issues:
+        return (False, issues)
+
+    latest = dashboard.get("latest")
+    if not isinstance(latest, dict):
+        return (False, ["dashboard.latest 不是字典结构"])
+
+    record_date = latest.get("date")
+    if not record_date or not isinstance(record_date, str):
+        issues.append("dashboard.latest.date 缺失或非字符串，无法判定数据日期")
+
+    sectors = latest.get("sectors")
+    if not isinstance(sectors, dict) or len(sectors) == 0:
+        issues.append("dashboard.latest.sectors 缺失或为空，无有效板块数据")
+        return (False, issues)
+
+    valid_sector_count = 0
+    for code, data in sectors.items():
+        if not isinstance(data, dict):
+            issues.append(f"板块 [{code}] 数据不是字典结构，跳过")
+            continue
+        details = data.get("details") or {}
+        total_posts = details.get("total_posts", 0)
+        index_value = data.get("index")
+        buy_idx = details.get("mom_buy_index")
+        sell_idx = details.get("mom_sell_index")
+
+        if not isinstance(total_posts, int) or total_posts <= 0:
+            continue
+        if not isinstance(index_value, (int, float)):
+            issues.append(f"板块 [{code}] index 非数值: {index_value}")
+            continue
+        if not isinstance(buy_idx, (int, float)) or not isinstance(sell_idx, (int, float)):
+            issues.append(f"板块 [{code}] buy/sell 指数非数值")
+            continue
+        valid_sector_count += 1
+
+    if valid_sector_count == 0:
+        issues.append("所有板块均未通过完整性校验（total_posts>0 且 index/buy/sell 为数值），拒绝同步")
+
+    provenance = dashboard.get("data_provenance") or {}
+    if not isinstance(provenance, dict):
+        issues.append("dashboard.data_provenance 不是字典结构")
+    else:
+        has_user_discussion = provenance.get("has_user_discussion")
+        if has_user_discussion is False:
+            issues.append("数据降级：所有用户讨论源均无记录(has_user_discussion=False)，拒绝覆盖本地数据")
+
+    return (len(issues) == 0, issues)
+
+
 def validate_source_posts(
     source_name: str, source_posts: Dict[str, List[Dict]]
 ) -> Tuple[Dict[str, List[Dict]], List[str]]:

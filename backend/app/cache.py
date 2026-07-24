@@ -3,7 +3,8 @@ import time
 import asyncio
 from collections import OrderedDict
 from typing import Any, Optional, Callable, Dict
-from threading import RLock
+
+from .config import settings
 
 
 class AsyncTTLCache:
@@ -47,6 +48,10 @@ class AsyncTTLCache:
         result = factory()
         if asyncio.iscoroutine(result):
             result = await result
+        # 不缓存错误响应：避免瞬时异常被缓存后持续向客户端返回错误
+        # 错误响应的判定：dict 且 code 字段非 200
+        if isinstance(result, dict) and result.get("code") not in (None, 200):
+            return result
         await self.set(key, result, ttl)
         return result
 
@@ -77,5 +82,11 @@ class AsyncTTLCache:
             }
 
 
-dashboard_cache = AsyncTTLCache(max_size=100, default_ttl=60)
-data_cache = AsyncTTLCache(max_size=500, default_ttl=300)
+dashboard_cache = AsyncTTLCache(
+    max_size=settings.DASHBOARD_CACHE_MAX_SIZE,
+    default_ttl=settings.DASHBOARD_CACHE_TTL,
+)
+data_cache = AsyncTTLCache(
+    max_size=settings.CACHE_MAX_SIZE,
+    default_ttl=settings.CACHE_TTL,
+)

@@ -62,25 +62,33 @@ def _to_post(row: Dict, sector: str) -> Dict:
 
 
 def collect_all() -> Dict[str, List[Dict]]:
-    """采集所有25个板块的ETF新闻/讨论数据。"""
+    """采集所有25个板块的ETF新闻/讨论数据，带重试。"""
     result: Dict[str, List[Dict]] = {}
     total = 0
+    MAX_RETRIES = 2  # AKShare 瞬时错误（请求频繁、连接重置）重试次数
+    RETRY_BACKOFF = 1.0
 
     for sector_key, cfg in SECTOR_ETF.items():
         code = cfg["code"]
         name = cfg["name"]
         posts: List[Dict] = []
 
-        try:
-            df = ak.stock_news_em(symbol=code)
-            if df is not None and not df.empty:
-                for _, row in df.iterrows():
-                    post = _to_post(row.to_dict(), sector_key)
-                    if post:
-                        posts.append(post)
-            print(f"  [{name}] AKShare采集到 {len(posts)} 条新闻")
-        except Exception as e:
-            print(f"  [{name}] AKShare采集失败: {e}")
+        for attempt in range(MAX_RETRIES + 1):
+            try:
+                df = ak.stock_news_em(symbol=code)
+                if df is not None and not df.empty:
+                    for _, row in df.iterrows():
+                        post = _to_post(row.to_dict(), sector_key)
+                        if post:
+                            posts.append(post)
+                print(f"  [{name}] AKShare采集到 {len(posts)} 条新闻")
+                break
+            except Exception as e:
+                if attempt < MAX_RETRIES:
+                    # 指数退避：1s、2s
+                    time.sleep(RETRY_BACKOFF * (attempt + 1))
+                else:
+                    print(f"  [{name}] AKShare采集失败（已重试{MAX_RETRIES}次）: {e}")
 
         result[sector_key] = posts
         total += len(posts)

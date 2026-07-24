@@ -5,7 +5,7 @@
         <div class="header-left">
           <h1 class="page-title">数据看板</h1>
           <span v-if="lastUpdateTime" class="update-time">
-            <span class="time-dot"></span>
+            <span class="time-dot" :class="{ 'ws-connected': wsConnected }"></span>
             更新于 {{ formatTime(lastUpdateTime) }}
           </span>
         </div>
@@ -19,10 +19,10 @@
         <span class="loading-text">加载中...</span>
       </div>
 
-      <div v-else-if="error" class="error-state">
+      <div v-else-if="error && !wsConnected" class="error-state">
         <span class="error-icon">{{ errorIcon }}</span>
         <p class="error-text">{{ error }}</p>
-        <button class="ios-button ios-button-primary" @click="refreshData">重新加载</button>
+        <button class="ios-button ios-button-primary" @click="fetchData">重新加载</button>
       </div>
 
       <template v-else>
@@ -30,10 +30,8 @@
           <IOSMetricCard
             title="综合情绪指数"
             :value="avgIndex"
-            :subValue="indexChange"
             :color="indexColor"
             icon="📊"
-            :trend="indexTrend"
           />
           <IOSMetricCard
             title="有效板块"
@@ -51,6 +49,10 @@
           />
         </div>
 
+        <div class="category-filter">
+          <IOSSegmentControl v-model="selectedCategory" :options="categoryOptions" @update:modelValue="handleCategoryChange" />
+        </div>
+
         <div class="chart-section ios-section">
           <div class="section-header">
             <h2 class="section-title">情绪走势</h2>
@@ -59,7 +61,9 @@
           <IOSCard elevated>
             <IOSLineChart v-if="lineChartData" :data="lineChartData" height="440px" />
             <div v-else class="chart-placeholder">
-              <span class="placeholder-text">暂无图表数据</span>
+              <span class="placeholder-text">
+                {{ lineChartError ? '图表数据加载失败，将在下次刷新时重试' : '暂无图表数据' }}
+              </span>
             </div>
           </IOSCard>
         </div>
@@ -72,8 +76,10 @@
             <IOSSectorList
               v-model="selectedSectors"
               :sectors="sectorRankingData"
+              :navigable="true"
               title=""
               @update:modelValue="handleSectorSelect"
+              @navigate="handleSectorNavigate"
             />
           </div>
         </div>
@@ -84,6 +90,7 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useSystemStore } from '@/stores/system'
 import IOSMetricCard from '@/components/ios/IOSMetricCard.vue'
@@ -93,6 +100,7 @@ import IOSSectorList from '@/components/ios/IOSSectorList.vue'
 import IOSSegmentControl from '@/components/ios/IOSSegmentControl.vue'
 import { SECTOR_NAMES, SECTOR_COLORS, SECTOR_CATEGORIES } from '@/core/constants'
 
+const router = useRouter()
 const store = useDashboardStore()
 const systemStore = useSystemStore()
 
@@ -100,21 +108,43 @@ const timeRange = ref('近7天')
 const timeOptions = ['近7天', '近30天', '近90天']
 const timeRangeDays = { '近7天': 7, '近30天': 30, '近90天': 90 }
 
+const POLL_INTERVAL_WS = 120000
+const POLL_INTERVAL_NO_WS = 30000
+const LINE_CHART_REFRESH_INTERVAL = 60000
+
+const categoryOptions = [
+  { label: '全部', value: 'all' },
+  { label: '大金融', value: 'finance' },
+  { label: '大消费', value: 'consumption' },
+  { label: '大科技', value: 'technology' },
+  { label: '大周期', value: 'cyclical' },
+  { label: '其他', value: 'others' }
+]
+const selectedCategory = ref('all')
+
 const allLeafSectorCodes = computed(() => {
   const codes = []
   SECTOR_CATEGORIES.forEach(cat => codes.push(...cat.children))
   return codes
 })
 
+const categorySectorCodes = computed(() => {
+  if (selectedCategory.value === 'all') return allLeafSectorCodes.value
+  const cat = SECTOR_CATEGORIES.find(c => c.code === selectedCategory.value)
+  return cat ? cat.children : []
+})
+
 const selectedSectors = ref([...allLeafSectorCodes.value])
-let refreshTimer = null
+let pollTimer = null
+let lineChartTimer = null
 
 const loading = computed(() => store.loading)
+const wsConnected = computed(() => store.wsConnected)
 const error = computed(() => {
-  // 网络断开时优先显示网络错误，而非API错误
   if (!systemStore.isOnline) {
     return '网络连接已断开，请检查网络连接'
   }
+  if (wsConnected.value) return ''
   return store.error
 })
 const errorIcon = computed(() => {
@@ -123,16 +153,13 @@ const errorIcon = computed(() => {
 })
 const overviewData = computed(() => store.overviewData)
 const lineChartData = computed(() => store.lineChartData)
+const lineChartError = computed(() => store.lineChartError)
 
 const avgIndex = computed(() => overviewData.value?.avg_index ?? null)
 const sectorCount = computed(() => overviewData.value?.sector_count ?? 0)
 const validSectorCount = computed(() => overviewData.value?.valid_sector_count ?? 0)
 const lastUpdateTime = computed(() => overviewData.value?.last_update_time ?? null)
 const dataQuality = computed(() => overviewData.value?.data_quality ?? null)
-
-const indexChange = computed(() => {
-  return null
-})
 
 const indexColor = computed(() => {
   const val = avgIndex.value
@@ -143,12 +170,8 @@ const indexColor = computed(() => {
   return 'gray'
 })
 
-const indexTrend = computed(() => {
-  return 'flat'
-})
-
 const dataQualityText = computed(() => {
-  if (!dataQuality.value) return '实时更新'
+  if (!dataQuality.value) return wsConnected.value ? '实时推送' : '实时更新'
   const dq = dataQuality.value
   if (dq.available === false) return dq.reason || '数据校验中'
   const marketIssues = dq.market_data?.issues?.length || 0
@@ -170,12 +193,14 @@ const dataQualityColor = computed(() => {
 const sectorRankingData = computed(() => {
   const sectors = overviewData.value?.sectors
   if (!sectors) return []
+  const allowedCodes = new Set(categorySectorCodes.value)
   return Object.entries(sectors)
+    .filter(([code]) => allowedCodes.has(code))
     .map(([code, data]) => {
       const idx = data?.index
       return {
         code,
-        name: SECTOR_NAMES[code] || code,
+        name: data?.name || SECTOR_NAMES[code] || code,
         value: idx,
         color: SECTOR_COLORS[code] || '#007AFF'
       }
@@ -208,7 +233,6 @@ function formatTime(timeStr) {
 }
 
 async function fetchData() {
-  // 网络断开时不发起请求，避免无意义的超时等待
   if (!systemStore.isOnline) {
     return
   }
@@ -220,7 +244,20 @@ async function fetchData() {
   }
 }
 
+async function refreshOverview() {
+  if (!systemStore.isOnline) return
+  try {
+    await store.fetchOverview()
+  } catch (e) {
+    // WebSocket连接时不显示HTTP错误
+    if (!wsConnected.value) {
+      console.error('概览刷新失败:', e)
+    }
+  }
+}
+
 async function refreshLineChart() {
+  if (!systemStore.isOnline) return
   try {
     const days = timeRangeDays[timeRange.value] || 7
     await store.fetchLineChart(selectedSectors.value, days)
@@ -229,11 +266,12 @@ async function refreshLineChart() {
   }
 }
 
-function refreshData() {
-  fetchData()
+function handleTimeRangeChange() {
+  refreshLineChart()
 }
 
-function handleTimeRangeChange() {
+function handleCategoryChange() {
+  selectedSectors.value = [...categorySectorCodes.value]
   refreshLineChart()
 }
 
@@ -241,30 +279,85 @@ function handleSectorSelect() {
   refreshLineChart()
 }
 
-function startAutoRefresh() {
-  if (refreshTimer) clearInterval(refreshTimer)
-  refreshTimer = setInterval(() => {
+function handleSectorNavigate(sector) {
+  if (sector?.code) {
+    router.push(`/sector/${sector.code}`)
+  }
+}
+
+function scheduleNextPoll() {
+  if (pollTimer) {
+    clearTimeout(pollTimer)
+    pollTimer = null
+  }
+  const interval = wsConnected.value ? POLL_INTERVAL_WS : POLL_INTERVAL_NO_WS
+  pollTimer = setTimeout(async () => {
+    if (document.visibilityState === 'visible') {
+      await refreshOverview()
+    }
+    scheduleNextPoll()
+  }, interval)
+}
+
+function scheduleLineChartRefresh() {
+  if (lineChartTimer) {
+    clearTimeout(lineChartTimer)
+    lineChartTimer = null
+  }
+  lineChartTimer = setTimeout(async () => {
+    if (document.visibilityState === 'visible' && systemStore.isOnline) {
+      await refreshLineChart()
+    }
+    scheduleLineChartRefresh()
+  }, LINE_CHART_REFRESH_INTERVAL)
+}
+
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible' && systemStore.isOnline) {
     fetchData()
-  }, 30000)
+  }
 }
 
 onMounted(() => {
+  store.initWebSocket()
   fetchData()
-  startAutoRefresh()
+  scheduleNextPoll()
+  scheduleLineChartRefresh()
+  document.addEventListener('visibilitychange', handleVisibilityChange)
 })
 
-// 网络恢复后自动重新加载数据
 watch(() => systemStore.isOnline, (online) => {
-  if (online && !overviewData.value) {
+  if (online) {
     fetchData()
+  }
+})
+
+watch(wsConnected, (connected) => {
+  if (pollTimer) {
+    clearTimeout(pollTimer)
+    pollTimer = null
+  }
+  scheduleNextPoll()
+})
+
+// 监听概览数据更新时间变化：当WebSocket推送新数据导致lastUpdateTime改变时，自动刷新折线图
+watch(lastUpdateTime, (newTime, oldTime) => {
+  if (newTime && newTime !== oldTime) {
+    refreshLineChart()
   }
 })
 
 onUnmounted(() => {
-  if (refreshTimer) {
-    clearInterval(refreshTimer)
-    refreshTimer = null
+  store.closeWebSocket()
+  if (pollTimer) {
+    clearTimeout(pollTimer)
+    pollTimer = null
   }
+  if (lineChartTimer) {
+    clearTimeout(lineChartTimer)
+    lineChartTimer = null
+  }
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 </script>
 
@@ -336,6 +429,11 @@ onUnmounted(() => {
   border-radius: 50%;
   background: var(--ios-green);
   animation: pulse 2s ease-in-out infinite;
+
+  &.ws-connected {
+    background: #007aff;
+    box-shadow: 0 0 6px rgba(0, 122, 255, 0.5);
+  }
 }
 
 @keyframes pulse {
@@ -376,12 +474,22 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--ios-spacing-lg);
-  margin-bottom: var(--ios-spacing-xl);
+  margin-bottom: var(--ios-spacing-lg);
 
   @include mobile {
     grid-template-columns: 1fr;
     gap: var(--ios-spacing-md);
-    margin-bottom: var(--ios-spacing-lg);
+    margin-bottom: var(--ios-spacing-md);
+  }
+}
+
+.category-filter {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--ios-spacing-lg);
+
+  @include mobile {
+    margin-bottom: var(--ios-spacing-md);
   }
 }
 
