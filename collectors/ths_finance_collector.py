@@ -13,8 +13,10 @@ from urllib.parse import urlparse
 import requests
 
 NEWS_PAGES = [
-    "https://news.10jqka.com.cn/today_list/",
-    "https://news.10jqka.com.cn/",
+    # 财经即时新闻：返回 field.10jqka.com.cn 域名的板块相关新闻，命中率高
+    "http://news.10jqka.com.cn/cjkx_list/",
+    # 股票频道首页：返回 stock.10jqka.com.cn 域名的个股/板块新闻
+    "http://stock.10jqka.com.cn/",
 ]
 
 REQUEST_TIMEOUT = 15
@@ -148,12 +150,18 @@ def _empty_result() -> Dict[str, List[Dict]]:
 
 
 def fetch_page(url: str, timeout: int = REQUEST_TIMEOUT) -> Optional[str]:
-    """获取页面 HTML 文本，带重试机制。"""
+    """获取页面 HTML 文本，带重试机制。
+
+    编码策略：同花顺页面使用 GBK 编码，不能用 utf-8 强制解码。
+    优先使用响应头声明的 charset；若无则用 chardet 自动检测（apparent_encoding）。
+    """
     for attempt in range(MAX_RETRIES):
         try:
             resp = requests.get(url, headers=DEFAULT_HEADERS, timeout=timeout)
             resp.raise_for_status()
-            resp.encoding = "utf-8"
+            # 服务器未声明编码或 requests fallback 到 ISO-8859-1 时，自动检测
+            if not resp.encoding or resp.encoding.lower() == "iso-8859-1":
+                resp.encoding = resp.apparent_encoding
             return resp.text
 
         except requests.exceptions.Timeout:

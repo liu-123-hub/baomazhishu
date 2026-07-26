@@ -227,45 +227,16 @@ def _empty_result() -> Dict[str, List[Dict]]:
 
 
 def collect_all() -> Dict[str, List[Dict]]:
-    """采集所有板块雪球社区讨论，ETF关键词搜索+二次归类。"""
-    result: Dict[str, List[Dict]] = _empty_result()
-    seen_ids: set = set()
+    """采集所有板块雪球社区讨论，ETF关键词搜索+二次归类。
 
-    print("  [雪球社区] 开始采集真实讨论数据...")
-
-    session = _get_session()
-    if not session._ensure_cookie():
-        print("  [雪球社区] ⚠️ 无法获取Cookie，跳过采集（雪球WAF需要登录）")
-        return result
-
-    test_items = session.search("银行ETF", count=3)
-    if not test_items:
-        print("  [雪球社区] ⚠️ 搜索API被WAF拦截(400016)，需要登录账号，跳过采集")
-        return result
-
-    total_count = 0
-
-    for sector, keywords in SEARCH_KEYWORDS.items():
-        sector_posts = []
-        for kw in keywords:
-            items = session.search(kw, count=SEARCH_COUNT)
-            for item in items:
-                parsed = _parse_post(item, sector)
-                if parsed is None:
-                    continue
-                pid = parsed["id"]
-                if pid in seen_ids:
-                    continue
-                seen_ids.add(pid)
-                sector_posts.append(parsed)
-            time.sleep(REQUEST_INTERVAL)
-
-        result[sector] = sector_posts
-        total_count += len(sector_posts)
-        if sector_posts:
-            print(f"  [雪球-{sector}] 采集到 {len(sector_posts)} 条讨论")
-
-    print(f"  [雪球社区] 采集完成，共 {total_count} 条真实讨论")
+    注意：雪球于 2025 年底加强 WAF，/statuses/search.json 等所有讨论 API
+    均返回 400016 错误码要求登录账号。在无登录态下本采集器会快速降级返回空数据，
+    不再发起注定失败的搜索请求，避免浪费网络资源和拖慢 pipeline。
+    雪球社区恢复或接入登录态后可重新启用搜索逻辑。
+    """
+    result = _empty_result()
+    print("  [雪球社区] ⚠️ 雪球讨论 API 需登录账号（400016 WAF），本采集器降级跳过")
+    print("  [雪球社区] 提示：东方财富股吧已覆盖 25 个板块的新闻数据，可作为替代信号源")
     return result
 
 

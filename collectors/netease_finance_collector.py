@@ -139,12 +139,17 @@ def _empty_result() -> Dict[str, List[Dict]]:
 
 
 def fetch_page(url: str, timeout: int = REQUEST_TIMEOUT) -> Optional[str]:
-    """获取页面 HTML 文本，带重试机制。"""
+    """获取页面 HTML 文本，带重试机制。
+
+    编码策略：网易财经页面为 UTF-8，但为兼容可能的编码变更，
+    优先使用响应头声明的 charset；若无则用 chardet 自动检测。
+    """
     for attempt in range(MAX_RETRIES):
         try:
             resp = requests.get(url, headers=DEFAULT_HEADERS, timeout=timeout)
             resp.raise_for_status()
-            resp.encoding = "utf-8"
+            if not resp.encoding or resp.encoding.lower() == "iso-8859-1":
+                resp.encoding = resp.apparent_encoding
             return resp.text
 
         except requests.exceptions.Timeout:

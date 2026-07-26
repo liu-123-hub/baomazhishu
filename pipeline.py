@@ -297,10 +297,12 @@ def run_pipeline() -> Dict:
             duration_ms=xq_community_duration * 1000,
             http_latency_ms=health_latency_map.get("雪球社区"),
         )
+        # 雪球 WAF 加强后搜索 API 需登录，0 条数据视为 skipped 而非 partial
         status_tracker.add_source(
             "雪球社区",
-            "success" if xq_community_count > 0 else "partial",
+            "skipped" if xq_community_count == 0 else "success",
             xq_community_count,
+            error="" if xq_community_count > 0 else "API需登录(WAF 400016)",
             duration=xq_community_duration
         )
     except Exception as e:
