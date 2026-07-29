@@ -84,6 +84,7 @@ def compute_sector_index(analysis_results: List) -> Dict:
     purity_signal = (len(pure_newbie) / max(newbie_count, 1)) * 100 if newbie_count > 0 else 0
     activity_signal = min(100, len(valid_posts) / 80 * 100)
     
+    # 四维权重：小白占比40%(覆盖广度) + 平均小白分25%(个体烈度) + 情绪强度20%(情绪化程度) + 纯度信号15%(极端小白比例)
     index = (
         newbie_ratio * 0.40 +
         avg_newbie_score * 0.25 +
@@ -101,6 +102,7 @@ def compute_sector_index(analysis_results: List) -> Dict:
     buy_intensity = sum(r.intent_strength for r in newbie_buy) / max(len(newbie_buy), 1)
     sell_intensity = sum(r.intent_strength for r in newbie_sell) / max(len(newbie_sell), 1)
     
+    # 买/卖指数权重：参与占比50% + 小白烈度修正30% + 关键词强度20%
     mom_buy_index = round(min(100, (
         buy_ratio * 100 * 0.50 +
         (avg_newbie_score / 100) * buy_ratio * 30 * 0.30 +
@@ -152,6 +154,7 @@ def compute_sector_index(analysis_results: List) -> Dict:
 
 
 def interpret_index(index: float) -> str:
+    """将指数数值映射为五级中文解读标签。"""
     if index >= 75:
         return "🔴 极度狂热 — 擦鞋童时刻！小白情绪爆表，历史级别的危险信号"
     elif index >= 60:
@@ -165,6 +168,7 @@ def interpret_index(index: float) -> str:
 
 
 def load_history() -> Dict:
+    """读取历史指数记录，自动对同日期记录去重（保留时间戳最新者）。"""
     history_file = os.path.join(DATA_DIR, "history.json")
     if os.path.exists(history_file):
         with open(history_file, 'r', encoding='utf-8') as f:
@@ -200,6 +204,7 @@ def load_history() -> Dict:
 
 
 def save_history(history: Dict):
+    """原子写入历史记录到 JSON 文件（tmp + replace 避免写入中断损坏）。"""
     history_file = os.path.join(DATA_DIR, "history.json")
     os.makedirs(DATA_DIR, exist_ok=True)
     tmp_file = history_file + ".tmp"
@@ -209,6 +214,7 @@ def save_history(history: Dict):
 
 
 def add_record(sector_indices: Dict[str, Dict], analysis_results: Dict):
+    """追加当日指数快照，同日重复执行会覆盖旧记录。"""
     history = load_history()
     
     record = {
@@ -237,6 +243,7 @@ def _empty_sector_data() -> Dict:
 
 
 def get_dashboard_data() -> Dict:
+    """组装前端仪表盘所需结构：最新快照 + 各板块历史序列 + 记录数。"""
     history = load_history()
     records = history.get("records", [])
 

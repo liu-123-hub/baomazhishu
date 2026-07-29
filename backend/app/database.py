@@ -27,7 +27,8 @@ class Database:
         conn = await aiosqlite.connect(self.db_path)
         conn.row_factory = aiosqlite.Row
         try:
-            # WAL 模式提升并发读写能力；busy_timeout 避免写锁冲突时立即失败
+            # WAL 提升并发读写；busy_timeout 避免写锁冲突时立即失败；
+            # synchronous=NORMAL 在 WAL 下兼顾性能与持久性
             await conn.execute("PRAGMA journal_mode=WAL")
             await conn.execute("PRAGMA busy_timeout=5000")
             await conn.execute("PRAGMA synchronous=NORMAL")
@@ -60,24 +61,19 @@ class Database:
                 )
             """)
 
-            try:
-                await conn.execute("ALTER TABLE sector_index ADD COLUMN data_source TEXT DEFAULT 'pipeline_collect'")
-            except Exception:
-                pass
-            try:
-                await conn.execute("ALTER TABLE sector_index ADD COLUMN data_fingerprint TEXT DEFAULT ''")
-            except Exception:
-                pass
-            try:
-                await conn.execute("ALTER TABLE sector_index ADD COLUMN source_passed INTEGER DEFAULT 1")
-            except Exception:
-                pass
-            try:
-                await conn.execute("ALTER TABLE sector_index ADD COLUMN user_discussion_present INTEGER DEFAULT 1")
-            except Exception:
-                pass
+            # schema 迁移：逐个 ALTER TABLE 新增字段，旧版本库静默忽略（列已存在）
+            for col_def in (
+                ("data_source", "TEXT DEFAULT 'pipeline_collect'"),
+                ("data_fingerprint", "TEXT DEFAULT ''"),
+                ("source_passed", "INTEGER DEFAULT 1"),
+                ("user_discussion_present", "INTEGER DEFAULT 1"),
+            ):
+                try:
+                    await conn.execute(f"ALTER TABLE sector_index ADD COLUMN {col_def[0]} {col_def[1]}")
+                except Exception:
+                    pass
 
-            # 补建 UNIQUE 索引支持 UPSERT，先清理历史重复数据
+            # 建 UNIQUE 索引前先清历史重复数据，保证 (sector_code, record_date) 唯一
             await conn.execute("""
                 DELETE FROM sector_index
                 WHERE id NOT IN (
@@ -123,7 +119,7 @@ class Database:
             """)
 
     async def insert_sector_index(self, data: Dict) -> int:
-        """插入或更新板块指数记录（UPSERT），包含数据来源审计字段。"""
+        """插入或更新板块指数记录（UPSERT）。"""
         now = datetime.now().isoformat()
         async with self.get_connection() as conn:
             cursor = await conn.execute(

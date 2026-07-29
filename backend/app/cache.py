@@ -10,6 +10,9 @@ from .config import settings
 class AsyncTTLCache:
     """异步安全的 TTL + LRU 缓存实现。"""
 
+    # TTL 与 maxsize 通过 settings 分层配置：
+    # dashboard_cache (TTL=30s, maxsize=100) — 高频访问的大盘概览，保证新鲜度
+    # data_cache (TTL=300s, maxsize=500) — 低频明细数据，节省数据库
     def __init__(self, max_size: int = 500, default_ttl: int = 300):
         self._max_size = max_size
         self._default_ttl = default_ttl
@@ -48,8 +51,7 @@ class AsyncTTLCache:
         result = factory()
         if asyncio.iscoroutine(result):
             result = await result
-        # 不缓存错误响应：避免瞬时异常被缓存后持续向客户端返回错误
-        # 错误响应的判定：dict 且 code 字段非 200
+        # 不缓存错误响应：瞬时异常被缓存后会持续向客户端返回错误
         if isinstance(result, dict) and result.get("code") not in (None, 200):
             return result
         await self.set(key, result, ttl)
