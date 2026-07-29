@@ -1,8 +1,17 @@
 """应用配置，支持环境变量覆盖。"""
 import os
+import sys
 from pathlib import Path
 from typing import List
 from pydantic_settings import BaseSettings
+
+# 从 analyzer 导入 SECTOR_NAMES 作为唯一真值来源，避免两处维护
+# config.py 在后端启动时最先加载，需自行注入根目录到 sys.path
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
+if str(_PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(_PROJECT_ROOT))
+
+from analyzer.index_calculator import SECTOR_NAMES as _SECTOR_NAMES
 
 
 class Settings(BaseSettings):
@@ -45,12 +54,10 @@ class Settings(BaseSettings):
     COLLECTOR_RETRY_TIMES: int = 3
     PLAYWRIGHT_HEADLESS: bool = True
     AUTO_COLLECT_INTERVAL: int = 1800
-    # 单次采集运行的最长允许耗时（秒），必须严格小于 AUTO_COLLECT_INTERVAL，
-    # 避免单次卡死导致后续周期运行无限堆积。超时后放弃当前运行并重置执行器。
+    # 必须 < AUTO_COLLECT_INTERVAL，防止单次卡死导致周期无限堆积
     COLLECTOR_RUN_DEADLINE: int = 1500
-    # 看门狗检查间隔（秒）：周期性检测漏触发/卡死的采集周期并发出告警日志。
+    # 看门狗检查间隔与告警宽限期：检测漏触发/卡死的采集周期
     WATCHDOG_CHECK_INTERVAL: int = 300
-    # 看门狗告警宽限期（秒）：超过 interval + deadline + grace 仍无成功运行则告警。
     WATCHDOG_GRACE: int = 60
 
     SECTOR_CATEGORIES: list = [
@@ -81,33 +88,7 @@ class Settings(BaseSettings):
         }
     ]
 
-    SECTOR_NAMES: dict = {
-        "bank": "银行",
-        "securities": "券商",
-        "insurance": "保险",
-        "baijiu": "白酒",
-        "food": "食品",
-        "medicine": "医药",
-        "appliance": "家电",
-        "tourism": "文旅",
-        "biotech": "创新药",
-        "consumer": "消费",
-        "electronics": "电子",
-        "computer": "计算机",
-        "communication": "通信",
-        "media": "传媒",
-        "cpo": "CPO通信",
-        "semiconductor": "半导体",
-        "nonferrous": "有色",
-        "coal": "煤炭",
-        "chemical": "化工",
-        "steel": "钢铁",
-        "realestate": "地产",
-        "infrastructure": "基建",
-        "newenergy": "新能源",
-        "nasdaq": "纳斯达克",
-        "gold": "黄金"
-    }
+    SECTOR_NAMES: dict = _SECTOR_NAMES
 
     class Config:
         env_file = ".env"

@@ -19,7 +19,7 @@ from .auto_collector import auto_collector
 
 
 def _configure_logging() -> None:
-    """配置全局日志：控制台+滚动文件双输出，不覆盖uvicorn已有配置。"""
+    """配置全局日志：控制台+滚动文件双输出。"""
     root_logger = logging.getLogger()
     if root_logger.handlers:
         return
@@ -53,6 +53,9 @@ _configure_logging()
 logger = logging.getLogger(__name__)
 
 
+# lifespan 统一管理启动/关闭生命周期：
+# 启动顺序：DB初始化 → 数据预热(后台) → WS广播循环 → 自动采集(延迟5s)
+# 关闭顺序：取消广播/预热任务 → 关闭采集器（含看门狗/定时循环）
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """应用生命周期管理。"""
@@ -103,7 +106,7 @@ async def _warmup_data_service():
 
 
 async def broadcast_data_loop():
-    """定时广播大盘概览到所有WebSocket连接，使用缓存降低数据库压力。"""
+    """定时广播大盘概览到所有 WebSocket 连接。"""
     while True:
         try:
             if manager.connection_count > 0:
@@ -133,10 +136,12 @@ def create_app() -> FastAPI:
         "allow_methods": ["*"],
         "allow_headers": ["*"],
     }
+    # localhost regex 允许本地开发时任意端口（Vite/HMR 临时端口）直接访问
     if settings.CORS_ALLOW_LOCALHOST_REGEX:
         cors_kwargs["allow_origin_regex"] = r"https?://(localhost|127\.0\.0\.1):\d+"
     app.add_middleware(CORSMiddleware, **cors_kwargs)
 
+    # 统一异常返回格式：{code, message, data, errors?}
     @app.exception_handler(RequestValidationError)
     async def validation_exception_handler(request: Request, exc: RequestValidationError):
         errors = []

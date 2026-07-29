@@ -98,17 +98,17 @@ def collect_limit_up_pool(start_date: Optional[str] = None, end_date: Optional[s
 
 
 def _fetch_dragon_tiger_list(trade_date: str) -> Optional[List[Dict]]:
-    """通过 AKShare 获取指定交易日龙虎榜数据。"""
-    # 龙虎榜列名常量：akshare 返回的 DataFrame 必须包含这些列才能解析。
-    # 非交易日（周末/节假日）调用时 akshare 内部会抛出 KeyError('股票代码')，
-    # 必须显式捕获并返回 None，避免中断整个采集流程。
+    """通过 AKShare 获取指定交易日龙虎榜数据。
+
+    非交易日（周末/节假日）调用时 akshare 内部会抛出 KeyError('股票代码')，
+    必须显式捕获并返回 None，避免中断整个采集流程。
+    """
     REQUIRED_COLUMNS = ("股票代码", "股票名称", "收盘价", "对应值", "成交量", "成交额", "指标")
     for attempt in range(MAX_RETRIES + 1):
         try:
             df = akshare.stock_lhb_detail_daily_sina(date=trade_date)
             if df is None or df.empty:
                 return None
-            # 列名校验：akshare 版本升级或非交易日可能返回空结构 DataFrame
             missing_cols = [c for c in REQUIRED_COLUMNS if c not in df.columns]
             if missing_cols:
                 if attempt < MAX_RETRIES:
@@ -132,7 +132,6 @@ def _fetch_dragon_tiger_list(trade_date: str) -> Optional[List[Dict]]:
             return records
 
         except KeyError as e:
-            # 非交易日 akshare 内部访问缺失列时抛出，视为当日无数据，不重试
             print(f"    [龙虎榜] {trade_date} 无数据（可能为非交易日）: 缺失键 {e}")
             return None
         except Exception as e:

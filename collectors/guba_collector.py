@@ -65,7 +65,7 @@ def collect_all() -> Dict[str, List[Dict]]:
     """采集所有25个板块的ETF新闻/讨论数据，带重试。"""
     result: Dict[str, List[Dict]] = {}
     total = 0
-    MAX_RETRIES = 2  # AKShare 瞬时错误（请求频繁、连接重置）重试次数
+    MAX_RETRIES = 2
     RETRY_BACKOFF = 1.0
 
     for sector_key, cfg in SECTOR_ETF.items():
@@ -85,7 +85,6 @@ def collect_all() -> Dict[str, List[Dict]]:
                 break
             except Exception as e:
                 if attempt < MAX_RETRIES:
-                    # 指数退避：1s、2s
                     time.sleep(RETRY_BACKOFF * (attempt + 1))
                 else:
                     print(f"  [{name}] AKShare采集失败（已重试{MAX_RETRIES}次）: {e}")

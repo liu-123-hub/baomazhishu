@@ -9,63 +9,7 @@ from urllib.parse import urlparse
 
 import httpx
 
-
-_PROBE_CONFIG = {
-    "东方财富股吧": {
-        "method": "http_head",
-        "url": "https://guba.eastmoney.com/",
-        "timeout": 3.0,
-        "expected_status": (200, 301, 302),
-    },
-    "小红书": {
-        "method": "env_key",
-        "env_key": "RNODE_API_KEY",
-        "fallback_url": "https://rnote.dev/",
-        "timeout": 3.0,
-    },
-    "雪球社区": {
-        "method": "http_head",
-        "url": "https://xueqiu.com/",
-        "timeout": 3.0,
-        "expected_status": (200, 301, 302, 403),
-    },
-    "Google News": {
-        "method": "http_head",
-        "url": "https://news.google.com/",
-        "timeout": 3.0,
-        "expected_status": (200, 301, 302),
-    },
-    "网易财经": {
-        "method": "http_head",
-        "url": "https://finance.163.com/",
-        "timeout": 3.0,
-        "expected_status": (200, 301, 302),
-    },
-    "东方财富资讯": {
-        "method": "http_head",
-        "url": "https://finance.eastmoney.com/",
-        "timeout": 3.0,
-        "expected_status": (200, 301, 302),
-    },
-    "同花顺财经": {
-        "method": "http_head",
-        "url": "https://news.10jqka.com.cn/",
-        "timeout": 3.0,
-        "expected_status": (200, 301, 302),
-    },
-    "行情数据(AKShare)": {
-        "method": "http_head",
-        "url": "https://finance.sina.com.cn/",
-        "timeout": 3.0,
-        "expected_status": (200, 301, 302),
-    },
-    "市场异动数据(AKShare)": {
-        "method": "http_head",
-        "url": "https://push2.eastmoney.com/",
-        "timeout": 3.0,
-        "expected_status": (200, 301, 302, 404),
-    },
-}
+from collectors.registry import PROBE_CONFIG
 
 
 async def _probe_http_head(name: str, url: str, timeout: float, expected_status) -> Dict:
@@ -90,7 +34,6 @@ async def _probe_http_head(name: str, url: str, timeout: float, expected_status)
             }
         return {
             "name": name,
-            # 状态码不在预期集合内应标记为 unreachable，避免 pipeline 误判数据源可用
             "status": "unreachable",
             "latency_ms": latency,
             "http_status": resp.status_code,
@@ -145,7 +88,7 @@ async def _probe_env_key(name: str, env_key: str, fallback_url: str, timeout: fl
 async def check_source_connectivity() -> List[Dict]:
     """对所有数据源执行连通性预检。"""
     tasks = []
-    for name, cfg in _PROBE_CONFIG.items():
+    for name, cfg in PROBE_CONFIG.items():
         method = cfg["method"]
         timeout = cfg.get("timeout", 3.0)
         if method == "http_head":

@@ -17,6 +17,9 @@ from collectors.ths_finance_collector import collect_all as collect_ths
 from collectors.xueqiu_community_collector import collect_all as collect_xueqiu_community
 from collectors.market_data_collector import collect_all as collect_market_data, validate_market_data
 from collectors.capital_flow_collector import collect_all as collect_capital_flow, validate_capital_flow
+from collectors.registry import (
+    GUBA, XHS, GOOGLE_NEWS, NETEASE, EASTMONEY_NEWS, THS, XUEQIU_COMMUNITY,
+)
 from collectors.data_validation import validate_source_posts
 from collectors.data_authenticator import (
     authenticate_collected_data,
@@ -31,12 +34,13 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 
 class DataSourceStatus:
-    """数据源状态追踪器。"""
+    """数据源状态追踪器，聚合各源成功/失败/条数/耗时并生成汇总字符串。"""
     
     def __init__(self):
         self.sources: Dict[str, Dict] = {}
     
     def add_source(self, name: str, status: str, count: int = 0, error: str = "", duration: float = 0.0):
+        """登记单个数据源的采集结果（success/failed/skipped/partial）。"""
         self.sources[name] = {
             "name": name,
             "status": status,
@@ -46,6 +50,7 @@ class DataSourceStatus:
         }
     
     def get_summary(self) -> str:
+        """格式化输出各源状态图标 + 条数 + 耗时 + 错误，含累计总条数。"""
         lines = []
         total_count = 0
         for name, info in self.sources.items():
@@ -64,6 +69,7 @@ class DataSourceStatus:
         return "\n".join(lines)
     
     def has_data(self) -> bool:
+        """只要有任一数据源拿到 >0 条数据即返回 True。"""
         return any(info["count"] > 0 for info in self.sources.values())
 
 
@@ -76,6 +82,7 @@ def _merge_sector_posts(
     duration_ms: Optional[float] = None,
     http_latency_ms: Optional[float] = None,
 ) -> int:
+    """单源合并策略：字段校验→去重→真实性校验→按 sector 键 extend 追加到 all_posts（不覆盖），返回本次有效条数。"""
     cleaned_posts, issues = validate_source_posts(source_name, source_posts)
 
     issue_count = len([i for i in issues if "缺少字段" in i or "数据已过期" in i or "重复" in i])
@@ -105,6 +112,7 @@ def _merge_sector_posts(
 
 
 def _write_dashboard_data(dashboard: Dict):
+    """原子写入仪表盘 JSON（tmp + os.replace），避免写入中断损坏。"""
     os.makedirs(DATA_DIR, exist_ok=True)
     dashboard_file = os.path.join(DATA_DIR, "dashboard_data.json")
     tmp_file = dashboard_file + ".tmp"
@@ -115,7 +123,14 @@ def _write_dashboard_data(dashboard: Dict):
 
 
 def run_pipeline() -> Dict:
-    """执行完整的数据采集→分析→指数计算流程。"""
+    """执行完整流程：0连通性预检→1九路真实采集(按 sector extend 合并)→2规则分析→3四维权重指数→4历史存储→5仪表盘数据+质量校验。"""
+    # 流程说明：
+    # 第0步 连通性预检：异步探测各数据源可达性，结果存入 health_latency_map 透传给后续真实性校验
+    # 第1步 九路采集（7路帖子 + 行情 + 异动）：每路独立采集→_merge_sector_posts 校验+鉴真→按 sector extend 合并到 all_posts（同源同板块不覆盖只追加）
+    # 第2步 多维度分析：analyze_all 遍历板块，每条帖子打分分级
+    # 第3步 指数计算：compute_sector_index 按四维权重合成 0-100 指数
+    # 第4步 存储历史：add_record 同日覆盖，保证重复执行幂等
+    # 第5步 前端数据：get_dashboard_data + 数据源状态 + 真实性溯源 + URL抽样/行情/异动质量校验
     print("=" * 65)
     print("   👩‍👧 宝妈指数 · 真实数据采集与分析")
     print(f"   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -123,6 +138,7 @@ def run_pipeline() -> Dict:
     
     status_tracker = DataSourceStatus()
     auth_reports: List = []
+    # health_latency_map：连通性预检测得的 HTTP 延迟(ms)，后续作为 authenticate_collected_data 真实性校验的佐证输入（采集耗时 vs 预检延迟偏差过大可能为伪造）
     health_latency_map: Dict[str, float] = {}
 
     print("\n🔌 第0步: 数据源连通性预检")
@@ -161,19 +177,19 @@ def run_pipeline() -> Dict:
         guba_data = collect_guba()
         guba_duration = time.time() - guba_start
         guba_count = _merge_sector_posts(
-            all_posts, "guba", guba_data, auth_reports, "东方财富股吧",
+            all_posts, "guba", guba_data, auth_reports, GUBA,
             duration_ms=guba_duration * 1000,
-            http_latency_ms=health_latency_map.get("东方财富股吧"),
+            http_latency_ms=health_latency_map.get(GUBA),
         )
         status_tracker.add_source(
-            "东方财富股吧",
+            GUBA,
             "success" if guba_count > 0 else "partial",
             guba_count,
             duration=guba_duration
         )
     except Exception as e:
         guba_duration = time.time() - guba_start
-        status_tracker.add_source("东方财富股吧", "failed", 0, str(e), guba_duration)
+        status_tracker.add_source(GUBA, "failed", 0, str(e), guba_duration)
         print(f"  ❌ 东方财富股吧采集失败: {e}")
 
     print("\n  [2/9] 小红书")
@@ -182,9 +198,9 @@ def run_pipeline() -> Dict:
         xhs_data = collect_xhs()
         xhs_duration = time.time() - xhs_start
         xhs_count = _merge_sector_posts(
-            all_posts, "xiaohongshu", xhs_data, auth_reports, "小红书",
+            all_posts, "xiaohongshu", xhs_data, auth_reports, XHS,
             duration_ms=xhs_duration * 1000,
-            http_latency_ms=health_latency_map.get("小红书"),
+            http_latency_ms=health_latency_map.get(XHS),
         )
         xhs_has_key = os.environ.get("RNODE_API_KEY", "") != ""
         if xhs_has_key:
@@ -192,7 +208,7 @@ def run_pipeline() -> Dict:
         else:
             status = "skipped"
         status_tracker.add_source(
-            "小红书",
+            XHS,
             status,
             xhs_count,
             error="" if xhs_has_key else "未配置API Key",
@@ -200,7 +216,7 @@ def run_pipeline() -> Dict:
         )
     except Exception as e:
         xhs_duration = time.time() - xhs_start
-        status_tracker.add_source("小红书", "failed", 0, str(e), xhs_duration)
+        status_tracker.add_source(XHS, "failed", 0, str(e), xhs_duration)
         print(f"  ❌ 小红书采集失败: {e}")
 
     print("\n  [3/9] Google News RSS")
@@ -209,19 +225,19 @@ def run_pipeline() -> Dict:
         google_news_data = collect_google_news()
         gnews_duration = time.time() - gnews_start
         gnews_count = _merge_sector_posts(
-            all_posts, "google_news_rss", google_news_data, auth_reports, "Google News",
+            all_posts, "google_news_rss", google_news_data, auth_reports, GOOGLE_NEWS,
             duration_ms=gnews_duration * 1000,
-            http_latency_ms=health_latency_map.get("Google News"),
+            http_latency_ms=health_latency_map.get(GOOGLE_NEWS),
         )
         status_tracker.add_source(
-            "Google News",
+            GOOGLE_NEWS,
             "success" if gnews_count > 0 else "partial",
             gnews_count,
             duration=gnews_duration
         )
     except Exception as e:
         gnews_duration = time.time() - gnews_start
-        status_tracker.add_source("Google News", "failed", 0, str(e), gnews_duration)
+        status_tracker.add_source(GOOGLE_NEWS, "failed", 0, str(e), gnews_duration)
         print(f"  ❌ Google News采集失败: {e}")
 
     print("\n  [4/9] 网易财经 RSS")
@@ -230,19 +246,19 @@ def run_pipeline() -> Dict:
         netease_data = collect_netease()
         netease_duration = time.time() - netease_start
         netease_count = _merge_sector_posts(
-            all_posts, "netease_finance_rss", netease_data, auth_reports, "网易财经",
+            all_posts, "netease_finance_rss", netease_data, auth_reports, NETEASE,
             duration_ms=netease_duration * 1000,
-            http_latency_ms=health_latency_map.get("网易财经"),
+            http_latency_ms=health_latency_map.get(NETEASE),
         )
         status_tracker.add_source(
-            "网易财经",
+            NETEASE,
             "success" if netease_count > 0 else "partial",
             netease_count,
             duration=netease_duration
         )
     except Exception as e:
         netease_duration = time.time() - netease_start
-        status_tracker.add_source("网易财经", "failed", 0, str(e), netease_duration)
+        status_tracker.add_source(NETEASE, "failed", 0, str(e), netease_duration)
         print(f"  ❌ 网易财经采集失败: {e}")
 
     print("\n  [5/9] 东方财富资讯")
@@ -251,19 +267,19 @@ def run_pipeline() -> Dict:
         xq_data = collect_xueqiu()
         xq_duration = time.time() - xq_start
         xq_count = _merge_sector_posts(
-            all_posts, "eastmoney_news", xq_data, auth_reports, "东方财富资讯",
+            all_posts, "eastmoney_news", xq_data, auth_reports, EASTMONEY_NEWS,
             duration_ms=xq_duration * 1000,
-            http_latency_ms=health_latency_map.get("东方财富资讯"),
+            http_latency_ms=health_latency_map.get(EASTMONEY_NEWS),
         )
         status_tracker.add_source(
-            "东方财富资讯",
+            EASTMONEY_NEWS,
             "success" if xq_count > 0 else "partial",
             xq_count,
             duration=xq_duration
         )
     except Exception as e:
         xq_duration = time.time() - xq_start
-        status_tracker.add_source("东方财富资讯", "failed", 0, str(e), xq_duration)
+        status_tracker.add_source(EASTMONEY_NEWS, "failed", 0, str(e), xq_duration)
         print(f"  ❌ 东方财富资讯采集失败: {e}")
 
     print("\n  [6/9] 同花顺财经")
@@ -272,19 +288,19 @@ def run_pipeline() -> Dict:
         ths_data = collect_ths()
         ths_duration = time.time() - ths_start
         ths_count = _merge_sector_posts(
-            all_posts, "ths_finance", ths_data, auth_reports, "同花顺财经",
+            all_posts, "ths_finance", ths_data, auth_reports, THS,
             duration_ms=ths_duration * 1000,
-            http_latency_ms=health_latency_map.get("同花顺财经"),
+            http_latency_ms=health_latency_map.get(THS),
         )
         status_tracker.add_source(
-            "同花顺财经",
+            THS,
             "success" if ths_count > 0 else "partial",
             ths_count,
             duration=ths_duration
         )
     except Exception as e:
         ths_duration = time.time() - ths_start
-        status_tracker.add_source("同花顺财经", "failed", 0, str(e), ths_duration)
+        status_tracker.add_source(THS, "failed", 0, str(e), ths_duration)
         print(f"  ❌ 同花顺财经采集失败: {e}")
 
     print("\n  [7/9] 雪球社区")
@@ -293,13 +309,13 @@ def run_pipeline() -> Dict:
         xq_community_data = collect_xueqiu_community()
         xq_community_duration = time.time() - xq_community_start
         xq_community_count = _merge_sector_posts(
-            all_posts, "xueqiu_community", xq_community_data, auth_reports, "雪球社区",
+            all_posts, "xueqiu_community", xq_community_data, auth_reports, XUEQIU_COMMUNITY,
             duration_ms=xq_community_duration * 1000,
-            http_latency_ms=health_latency_map.get("雪球社区"),
+            http_latency_ms=health_latency_map.get(XUEQIU_COMMUNITY),
         )
         # 雪球 WAF 加强后搜索 API 需登录，0 条数据视为 skipped 而非 partial
         status_tracker.add_source(
-            "雪球社区",
+            XUEQIU_COMMUNITY,
             "skipped" if xq_community_count == 0 else "success",
             xq_community_count,
             error="" if xq_community_count > 0 else "API需登录(WAF 400016)",
@@ -307,7 +323,7 @@ def run_pipeline() -> Dict:
         )
     except Exception as e:
         xq_community_duration = time.time() - xq_community_start
-        status_tracker.add_source("雪球社区", "failed", 0, str(e), xq_community_duration)
+        status_tracker.add_source(XUEQIU_COMMUNITY, "failed", 0, str(e), xq_community_duration)
         print(f"  ❌ 雪球社区采集失败: {e}")
 
     print("\n  [8/9] 行情数据 (AKShare)")

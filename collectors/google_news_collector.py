@@ -1,7 +1,7 @@
 """Google News RSS 采集器，无需 API Key，为各板块补充公开新闻信号。"""
 import hashlib
-import html
-import re
+import os
+import sys
 import time
 from datetime import datetime
 from typing import Dict, List
@@ -10,24 +10,27 @@ from xml.etree import ElementTree as ET
 
 import requests
 
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from collectors.common import clean_html as _clean_html
+
 RSS_TEMPLATE = (
     "https://news.google.com/rss/search?q={query}&hl=zh-CN&gl=CN&ceid=CN:zh-Hans"
 )
 
-# 采集参数集中管理，便于调优
-MAX_RETRIES = 2                # 单关键词最大重试次数（不含首次）
-RETRY_BACKOFF_BASE = 1.5       # 指数退避基数（秒）
-REQUEST_INTERVAL = 0.4         # 相邻请求最小间隔，避免触发 IP 级限流
-_CONNECT_TIMEOUT = 5           # 连接超时
-_READ_TIMEOUT = 15             # 读取超时
+MAX_RETRIES = 2
+RETRY_BACKOFF_BASE = 1.5
+REQUEST_INTERVAL = 0.4
+_CONNECT_TIMEOUT = 5
+_READ_TIMEOUT = 15
 
-# 浏览器风格的 User-Agent，避免被 Google News 识别为爬虫降级响应
 _BROWSER_UA = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
     "(KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
 )
 
-# 模块级 Session：复用 TCP/TLS 连接，避免 75 次请求各开新连接
 _session: requests.Session = requests.Session()
 _session.headers.update({"User-Agent": _BROWSER_UA})
 _last_request_ts = 0.0
@@ -59,12 +62,6 @@ SEARCH_KEYWORDS = {
     "realestate": ["房地产 ETF", "地产 ETF", "房地产 股票"],
     "infrastructure": ["基建 ETF", "建筑 ETF", "基建 股票"],
 }
-
-
-def _clean_html(raw_html: str) -> str:
-    text = re.sub(r"<[^>]+>", " ", raw_html or "")
-    text = html.unescape(text)
-    return re.sub(r"\s+", " ", text).strip()
 
 
 def _parse_rss(xml_text: str) -> List[Dict]:
@@ -101,7 +98,6 @@ def search_news(keyword: str, limit: int = 8) -> List[Dict]:
     last_err = None
     resp = None
     for attempt in range(MAX_RETRIES + 1):
-        # 简单的请求间隔节流，避免突发流量触发限流
         wait = REQUEST_INTERVAL - (time.time() - _last_request_ts)
         if wait > 0:
             time.sleep(wait)
@@ -115,7 +111,6 @@ def search_news(keyword: str, limit: int = 8) -> List[Dict]:
             return _parse_rss(resp.text)[:limit]
         except requests.RequestException as exc:
             last_err = exc
-            # 4xx 客户端错误不再重试（重试只会加重限流）
             if resp is not None and 400 <= resp.status_code < 500:
                 break
             if attempt < MAX_RETRIES:
@@ -164,7 +159,6 @@ def collect_all() -> Dict[str, List[Dict]]:
         result[sector] = posts
         print(f"  [Google News-{sector}] 采集到 {len(posts)} 条")
 
-    # 显式关闭 Session 释放连接池资源
     try:
         _session.close()
     except Exception:

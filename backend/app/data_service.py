@@ -52,8 +52,8 @@ def _compute_is_degraded(
     json_provenance_time: Optional[str] = None,
     has_valid_data: Optional[bool] = None,
 ) -> bool:
-    """判断板块是否降级（数据过期、来源未通过校验或无有效数据）。"""
-    # 数据源未通过真实性校验：直接降级，避免向用户呈现不可信数据
+    """判断板块是否降级。"""
+    # source_passed=False 表示数据源真实性校验未通过，直接降级避免呈现不可信数据
     if source_passed is False:
         return True
 
@@ -66,6 +66,7 @@ def _compute_is_degraded(
             return True
         now = datetime.now()
         age_seconds = (now - update_dt).total_seconds()
+        # 超过 72h 的数据视为过期降级
         if age_seconds > _DEGRADED_THRESHOLD_SECONDS:
             return True
 
@@ -73,7 +74,7 @@ def _compute_is_degraded(
 
 
 def _load_from_json_file() -> Dict[str, Any]:
-    """从 JSON 文件加载最新数据，返回包含 sectors 和顶层 timestamp/date 的字典。"""
+    """从 JSON 文件加载最新数据。"""
     try:
         if not os.path.exists(JSON_DATA_PATH):
             logger.warning(f"JSON 数据文件不存在: {JSON_DATA_PATH}")
@@ -265,7 +266,7 @@ def _build_merged_history_for_trend(code: str, db_history: List[Dict], json_hist
 
 
 def _compute_positive_ratio(row: Dict) -> float:
-    """根据买卖指数估算正面情绪比例（买卖均为0时返回50.0中性）。"""
+    """根据买卖指数估算正面情绪比例。"""
     buy = float(row.get('buy_index', 0) or 0)
     sell = float(row.get('sell_index', 0) or 0)
     total = buy + sell
@@ -296,7 +297,7 @@ def _map_sector_row(
     has_valid_data = index_value is not None and post_count > 0
     user_discussion_raw = row.get('user_discussion_present')
     user_discussion_present = bool(user_discussion_raw) if user_discussion_raw is not None else global_has_user_discussion
-    # 从数据库行提取数据源校验状态：source_passed=0 表示来源未通过真实性校验
+    # source_passed=0 表示来源真实性校验未通过，降级策略会据此标记板块
     source_passed_raw = row.get('source_passed')
     source_passed = bool(source_passed_raw) if source_passed_raw is not None else None
 
@@ -397,7 +398,13 @@ def _map_json_sector(
 
 
 async def _compute_dashboard_overview() -> Dict[str, Any]:
-    """计算大盘概览数据。"""
+    """计算大盘概览：数据库优先，JSON 文件降级回补。"""
+    # 双源融合降级策略：
+    # 1. 首选 DB 最新数据（结构化、可按板块独立过滤）
+    # 2. 对 DB 缺失的板块，用 dashboard_data.json 的 latest.sectors 回补
+    # 3. 若 DB 全空，则退化为纯 JSON 模式
+    # 4. 每个板块独立校验：数据新鲜度（72h阈值）、有效性（index+post_count均存在）、
+    #    来源真实性（source_passed），任一不满足则标记 is_degraded
     try:
         rows = await db.get_latest_sector_index()
 
@@ -700,7 +707,7 @@ async def _compute_history_trend(code: Optional[str], days: int = 7) -> Dict[str
 
 
 async def get_history_trend(code: Optional[str] = None, days: int = 7) -> Dict[str, Any]:
-    """获取历史趋势（带缓存，TTL=30s确保数据新鲜度）。"""
+    """获取历史趋势（带缓存）。"""
     return await dashboard_cache.get_or_set(
         f'history_trend_{code}_{days}',
         lambda: _compute_history_trend(code, days),
@@ -881,7 +888,7 @@ def _load_capital_flow() -> Dict[str, Any]:
 
 
 async def get_capital_flow_summary() -> Dict[str, Any]:
-    """获取市场异动数据概览（涨停池 + 龙虎榜统计）。"""
+    """获取市场异动数据概览。"""
     try:
         data = _load_capital_flow()
         if not data:

@@ -1,21 +1,25 @@
-"""同花顺财经新闻采集器，HTML 解析公开新闻并按板块分类。
-
-数据源：同花顺(10jqka.com.cn)公开新闻页面，真实公开财经资讯。
-"""
-import hashlib
-import html
+"""同花顺财经新闻采集器，HTML 解析公开新闻并按板块分类。"""
+import os
+import sys
+from typing import Dict, List
+from urllib.parse import urlparse
 import re
 import time
-from datetime import datetime
-from typing import Dict, List, Optional
-from urllib.parse import urlparse
 
-import requests
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from collectors.common import (
+    classify_sector,
+    empty_sector_result,
+    fetch_html_page,
+    make_post,
+    parse_html_links,
+)
 
 NEWS_PAGES = [
-    # 财经即时新闻：返回 field.10jqka.com.cn 域名的板块相关新闻，命中率高
     "http://news.10jqka.com.cn/cjkx_list/",
-    # 股票频道首页：返回 stock.10jqka.com.cn 域名的个股/板块新闻
     "http://stock.10jqka.com.cn/",
 ]
 
@@ -61,11 +65,8 @@ SECTOR_KEYWORDS: Dict[str, List[str]] = {
     "infrastructure": ["基建", "基建ETF", "建筑", "中国建筑", "中国交建", "基建板块"],
 }
 
-DEFAULT_HEADERS = {
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "zh-CN,zh;q=0.9",
-}
+SKIP_KEYWORDS = ["首页", "登录", "注册", "下载", "更多", "返回", "网站地图",
+                 "查看", "关于", "联系"]
 
 _LINK_PATTERN = re.compile(
     r'<a[^>]*href="(https?://[^"]*10jqka\.com\.cn[^"]*shtml)"[^>]*>([^<]{8,120})</a>',
@@ -73,133 +74,19 @@ _LINK_PATTERN = re.compile(
 )
 
 
-def _clean_html(raw_html: str) -> str:
-    """清除 HTML 标签并反转义实体，返回纯文本。"""
-    text = re.sub(r"<[^>]+>", " ", raw_html or "")
-    text = html.unescape(text)
-    return re.sub(r"\s+", " ", text).strip()
-
-
-def _parse_html(html_text: str) -> List[Dict]:
-    """从 HTML 页面中提取新闻标题和链接。"""
-    items: List[Dict] = []
-    seen_links: set = set()
-
-    for match in _LINK_PATTERN.finditer(html_text):
-        link = match.group(1).strip()
-        title = _clean_html(match.group(2))
-
-        if not title or len(title) < 8:
-            continue
-        skip_keywords = ["首页", "登录", "注册", "下载", "更多", "返回", "网站地图",
-                         "查看", "关于", "联系"]
-        if any(sk in title for sk in skip_keywords):
-            continue
-
-        if link in seen_links:
-            continue
-        seen_links.add(link)
-
-        items.append({
-            "title": title,
-            "link": link,
-            "description": "",
-            "source": "同花顺财经",
-            "pub_date": "",
-        })
-
-    return items
-
-
-def _classify_sector(title: str, description: str) -> Optional[str]:
-    """根据标题关键词匹配，将新闻归入对应板块。"""
-    combined = f"{title} {description}"
-
-    for sector, keywords in SECTOR_KEYWORDS.items():
-        for kw in keywords:
-            if kw in title:
-                return sector
-        for kw in keywords:
-            if kw in combined:
-                return sector
-
-    return None
-
-
-def _to_post(item: Dict, sector: str) -> Dict:
-    """将新闻 item 转为项目统一的 post 字典格式。"""
-    link = item["link"]
-    title = item["title"]
-    digest = hashlib.md5(link.encode("utf-8")).hexdigest()[:12]
-
-    return {
-        "id": f"ths_{sector}_{digest}",
-        "title": title[:100],
-        "content": item.get("description", "")[:300],
-        "url": link,
-        "platform": "ths_finance",
-        "author": item.get("source", "同花顺财经"),
-        "date": item.get("pub_date", ""),
-        "collected_at": datetime.now().isoformat(),
-    }
-
-
-def _empty_result() -> Dict[str, List[Dict]]:
-    """生成包含所有25个板块的空结果字典。"""
-    return {sector: [] for sector in SECTOR_KEYWORDS}
-
-
-def fetch_page(url: str, timeout: int = REQUEST_TIMEOUT) -> Optional[str]:
-    """获取页面 HTML 文本，带重试机制。
-
-    编码策略：同花顺页面使用 GBK 编码，不能用 utf-8 强制解码。
-    优先使用响应头声明的 charset；若无则用 chardet 自动检测（apparent_encoding）。
-    """
-    for attempt in range(MAX_RETRIES):
-        try:
-            resp = requests.get(url, headers=DEFAULT_HEADERS, timeout=timeout)
-            resp.raise_for_status()
-            # 服务器未声明编码或 requests fallback 到 ISO-8859-1 时，自动检测
-            if not resp.encoding or resp.encoding.lower() == "iso-8859-1":
-                resp.encoding = resp.apparent_encoding
-            return resp.text
-
-        except requests.exceptions.Timeout:
-            if attempt < MAX_RETRIES - 1:
-                time.sleep(RETRY_DELAY_BASE * (attempt + 1))
-            else:
-                print(f"    [同花顺] 请求超时（已重试{MAX_RETRIES}次）: {url}")
-
-        except requests.exceptions.ConnectionError as e:
-            if attempt < MAX_RETRIES - 1:
-                time.sleep(RETRY_DELAY_BASE * (attempt + 1))
-            else:
-                print(f"    [同花顺] 连接失败（已重试{MAX_RETRIES}次）: {e}")
-
-        except requests.exceptions.HTTPError:
-            status = resp.status_code if hasattr(resp, "status_code") else "N/A"
-            if isinstance(status, int) and 400 <= status < 500:
-                print(f"    [同花顺] HTTP {status} 客户端错误，跳过: {url}")
-                break
-            if attempt < MAX_RETRIES - 1:
-                time.sleep(RETRY_DELAY_BASE * (attempt + 1))
-            else:
-                print(f"    [同花顺] HTTP {status} 服务端错误，已重试 {MAX_RETRIES} 次仍失败: {url}")
-
-    return None
-
-
 def collect_all() -> Dict[str, List[Dict]]:
     """采集所有新闻页面，按板块关键词分类后返回。"""
-    result: Dict[str, List[Dict]] = _empty_result()
+    result = empty_sector_result(SECTOR_KEYWORDS)
     seen_links: set = set()
 
     for page_url in NEWS_PAGES:
-        html_text = fetch_page(page_url)
+        html_text = fetch_html_page(
+            page_url, REQUEST_TIMEOUT, MAX_RETRIES, RETRY_DELAY_BASE, "[同花顺]"
+        )
         if html_text is None:
             continue
 
-        items = _parse_html(html_text)[:MAX_ITEMS_PER_PAGE]
+        items = parse_html_links(html_text, _LINK_PATTERN, SKIP_KEYWORDS, "同花顺财经")[:MAX_ITEMS_PER_PAGE]
 
         matched_count = 0
         for item in items:
@@ -207,12 +94,14 @@ def collect_all() -> Dict[str, List[Dict]]:
             if link in seen_links:
                 continue
 
-            sector = _classify_sector(item["title"], item.get("description", ""))
+            sector = classify_sector(item["title"], item.get("description", ""), SECTOR_KEYWORDS)
             if sector is None:
                 continue
 
             seen_links.add(link)
-            result[sector].append(_to_post(item, sector))
+            result[sector].append(
+                make_post(item, sector, "ths_finance", "ths", "同花顺财经")
+            )
             matched_count += 1
 
         print(f"  [同花顺] {urlparse(page_url).path} 共 {len(items)} 条，命中板块 {matched_count} 条")

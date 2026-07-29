@@ -232,7 +232,6 @@ def collect_all() -> Dict[str, List[Dict]]:
     注意：雪球于 2025 年底加强 WAF，/statuses/search.json 等所有讨论 API
     均返回 400016 错误码要求登录账号。在无登录态下本采集器会快速降级返回空数据，
     不再发起注定失败的搜索请求，避免浪费网络资源和拖慢 pipeline。
-    雪球社区恢复或接入登录态后可重新启用搜索逻辑。
     """
     result = _empty_result()
     print("  [雪球社区] ⚠️ 雪球讨论 API 需登录账号（400016 WAF），本采集器降级跳过")

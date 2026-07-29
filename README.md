@@ -31,11 +31,11 @@
 ### 后端启动
 
 ```bash
-# 1. 安装依赖
-cd backend
+# 1. 安装依赖（在项目根目录执行，依赖由 pyproject.toml 统一管理）
 pip install -r requirements.txt
 
 # 2. 启动服务
+cd backend
 python main.py
 ```
 

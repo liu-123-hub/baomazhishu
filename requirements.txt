@@ -1,23 +1,7 @@
-# ============================================
 # 宝妈指数系统 - 统一依赖清单
-# ============================================
-
-# ---------- Web后端框架 ----------
-fastapi==0.115.0
-uvicorn[standard]==0.30.6
-pydantic==2.9.2
-pydantic-settings==2.5.2
-
-# ---------- HTTP客户端 ----------
-httpx==0.27.2
-requests==2.32.3
-
-# ---------- 数据采集 ----------
-akshare>=1.12.0
-
-# ---------- 数据库 ----------
-aiosqlite==0.20.0
-
-# ---------- 测试框架 ----------
-pytest>=8.0.0
-pytest-asyncio>=0.23.0
+# 依赖来源统一由 pyproject.toml 管理（[project] dependencies 运行时依赖，
+# [project.optional-dependencies] test 测试依赖），本文件仅以可编辑模式
+# 安装项目本体及测试依赖，避免与 pyproject.toml 两处维护版本号漂移。
+#
+# 安装：pip install -r requirements.txt
+-e .[test]
