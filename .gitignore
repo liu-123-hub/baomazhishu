@@ -66,3 +66,9 @@ backend/dashboard.db
 
 # 审查回执日志（本地记录，不入库）
 .review_receipts.log
+
+# 测试覆盖率产物
+.coverage
+.coverage.*
+htmlcov/
+.pytest_cache/
