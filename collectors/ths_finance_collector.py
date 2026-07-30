@@ -10,13 +10,17 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
+from analyzer.sector_keywords import get_all_sector_keywords
 from collectors.common import (
-    classify_sector,
+    classify_sectors,
     empty_sector_result,
     fetch_html_page,
-    make_post,
+    make_multi_sector_posts,
     parse_html_links,
 )
+
+SECTOR_KEYWORDS: Dict[str, List[str]] = get_all_sector_keywords()
+ALL_SECTORS: List[str] = list(SECTOR_KEYWORDS.keys())
 
 NEWS_PAGES = [
     "http://news.10jqka.com.cn/cjkx_list/",
@@ -27,43 +31,6 @@ REQUEST_TIMEOUT = 15
 MAX_ITEMS_PER_PAGE = 80
 MAX_RETRIES = 3
 RETRY_DELAY_BASE = 2
-
-SECTOR_KEYWORDS: Dict[str, List[str]] = {
-    "nasdaq": ["纳斯达克", "纳指", "美股", "美科技", "纳指ETF", "标普500",
-               "中概股", "美国股市", "科技股"],
-    "gold": ["黄金", "金价", "贵金属", "金条", "黄金ETF", "金价下跌", "金价上涨",
-             "黄金基金", "避险资产", "黄金走势"],
-    "cpo": ["CPO", "光模块", "通信ETF", "5G通信", "光通信", "算力",
-            "AI算力", "数据中心", "通信设备"],
-    "semiconductor": ["半导体", "芯片", "集成电路", "芯片ETF", "半导体ETF", "AI芯片",
-                      "国产芯片", "芯片制造", "半导体设备", "中芯国际"],
-    "bank": ["银行", "银行ETF", "银行股", "银行业", "大行", "股份行", "城商行",
-             "招商银行", "工商银行", "净息差", "利差", "银行板块"],
-    "securities": ["证券", "证券ETF", "券商", "券商股", "证券公司",
-                   "中信证券", "华泰证券", "牛市旗手", "券商板块"],
-    "biotech": ["创新药", "生物医药", "医药ETF", "创新药ETF", "医药",
-                "生物科技", "CXO", "药明", "恒瑞医药", "医疗器械", "医药股"],
-    "consumer": ["消费", "消费ETF", "消费股", "白酒", "食品饮料",
-                 "茅台", "五粮液", "必选消费", "可选消费", "消费板块"],
-    "newenergy": ["新能源", "新能源ETF", "光伏", "锂电", "新能源车",
-                  "宁德时代", "比亚迪", "碳酸锂", "储能", "风电", "新能源板块"],
-    "insurance": ["保险", "保险ETF", "中国平安", "中国人寿", "新华保险", "保险板块"],
-    "baijiu": ["白酒", "酒ETF", "茅台", "五粮液", "泸州老窖", "汾酒", "白酒板块"],
-    "food": ["食品", "食品ETF", "调味品", "伊利", "海天味业", "食品饮料", "食品板块"],
-    "medicine": ["医药", "医疗ETF", "医疗", "恒瑞医药", "药明康德", "迈瑞医疗", "医药板块"],
-    "appliance": ["家电", "家电ETF", "美的", "格力", "海尔", "家电板块"],
-    "tourism": ["旅游", "旅游ETF", "文旅", "中国中免", "宋城演艺", "旅游板块", "免税"],
-    "electronics": ["电子", "电子ETF", "消费电子", "立讯精密", "歌尔股份", "电子板块"],
-    "computer": ["计算机", "计算机ETF", "软件", "金山办公", "中科曙光", "计算机板块", "信创"],
-    "communication": ["通信", "5G通信ETF", "5G", "中兴通讯", "烽火通信", "通信板块"],
-    "media": ["传媒", "传媒ETF", "游戏", "三七互娱", "完美世界", "传媒板块", "影视"],
-    "nonferrous": ["有色", "有色ETF", "铜", "铝", "锂", "紫金矿业", "有色金属"],
-    "coal": ["煤炭", "煤炭ETF", "动力煤", "焦煤", "中国神华", "陕西煤业", "煤炭板块"],
-    "chemical": ["化工", "化工ETF", "万华化学", "荣盛石化", "恒力石化", "化工板块"],
-    "steel": ["钢铁", "钢铁ETF", "宝钢股份", "鞍钢股份", "钢铁板块", "铁矿石"],
-    "realestate": ["地产", "房地产ETF", "房地产", "万科", "保利发展", "地产板块"],
-    "infrastructure": ["基建", "基建ETF", "建筑", "中国建筑", "中国交建", "基建板块"],
-}
 
 SKIP_KEYWORDS = ["首页", "登录", "注册", "下载", "更多", "返回", "网站地图",
                  "查看", "关于", "联系"]
@@ -94,14 +61,14 @@ def collect_all() -> Dict[str, List[Dict]]:
             if link in seen_links:
                 continue
 
-            sector = classify_sector(item["title"], item.get("description", ""), SECTOR_KEYWORDS)
-            if sector is None:
+            sectors = classify_sectors(item["title"], item.get("description", ""), SECTOR_KEYWORDS)
+            if not sectors:
                 continue
 
             seen_links.add(link)
-            result[sector].append(
-                make_post(item, sector, "ths_finance", "ths", "同花顺财经")
-            )
+            posts_by_sector = make_multi_sector_posts(item, sectors, "ths_finance", "ths", "同花顺财经")
+            for sector, post in posts_by_sector.items():
+                result[sector].append(post)
             matched_count += 1
 
         print(f"  [同花顺] {urlparse(page_url).path} 共 {len(items)} 条，命中板块 {matched_count} 条")

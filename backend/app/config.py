@@ -1,17 +1,31 @@
-"""应用配置，支持环境变量覆盖。"""
+"""应用配置，支持环境变量覆盖。
+
+板块分类 v2.0：从 analyzer.index_calculator 统一导入 SECTOR_NAMES、SECTOR_CATEGORIES、
+SECTOR_META 等配置，确保前后端和采集器使用唯一真值来源。
+"""
 import os
 import sys
 from pathlib import Path
 from typing import List
 from pydantic_settings import BaseSettings
 
-# 从 analyzer 导入 SECTOR_NAMES 作为唯一真值来源，避免两处维护
+# 从 analyzer 导入板块配置作为唯一真值来源，避免多处维护
 # config.py 在后端启动时最先加载，需自行注入根目录到 sys.path
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
 
-from analyzer.index_calculator import SECTOR_NAMES as _SECTOR_NAMES
+from analyzer.index_calculator import (
+    SECTOR_NAMES as _SECTOR_NAMES,
+    SECTOR_CATEGORIES as _SECTOR_CATEGORIES,
+    SECTOR_META as _SECTOR_META,
+    INDUSTRY_SECTORS as _INDUSTRY_SECTORS,
+    CONCEPT_SECTORS as _CONCEPT_SECTORS,
+    TIER_COLORS as _TIER_COLORS,
+    get_sector_type,
+    get_sector_tier,
+    get_related_sectors,
+)
 
 
 class Settings(BaseSettings):
@@ -33,6 +47,12 @@ class Settings(BaseSettings):
         "http://127.0.0.1:4173",
         "http://localhost:8000",
         "http://127.0.0.1:8000",
+        "http://app.momindex.local",
+        "https://app.momindex.local",
+        "capacitor://localhost",
+        "http://localhost",
+        "http://10.0.2.2",
+        "http://10.0.2.2:8000",
     ]
 
     CORS_ALLOW_LOCALHOST_REGEX: bool = True
@@ -60,35 +80,13 @@ class Settings(BaseSettings):
     WATCHDOG_CHECK_INTERVAL: int = 300
     WATCHDOG_GRACE: int = 60
 
-    SECTOR_CATEGORIES: list = [
-        {
-            "code": "finance",
-            "name": "大金融",
-            "children": ["bank", "securities", "insurance"]
-        },
-        {
-            "code": "consumption",
-            "name": "大消费",
-            "children": ["baijiu", "food", "medicine", "appliance", "tourism", "biotech", "consumer"]
-        },
-        {
-            "code": "technology",
-            "name": "大科技",
-            "children": ["electronics", "computer", "communication", "media", "cpo", "semiconductor"]
-        },
-        {
-            "code": "cyclical",
-            "name": "大周期",
-            "children": ["nonferrous", "coal", "chemical", "steel", "realestate", "infrastructure", "newenergy"]
-        },
-        {
-            "code": "others",
-            "name": "其他",
-            "children": ["nasdaq", "gold"]
-        }
-    ]
-
+    # 板块分类 v2.0：从核心定义统一导入，按投资风格梯队组织
+    SECTOR_CATEGORIES: list = _SECTOR_CATEGORIES
     SECTOR_NAMES: dict = _SECTOR_NAMES
+    SECTOR_META: dict = _SECTOR_META
+    INDUSTRY_SECTORS: list = _INDUSTRY_SECTORS
+    CONCEPT_SECTORS: list = _CONCEPT_SECTORS
+    TIER_COLORS: dict = _TIER_COLORS
 
     class Config:
         env_file = ".env"

@@ -1,9 +1,19 @@
 """小红书数据采集器，通过 rnote.dev API 获取真实笔记数据。"""
 import os
+import sys
 import time
 import requests
 from datetime import datetime
 from typing import List, Dict, Optional
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if _ROOT not in sys.path:
+    sys.path.insert(0, _ROOT)
+
+from analyzer.sector_keywords import get_all_sector_keywords
+
+SECTOR_KEYWORDS: Dict[str, List[str]] = get_all_sector_keywords()
+ALL_SECTORS: List[str] = list(SECTOR_KEYWORDS.keys())
 
 API_KEY = os.environ.get("RNODE_API_KEY", "")
 API_BASE = "https://rnote.dev/api/v2"
@@ -14,34 +24,47 @@ MAX_RETRIES = 2
 RETRY_DELAY = 2
 
 SEARCH_KEYWORDS = {
-    "nasdaq":     ["美股怎么买", "纳斯达克新手", "纳指还能买吗", "买美股"],
-    "gold":       ["黄金怎么买", "买黄金亏了", "黄金新手", "黄金还能涨吗"],
-    "cpo":        ["CPO是什么", "光模块还能涨吗", "通信ETF"],
-    "semiconductor": ["芯片还能买吗", "半导体新手", "芯片ETF"],
+    # 大金融
     "bank":       ["银行ETF怎么买", "银行股新手", "银行还能涨吗", "银行亏了"],
     "securities": ["证券ETF新手", "券商还能涨吗", "证券亏了", "券商入门"],
-    "biotech":    ["创新药怎么买", "医药ETF新手", "创新药还能涨吗", "医药亏了"],
-    "consumer":   ["消费ETF怎么买", "白酒新手", "消费股还能买吗", "消费亏了"],
-    "newenergy":  ["新能源怎么买", "光伏新手", "新能源还能涨吗", "新能源亏了"],
     "insurance":  ["保险怎么买", "保险股", "平安保险"],
+    # 大消费
     "baijiu":     ["白酒基金", "白酒还能涨吗", "茅台股票"],
     "food":       ["食品饮料基金", "消费基金怎么买"],
     "medicine":   ["医药基金怎么买", "医疗基金", "医药还能涨吗"],
     "appliance":  ["家电板块", "家电基金"],
     "tourism":    ["旅游基金", "文旅板块", "免税概念"],
+    "biotech":    ["创新药怎么买", "医药ETF新手", "创新药还能涨吗", "生物医药亏了"],
+    "consumer":   ["消费ETF怎么买", "大消费新手", "消费股还能买吗", "消费亏了"],
+    # 大科技 - T1 AI算力硬科技
+    "semiconductor": ["芯片还能买吗", "半导体新手", "芯片ETF"],
     "electronics": ["消费电子基金", "电子ETF"],
+    "ai_computing": ["AI算力基金", "算力ETF", "人工智能怎么买", "GPU股票"],
+    "cpo":        ["CPO是什么", "光模块还能涨吗", "通信ETF"],
+    # 大科技 - T2 高端制造
     "computer":   ["计算机ETF", "信创基金", "软件股"],
     "communication": ["5G基金", "通信板块"],
+    "military":   ["军工基金", "军工板块", "军工还能涨吗"],
+    "robot":      ["机器人基金", "人形机器人股票", "减速器板块"],
     "media":      ["游戏基金", "传媒ETF", "影视股"],
-    "nonferrous": ["有色金属基金", "铜价", "锂矿"],
+    # 能源产业链 - 传统能源
     "coal":       ["煤炭基金", "煤炭股", "煤价"],
+    "crude_oil":  ["原油基金", "石油怎么买", "油价上涨", "原油亏了"],
+    # 新能源赛道 - 核心组件
+    "newenergy":  ["新能源怎么买", "光伏新手", "新能源还能涨吗", "新能源亏了"],
+    "battery":    ["锂电池基金", "电池ETF怎么买", "宁德时代", "固态电池"],
+    # 电力基建领域
+    "power_grid": ["电网设备", "特高压基金", "电力基建", "智能电网"],
+    "infrastructure": ["基建基金", "基建板块"],
+    # 周期资源
+    "nonferrous": ["有色金属基金", "铜价", "锂矿"],
     "chemical":   ["化工基金", "化工板块"],
     "steel":      ["钢铁板块", "钢铁ETF"],
     "realestate": ["地产基金", "房地产板块", "楼市"],
-    "infrastructure": ["基建基金", "基建板块"],
+    # 其他
+    "nasdaq":     ["美股怎么买", "纳斯达克新手", "纳指还能买吗", "买美股"],
+    "gold":       ["黄金怎么买", "买黄金亏了", "黄金新手", "黄金还能涨吗"],
 }
-
-ALL_SECTORS = list(SEARCH_KEYWORDS.keys())
 
 
 def _retry_request(func, *args, **kwargs):
@@ -160,7 +183,7 @@ def _parse_note(raw: Dict) -> Optional[Dict]:
 
 
 def _empty_sector_result() -> Dict[str, List[Dict]]:
-    """返回空的板块数据结构，覆盖全部25个板块。"""
+    """返回空的板块数据结构，覆盖全部30个板块。"""
     return {s: [] for s in ALL_SECTORS}
 
 
@@ -176,7 +199,8 @@ def collect_all() -> Dict[str, List[Dict]]:
     print("  [小红书] 开始从 rnote.dev API 采集真实数据...")
     
     total_count = 0
-    for sector_key, keywords in SEARCH_KEYWORDS.items():
+    for sector_key in ALL_SECTORS:
+        keywords = SEARCH_KEYWORDS.get(sector_key, [sector_key])
         all_notes = []
         for kw in keywords:
             notes = search_notes(kw, count=5)
