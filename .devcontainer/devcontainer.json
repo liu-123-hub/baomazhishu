@@ -1,0 +1,70 @@
+{
+  // 宝妈指数 - 后端 Codespaces 开发环境配置
+  // 在 GitHub 仓库页面点击 "Code" -> "Codespaces" -> "Create codespace on master"
+  // 即可一键启动带 Python 3.11 + 项目依赖的云端开发环境
+  "name": "宝妈指数后端 (FastAPI)",
+  // 使用微软官方 Python 3.11 开发容器镜像（项目要求 Python>=3.10）
+  // 该镜像已内置 git、curl、make 等常用工具，无需额外安装
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  // 附加功能：安装常用 Linux 工具集，便于在 Codespaces 内进行调试
+  "features": {
+    "ghcr.io/devcontainers/features/common-utils:2": {
+      "installZsh": true,
+      "configureZshAsDefaultShell": false,
+      "username": "vscode",
+      "upgradePackages": true
+    }
+  },
+  // 自动转发后端服务端口，外部可通过 Codespaces 公网 URL 直接访问
+  "forwardPorts": [8000],
+  // 端口标签与自动转发行为：8000 端口对应 FastAPI 后端
+  "portsAttributes": {
+    "8000": {
+      "label": "FastAPI 后端",
+      "onAutoForward": "openBrowser",
+      "visibility": "public"
+    }
+  },
+  // 容器创建后自动执行：安装项目运行时依赖 + 测试依赖
+  // pyproject.toml 中 [project] dependencies 为运行时依赖，
+  // [project.optional-dependencies].test 为测试依赖，通过 -e .[test] 一次性安装
+  "postCreateCommand": "pip install --upgrade pip && pip install -e .[test]",
+  // 容器每次启动后打印启动提示，引导用户运行后端
+  // 项目内置 scripts/start_backend.sh 脚本，可一键启动
+  "postStartCommand": "chmod +x scripts/start_backend.sh && echo '\\n✅ Codespaces 环境就绪\\n  启动后端: bash scripts/start_backend.sh\\n  API 文档: 启动后访问 /docs\\n'",
+  // 远程环境变量：禁用 Python 输出缓冲，确保日志实时显示
+  "remoteEnv": {
+    "PYTHONUNBUFFERED": "1",
+    "PYTHONDONTWRITEBYTECODE": "1"
+  },
+  // VS Code 扩展与编辑器配置（自动安装到 Codespaces）
+  "customizations": {
+    "vscode": {
+      // 推荐扩展：Python 开发、智能提示、格式化、YAML 配置文件支持
+      "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "ms-python.black-formatter",
+        "redhat.vscode-yaml",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        // 使用镜像内置的系统 Python（devcontainers/python 镜像约定路径）
+        "python.defaultInterpreterPath": "/usr/local/python/current/bin/python",
+        // 已通过 pyproject.toml 注册 backend 模块，无需虚拟环境
+        "python.terminal.activateEnvironment": false,
+        "editor.formatOnSave": true,
+        "[python]": {
+          "editor.defaultFormatter": "ms-python.black-formatter",
+          "editor.codeActionsOnSave": {
+            "source.organizeImports": "explicit"
+          }
+        },
+        "files.exclude": {
+          "**/__pycache__": true,
+          "**/.pytest_cache": true
+        }
+      }
+    }
+  }
+}
