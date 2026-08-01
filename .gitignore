@@ -51,15 +51,10 @@ data/*_audit_log.json
 data/backup_*/
 
 # 前端依赖与构建产物
-frontend-vue/node_modules/
-frontend-vue/dist/
-frontend-vue/release/
-
-# 打包产物与签名密钥（含 keystore，禁止入库）
+node_modules/
+dist/
+build/
 release/
-
-# 旧版前端目录
-frontend/
 
 # SQLite 数据库文件
 backend/dashboard.db

@@ -1,0 +1,128 @@
+/**
+ * iOS 设计系统 - 设计令牌
+ */
+
+:root {
+  --ios-blue: #007AFF;
+  --ios-green: #34C759;
+  --ios-red: #FF3B30;
+  --ios-orange: #FF9500;
+  --ios-yellow: #FFCC00;
+  --ios-purple: #AF52DE;
+  --ios-pink: #FF2D55;
+  --ios-teal: #5AC8FA;
+  --ios-indigo: #5856D6;
+  --ios-gray: #8E8E93;
+  --ios-gray2: #AEAEB2;
+  --ios-gray3: #C7C7CC;
+  --ios-gray4: #D1D1D6;
+  --ios-gray5: #E5E5EA;
+  --ios-gray6: #F2F2F7;
+
+  --ios-bg-primary: #F2F2F7;
+  --ios-bg-secondary: #FFFFFF;
+  --ios-bg-tertiary: #F9F9FB;
+  --ios-bg-grouped: #F2F2F7;
+  --ios-bg-elevated: #FFFFFF;
+
+  --ios-label-primary: #000000;
+  --ios-label-secondary: rgba(60, 60, 67, 0.6);
+  --ios-label-tertiary: rgba(60, 60, 67, 0.3);
+  --ios-label-quaternary: rgba(60, 60, 67, 0.18);
+
+  --ios-separator: rgba(60, 60, 67, 0.12);
+  --ios-separator-opaque: #C6C6C8;
+  --ios-fill-primary: rgba(120, 120, 128, 0.12);
+  --ios-fill-secondary: rgba(120, 120, 128, 0.16);
+  --ios-fill-tertiary: rgba(118, 118, 128, 0.24);
+
+  --ios-shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.06);
+  --ios-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.04), 0 2px 4px rgba(0, 0, 0, 0.06);
+  --ios-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.06), 0 4px 6px rgba(0, 0, 0, 0.05);
+  --ios-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.08), 0 10px 10px rgba(0, 0, 0, 0.04);
+
+  --ios-radius-sm: 8px;
+  --ios-radius-md: 12px;
+  --ios-radius-lg: 16px;
+  --ios-radius-xl: 20px;
+  --ios-radius-full: 9999px;
+
+  --ios-blur-light: saturate(180%) blur(20px);
+  --ios-blur-dark: saturate(180%) blur(20px);
+
+  --ios-font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text',
+    'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica,
+    Arial, sans-serif;
+
+  --ios-text-xs: 11px;
+  --ios-text-sm: 13px;
+  --ios-text-base: 15px;
+  --ios-text-lg: 17px;
+  --ios-text-xl: 20px;
+  --ios-text-2xl: 22px;
+  --ios-text-3xl: 28px;
+  --ios-text-4xl: 34px;
+
+  --ios-leading-tight: 1.2;
+  --ios-leading-normal: 1.4;
+  --ios-leading-relaxed: 1.6;
+
+  --ios-spacing-xs: 4px;
+  --ios-spacing-sm: 8px;
+  --ios-spacing-md: 12px;
+  --ios-spacing-lg: 16px;
+  --ios-spacing-xl: 20px;
+  --ios-spacing-2xl: 24px;
+  --ios-spacing-3xl: 32px;
+
+  --ios-nav-height: 44px;
+  --ios-tab-height: 49px;
+  --ios-status-bar: 44px;
+
+  --ios-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ios-ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ios-ease-in: cubic-bezier(0.42, 0, 1, 1);
+  --ios-ease-out: cubic-bezier(0, 0, 0.58, 1);
+  --ios-ease-in-out: cubic-bezier(0.42, 0, 0.58, 1);
+
+  --ios-duration-fast: 150ms;
+  --ios-duration-normal: 250ms;
+  --ios-duration-slow: 350ms;
+}
+
+:root.dark,
+[data-theme="dark"] {
+  --ios-bg-primary: #000000;
+  --ios-bg-secondary: #1C1C1E;
+  --ios-bg-tertiary: #2C2C2E;
+  --ios-bg-grouped: #000000;
+  --ios-bg-elevated: #1C1C1E;
+
+  --ios-label-primary: #FFFFFF;
+  --ios-label-secondary: rgba(235, 235, 245, 0.6);
+  --ios-label-tertiary: rgba(235, 235, 245, 0.3);
+  --ios-label-quaternary: rgba(235, 235, 245, 0.16);
+
+  --ios-separator: rgba(84, 84, 88, 0.65);
+  --ios-separator-opaque: #38383A;
+  --ios-fill-primary: rgba(120, 120, 128, 0.36);
+  --ios-fill-secondary: rgba(120, 120, 128, 0.32);
+  --ios-fill-tertiary: rgba(118, 118, 128, 0.24);
+
+  --ios-gray6: #1C1C1E;
+  --ios-gray5: #2C2C2E;
+  --ios-gray4: #3A3A3C;
+  --ios-gray3: #48484A;
+  --ios-gray2: #636366;
+  --ios-gray: #8E8E93;
+
+  --ios-blue: #0A84FF;
+  --ios-green: #30D158;
+  --ios-red: #FF453A;
+  --ios-orange: #FF9F0A;
+  --ios-yellow: #FFD60A;
+  --ios-purple: #BF5AF2;
+  --ios-pink: #FF375F;
+  --ios-teal: #64D2FF;
+  --ios-indigo: #5E5CE6;
+}

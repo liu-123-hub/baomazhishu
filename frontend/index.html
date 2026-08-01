@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#F2F2F7" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
+    <meta name="description" content="MOM指数 - 实时股市情绪数据看板" />
+    <meta name="keywords" content="股市情绪,数据看板,MOM指数,情绪分析" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="MOM指数" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-TileColor" content="#F2F2F7" />
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><rect width='100' height='100' rx='22' fill='%23007AFF'/><path d='M25 65 L45 45 L55 55 L75 30' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/><circle cx='75' cy='30' r='6' fill='white'/></svg>" />
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' fill='none'><rect width='100' height='100' rx='22' fill='%23007AFF'/><path d='M25 65 L45 45 L55 55 L75 30' stroke='white' stroke-width='8' stroke-linecap='round' stroke-linejoin='round'/><circle cx='75' cy='30' r='6' fill='white'/></svg>" />
+    <link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiT09NIOW8oOaVsCIsInNob3J0X25hbWUiOiJNT03lqKjmlbAiLCJzdGFydF91cmwiOiIvIiwiZGlzcGxheSI6InN0YW5kYWxvbmUiLCJiYWNrZ3JvdW5kX2NvbG9yIjoiRjJGMkY3IiwidGhlbWVfY29sb3IiOiIwMDdBRkYiLCJpY29ucyI6W3sic3JjIjoiZGF0YTppbWFnZS9zdmcreG1sLDxzdmcgeG1sbnM9J2h0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnJyB2aWV3Qm94PScwIDAgMTAwIDEwMCcgZmlsbD0nbm9uZSc+PHJlY3Qgd2lkdGg9JzEwMCcgaGVpZ2h0PScxMDAnIHJ4PScyMicgZmlsbD0nIzAwN0FGRicvPjxwYXRoIGQ9J00yNSA2NSBMNDUgNDUgTDU1IDU1IEw3NSAzMCcgc3Ryb2tlPSd3aGl0ZScgc3Ryb2tlLXdpZHRoPSc4JyBzdHJva2UtbGluZWNhcD0ncm91bmQnIHN0cm9rZS1saW5lam9pbj0ncm91bmQnLz48Y2lyY2xlIGN4PSc3NScgY3k9JzMwJyByPSc2JyBmaWxsPSd3aGl0ZScvPjwvc3ZnPiIsInNpemVzIjoiMTAweDEwMCIsInR5cGUiOiJpbWFnZS9zdmcreG1sIn1dfQ==" />
+    <title>MOM指数</title>
+    <style>
+      [v-cloak] { display: none !important; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+      }
+      #app:empty::before {
+        content: '';
+        display: block;
+        width: 100%;
+        height: 100vh;
+        background: #F2F2F7;
+      }
+      @media (prefers-color-scheme: dark) {
+        #app:empty::before {
+          background: #000000;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-cloak></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

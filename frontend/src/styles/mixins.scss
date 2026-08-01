@@ -1,0 +1,137 @@
+@mixin ios-glass($opacity: 0.8) {
+  background: rgba(255, 255, 255, $opacity);
+  backdrop-filter: var(--ios-blur-light);
+  -webkit-backdrop-filter: var(--ios-blur-light);
+}
+
+@mixin ios-glass-dark($opacity: 0.7) {
+  background: rgba(28, 28, 30, $opacity);
+  backdrop-filter: var(--ios-blur-dark);
+  -webkit-backdrop-filter: var(--ios-blur-dark);
+}
+
+@mixin ios-card {
+  background: var(--ios-bg-secondary);
+  border-radius: var(--ios-radius-lg);
+  box-shadow: var(--ios-shadow-sm);
+  overflow: hidden;
+}
+
+@mixin ios-card-elevated {
+  background: var(--ios-bg-elevated);
+  border-radius: var(--ios-radius-lg);
+  box-shadow: var(--ios-shadow-md);
+}
+
+@mixin ios-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--ios-spacing-sm) var(--ios-spacing-lg);
+  border-radius: var(--ios-radius-md);
+  font-size: var(--ios-text-base);
+  font-weight: 600;
+  transition: all var(--ios-duration-fast) var(--ios-ease);
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+
+  &:active { transform: scale(0.96); opacity: 0.8; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+}
+
+@mixin ios-button-primary {
+  @include ios-button;
+  background: var(--ios-blue);
+  color: white;
+  &:hover { filter: brightness(1.1); }
+}
+
+@mixin ios-button-secondary {
+  @include ios-button;
+  background: var(--ios-fill-primary);
+  color: var(--ios-blue);
+  &:hover { background: var(--ios-fill-secondary); }
+}
+
+@mixin ios-title-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--ios-spacing-md) var(--ios-spacing-lg);
+  min-height: var(--ios-nav-height);
+}
+
+@mixin ios-scrollbar {
+  &::-webkit-scrollbar { width: 6px; height: 6px; }
+  &::-webkit-scrollbar-track { background: transparent; }
+  &::-webkit-scrollbar-thumb {
+    background: var(--ios-fill-tertiary);
+    border-radius: var(--ios-radius-full);
+    &:hover { background: var(--ios-gray3); }
+  }
+  scrollbar-width: thin;
+  scrollbar-color: var(--ios-fill-tertiary) transparent;
+}
+
+@mixin ios-text-truncate($lines: 1) {
+  @if $lines == 1 {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  } @else {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+}
+
+@mixin ios-safe-area {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+@mixin ios-safe-top { padding-top: env(safe-area-inset-top); }
+@mixin ios-safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+@mixin ios-hover {
+  transition: all var(--ios-duration-fast) var(--ios-ease);
+  @media (hover: hover) { &:hover { @content; } }
+}
+
+@mixin ios-press {
+  transition: transform var(--ios-duration-fast) var(--ios-spring);
+  &:active { transform: scale(0.96); }
+}
+
+@mixin ios-focus-ring {
+  outline: 2px solid var(--ios-blue);
+  outline-offset: 2px;
+}
+
+@mixin ios-gradient-text($start, $end) {
+  background: linear-gradient(135deg, $start, $end);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@mixin respond-to($breakpoint) {
+  @if $breakpoint == 'mobile' {
+    @media (max-width: 767px) { @content; }
+  } @else if $breakpoint == 'tablet' {
+    @media (min-width: 768px) and (max-width: 1023px) { @content; }
+  } @else if $breakpoint == 'desktop' {
+    @media (min-width: 1024px) { @content; }
+  } @else if $breakpoint == 'wide' {
+    @media (min-width: 1280px) { @content; }
+  }
+}
+
+@mixin mobile { @include respond-to('mobile') { @content; } }
+@mixin tablet { @include respond-to('tablet') { @content; } }
+@mixin desktop { @include respond-to('desktop') { @content; } }

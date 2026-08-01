@@ -43,42 +43,11 @@ python main.py
 
 API 文档：`http://localhost:8000/docs`
 
-> 💡 也可使用一键启动脚本：Linux/macOS/Codespaces 执行 `bash scripts/start_backend.sh`，Windows 执行 `scripts\start_backend.bat`。
-
-### 在 GitHub Codespaces 上运行后端
-
-本项目已配置 `.devcontainer/devcontainer.json`，可在 GitHub Codespaces 中一键启动完整的后端开发环境，无需本地安装任何依赖。
-
-**启动步骤：**
-
-1. 打开 GitHub 仓库页面（`https://github.com/liu-123-hub/baomazhishu`）
-2. 点击绿色 **Code** 按钮 → 切换到 **Codespaces** 标签 → 点击 **`+` Create codespace on master**
-3. 等待 Codespaces 自动构建（首次约 2-3 分钟，会自动安装 Python 3.11 + 项目依赖）
-4. 构建完成后，在 VS Code 终端执行：
-
-   ```bash
-   bash scripts/start_backend.sh
-   ```
-
-5. 看到 `系统已启动` 提示后，Codespaces 会自动转发 8000 端口并在浏览器打开公网访问 URL
-
-**Codespaces 环境说明：**
-
-| 项目 | 配置 |
-|------|------|
-| Python 版本 | 3.11（官方 devcontainers 镜像） |
-| 端口转发 | 8000（FastAPI 后端，自动公开） |
-| 依赖安装 | `postCreateCommand` 自动执行 `pip install -e .[test]` |
-| VS Code 扩展 | Python、Pylance、Black Formatter、YAML 自动安装 |
-| 数据库 | SQLite（`backend/dashboard.db`，运行时自动创建） |
-
-> ⚠️ Codespaces 免费额度有限（个人账户每月 120 核心小时），长时间不使用请手动停止或删除 Codespace 以节省额度。
-
 ### 前端启动
 
 ```bash
 # 1. 安装依赖
-cd frontend-vue
+cd frontend
 npm install
 
 # 2. 开发模式
@@ -126,12 +95,12 @@ mom-index/
 │   │   ├── websocket.py  # WebSocket 管理
 │   │   └── auto_collector.py # 自动采集
 │   └── main.py           # 启动入口
-├── frontend-vue/         # Vue 3 前端
+├── frontend/             # Vue 3 前端（Web）
 │   └── src/
 │       ├── views/        # 页面视图
 │       ├── components/   # 组件
 │       ├── stores/       # Pinia 状态
-│       └── api/          # API 封装
+│       └── core/         # API 封装
 ├── collectors/           # 数据采集器
 ├── analyzer/             # 分析与指数计算
 ├── data/                 # 数据文件目录

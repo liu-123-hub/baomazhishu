@@ -1,0 +1,29 @@
+{
+  "name": "mom-index-cross-platform",
+  "private": true,
+  "version": "2.0.0",
+  "type": "module",
+  "description": "宝妈指数 - 金融市场情绪分析系统 (Web)",
+  "scripts": {
+    "dev": "vite",
+    "dev:web": "vite --mode web",
+    "build": "vite build",
+    "build:web": "vite build --mode web",
+    "build:pwa": "vite build --mode pwa",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "axios": "^1.7.0",
+    "dayjs": "^1.11.10",
+    "echarts": "^5.5.0",
+    "pinia": "^2.2.0",
+    "vue": "^3.5.0",
+    "vue-router": "^4.4.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.1.0",
+    "sass": "^1.78.0",
+    "vite": "^5.4.0",
+    "vite-plugin-pwa": "^0.20.0"
+  }
+}
