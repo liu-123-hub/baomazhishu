@@ -56,39 +56,39 @@ logger = logging.getLogger(__name__)
 async def lifespan(app: FastAPI):
     """启动顺序：DB初始化→数据预热→WS广播→自动采集。"""
     print("=" * 65)
-    print("   🚀 实时数据大屏系统 - FastAPI 后端")
-    print(f"   📅 {settings.PROJECT_NAME}")
+    print("   实时数据大屏系统 - FastAPI 后端")
+    print(f"   {settings.PROJECT_NAME}")
     print("=" * 65)
 
     print("[1/4] 初始化数据库...")
     await db.init_database()
-    print("   ✅ 数据库就绪")
+    print("   [OK] 数据库就绪")
 
     print("[2/4] 启动数据服务预热（后台执行）...")
     warmup_task = asyncio.create_task(_warmup_data_service())
-    print("   ✅ 数据服务预热已在后台启动")
+    print("   [OK] 数据服务预热已在后台启动")
 
     print("[3/4] 启动实时数据推送...")
     broadcast_task = asyncio.create_task(broadcast_data_loop())
-    print("   ✅ 实时推送已启动")
+    print("   [OK] 实时推送已启动")
 
     print("[4/4] 启动自动数据采集（延迟5秒后首次执行）...")
     await auto_collector.start(delayed_start=True)
-    print("   ✅ 自动采集已启动")
+    print("   [OK] 自动采集已启动")
 
     print("\n" + "=" * 65)
-    print(f"   ✅ 系统已启动")
-    print(f"   🌐 API 服务: http://{settings.HOST}:{settings.PORT}")
-    print(f"   📡 API 文档: http://{settings.HOST}:{settings.PORT}/docs")
+    print("   [OK] 系统已启动")
+    print(f"   API 服务: http://{settings.HOST}:{settings.PORT}")
+    print(f"   API 文档: http://{settings.HOST}:{settings.PORT}/docs")
     print("=" * 65 + "\n")
 
     yield
 
-    print("\n⏹️  正在关闭系统...")
+    print("\n[STOP] 正在关闭系统...")
     broadcast_task.cancel()
     warmup_task.cancel()
     await auto_collector.close()
-    print("   ✅ 系统已关闭")
+    print("   [OK] 系统已关闭")
 
 
 async def _warmup_data_service():
