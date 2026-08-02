@@ -131,7 +131,7 @@ const platform = {
   get os() { return currentOS },
   get isWeb() { return currentPlatform === PLATFORM_TYPES.WEB },
   get isMobile() { return currentPlatform === PLATFORM_TYPES.MOBILE },
-  get isDesktop() { return false },
+  get isDesktop() { return currentPlatform === PLATFORM_TYPES.WEB && !isTouchDevice() },
   get isTouch() { return isTouchDevice() },
   get apis() { return nativeApis || createFallbackApis() },
   PLATFORM_TYPES,

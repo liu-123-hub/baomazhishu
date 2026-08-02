@@ -1,87 +1,153 @@
 <template>
   <div class="dashboard-view ios-animate-fade">
     <div class="dashboard-container">
-      <header class="dashboard-header">
+      <header class="dashboard-header" role="banner">
         <div class="header-left">
           <h1 class="page-title">数据看板</h1>
-          <span v-if="lastUpdateTime" class="update-time">
-            <span class="time-dot" :class="{ 'ws-connected': wsConnected }"></span>
+          <span v-if="lastUpdateTime" class="update-time" :aria-label="`更新于 ${formatTime(lastUpdateTime)}`">
+            <span class="time-dot" :class="{ 'ws-connected': wsConnected }" :aria-hidden="true"></span>
             更新于 {{ formatTime(lastUpdateTime) }}
           </span>
         </div>
         <div class="header-right">
-          <IOSSegmentControl v-model="timeRange" :options="timeOptions" @update:modelValue="handleTimeRangeChange" />
+          <IOSSegmentControl
+            v-model="timeRange"
+            :options="timeOptions"
+            aria-label="时间范围选择"
+            @update:modelValue="handleTimeRangeChange"
+          />
         </div>
       </header>
 
-      <div v-if="loading && !overviewData" class="loading-state">
-        <div class="ios-spinner"></div>
-        <span class="loading-text">加载中...</span>
+      <!-- 骨架屏加载状态 -->
+      <template v-if="isInitialLoading">
+        <div class="metrics-skeleton" aria-label="加载中">
+          <IOSSkeleton v-for="i in 3" :key="i" variant="card" class="metric-skeleton-item" />
+        </div>
+        <div class="category-filter-skeleton">
+          <div class="skeleton-block" style="width: 280px; height: 34px; border-radius: 10px;"></div>
+        </div>
+        <div class="chart-skeleton ios-section">
+          <div class="section-header-skeleton">
+            <div class="skeleton-block" style="width: 80px; height: 22px;"></div>
+            <div class="skeleton-block" style="width: 100px; height: 16px;"></div>
+          </div>
+          <IOSSkeleton variant="chart" />
+        </div>
+        <div class="list-skeleton ios-section">
+          <div class="section-header-skeleton">
+            <div class="skeleton-block" style="width: 80px; height: 22px;"></div>
+          </div>
+          <IOSSkeleton variant="list" :rows="8" />
+        </div>
+      </template>
+
+      <!-- 错误状态 -->
+      <div v-else-if="hasError" class="error-state" role="alert" aria-live="assertive">
+        <span class="error-icon" aria-hidden="true">{{ errorIcon }}</span>
+        <p class="error-text">{{ errorMessage }}</p>
+        <button
+          class="ios-button ios-button-primary"
+          @click="fetchData"
+          :disabled="loading"
+          aria-label="重新加载数据"
+        >
+          {{ loading ? '加载中...' : '重新加载' }}
+        </button>
       </div>
 
-      <div v-else-if="error && !wsConnected" class="error-state">
-        <span class="error-icon">{{ errorIcon }}</span>
-        <p class="error-text">{{ error }}</p>
-        <button class="ios-button ios-button-primary" @click="fetchData">重新加载</button>
-      </div>
-
+      <!-- 正常内容 -->
       <template v-else>
-        <div class="metrics-grid">
-          <IOSMetricCard
-            title="综合情绪指数"
-            :value="avgIndex"
-            :color="indexColor"
-            icon="📊"
-          />
-          <IOSMetricCard
-            title="有效板块"
-            :value="validSectorCount"
-            :subValue="`/ ${sectorCount} 个板块`"
-            color="blue"
-            icon="📈"
-          />
-          <IOSMetricCard
-            title="数据状态"
-            value="正常"
-            :subValue="dataQualityText"
-            :color="dataQualityColor"
-            icon="✅"
-          />
-        </div>
+        <!-- 指标卡片 -->
+        <section class="metrics-section" aria-label="数据概览">
+          <div class="metrics-grid">
+            <IOSMetricCard
+              title="综合情绪指数"
+              :value="avgIndex"
+              :color="indexColor"
+              icon="📊"
+            />
+            <IOSMetricCard
+              title="有效板块"
+              :value="validSectorCount"
+              :subValue="`/ ${sectorCount} 个板块`"
+              color="blue"
+              icon="📈"
+            />
+            <IOSMetricCard
+              title="数据状态"
+              value="正常"
+              :subValue="dataQualityText"
+              :color="dataQualityColor"
+              icon="✅"
+            />
+          </div>
+        </section>
 
-        <div class="category-filter">
-          <IOSSegmentControl v-model="selectedCategory" :options="categoryOptions" @update:modelValue="handleCategoryChange" />
-        </div>
+        <!-- 分类筛选 -->
+        <section class="category-filter" aria-label="板块分类筛选">
+          <IOSSegmentControl
+            v-model="selectedCategory"
+            :options="categoryOptions"
+            aria-label="板块分类"
+            @update:modelValue="handleCategoryChange"
+          />
+        </section>
 
-        <div class="chart-section ios-section">
+        <!-- 走势图 -->
+        <section class="chart-section ios-section" aria-label="情绪走势图">
           <div class="section-header">
             <h2 class="section-title">情绪走势</h2>
             <span class="section-subtitle">{{ chartSubtitle }}</span>
+            <button
+              v-if="lineChartError"
+              class="retry-btn"
+              @click="refreshLineChart"
+              aria-label="重新加载图表"
+            >
+              重试
+            </button>
           </div>
           <IOSCard elevated>
-            <IOSLineChart v-if="lineChartData" :data="lineChartData" height="440px" />
+            <div v-if="lineChartLoading" class="chart-loading">
+              <div class="ios-spinner" aria-hidden="true"></div>
+              <span class="loading-text">加载图表中...</span>
+            </div>
+            <IOSLineChart v-else-if="lineChartData" :data="lineChartData" height="440px" />
             <div v-else class="chart-placeholder">
+              <span class="placeholder-icon" aria-hidden="true">📈</span>
               <span class="placeholder-text">
-                {{ lineChartError ? '图表数据加载失败，将在下次刷新时重试' : '暂无图表数据' }}
+                {{ lineChartError ? '图表数据加载失败' : '暂无图表数据' }}
               </span>
+              <button v-if="lineChartError" class="ios-button ios-button-secondary" @click="refreshLineChart">
+                点击重试
+              </button>
             </div>
           </IOSCard>
-        </div>
+        </section>
 
-        <div class="content-grid">
-          <div class="sectors-section ios-section">
-            <div class="section-header">
-              <h2 class="section-title">板块排行</h2>
-            </div>
-            <IOSSectorList
-              v-model="selectedSectors"
-              :sectors="sectorRankingData"
-              :navigable="true"
-              title=""
-              @update:modelValue="handleSectorSelect"
-              @navigate="handleSectorNavigate"
-            />
+        <!-- 板块排行 -->
+        <section class="sectors-section ios-section" aria-label="板块排行">
+          <div class="section-header">
+            <h2 class="section-title">板块排行</h2>
+            <span class="section-count" v-if="sectorRankingData.length">
+              共 {{ sectorRankingData.length }} 个板块
+            </span>
           </div>
+          <IOSSectorList
+            v-model="selectedSectors"
+            :sectors="sectorRankingData"
+            :navigable="true"
+            title=""
+            @update:modelValue="handleSectorSelect"
+            @navigate="handleSectorNavigate"
+          />
+        </section>
+
+        <!-- 离线下拉刷新提示（移动端） -->
+        <div v-if="!systemStore.isOnline" class="offline-banner" role="status">
+          <span aria-hidden="true">📡</span>
+          <span>当前处于离线状态，数据可能不是最新</span>
         </div>
       </template>
     </div>
@@ -93,16 +159,19 @@ import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useSystemStore } from '@/stores/system'
+import { useToastStore } from '@/stores/toast'
 import IOSMetricCard from '@/components/ios/IOSMetricCard.vue'
 import IOSCard from '@/components/ios/IOSCard.vue'
 import IOSLineChart from '@/components/ios/IOSLineChart.vue'
 import IOSSectorList from '@/components/ios/IOSSectorList.vue'
 import IOSSegmentControl from '@/components/ios/IOSSegmentControl.vue'
-import { SECTOR_NAMES, SECTOR_COLORS, SECTOR_CATEGORIES } from '@/core/constants'
+import IOSSkeleton from '@/components/ios/IOSSkeleton.vue'
+import { SECTOR_NAMES, SECTOR_COLORS, SECTOR_CATEGORIES, INDEX_LEVELS } from '@/core/constants'
 
 const router = useRouter()
 const store = useDashboardStore()
 const systemStore = useSystemStore()
+const toastStore = useToastStore()
 
 const timeRange = ref('近7天')
 const timeOptions = ['近7天', '近30天', '近90天']
@@ -112,14 +181,12 @@ const POLL_INTERVAL_WS = 120000
 const POLL_INTERVAL_NO_WS = 30000
 const LINE_CHART_REFRESH_INTERVAL = 60000
 
-const categoryOptions = [
-  { label: '全部', value: 'all' },
-  { label: '大金融', value: 'finance' },
-  { label: '大消费', value: 'consumption' },
-  { label: '大科技', value: 'technology' },
-  { label: '大周期', value: 'cyclical' },
-  { label: '其他', value: 'others' }
-]
+const categoryOptions = computed(() => {
+  return [
+    { label: '全部', value: 'all' },
+    ...SECTOR_CATEGORIES.map(cat => ({ label: cat.name.split('·')[0] || cat.name, value: cat.code }))
+  ]
+})
 const selectedCategory = ref('all')
 
 const allLeafSectorCodes = computed(() => {
@@ -134,23 +201,30 @@ const categorySectorCodes = computed(() => {
   return cat ? cat.children : []
 })
 
-const selectedSectors = ref([...allLeafSectorCodes.value])
+const selectedSectors = ref([])
 let pollTimer = null
 let lineChartTimer = null
 
 const loading = computed(() => store.loading)
+const lineChartLoading = computed(() => loading.value && !lineChartData.value)
+const isInitialLoading = computed(() => loading.value && !overviewData.value)
 const wsConnected = computed(() => store.wsConnected)
-const error = computed(() => {
+
+const errorMessage = computed(() => {
   if (!systemStore.isOnline) {
     return '网络连接已断开，请检查网络连接'
   }
   if (wsConnected.value) return ''
   return store.error
 })
+
+const hasError = computed(() => !!errorMessage.value)
+
 const errorIcon = computed(() => {
   if (!systemStore.isOnline) return '📡'
   return '⚠️'
 })
+
 const overviewData = computed(() => store.overviewData)
 const lineChartData = computed(() => store.lineChartData)
 const lineChartError = computed(() => store.lineChartError)
@@ -164,10 +238,10 @@ const dataQuality = computed(() => overviewData.value?.data_quality ?? null)
 const indexColor = computed(() => {
   const val = avgIndex.value
   if (val == null) return null
-  if (val >= 60) return 'red'
-  if (val >= 40) return 'orange'
-  if (val >= 20) return 'blue'
-  return 'gray'
+  if (val >= INDEX_LEVELS.EXTREME_GREED.max) return 'red'
+  if (val >= INDEX_LEVELS.GREED.max) return 'red'
+  if (val >= INDEX_LEVELS.NEUTRAL.max) return 'orange'
+  return 'blue'
 })
 
 const dataQualityText = computed(() => {
@@ -233,12 +307,16 @@ function formatTime(timeStr) {
 }
 
 async function fetchData() {
-  if (!systemStore.isOnline) {
+  if (!systemStore.isOnline && !overviewData.value) {
+    toastStore.warning('网络连接已断开')
     return
   }
   try {
     const days = timeRangeDays[timeRange.value] || 7
     await store.fetchAll(selectedSectors.value, days)
+    if (overviewData.value) {
+      toastStore.success('数据已更新')
+    }
   } catch (e) {
     console.error('数据加载失败:', e)
   }
@@ -249,7 +327,6 @@ async function refreshOverview() {
   try {
     await store.fetchOverview()
   } catch (e) {
-    // WebSocket连接时不显示HTTP错误
     if (!wsConnected.value) {
       console.error('概览刷新失败:', e)
     }
@@ -319,6 +396,7 @@ function handleVisibilityChange() {
 }
 
 onMounted(() => {
+  selectedSectors.value = [...allLeafSectorCodes.value]
   store.initWebSocket()
   fetchData()
   scheduleNextPoll()
@@ -327,7 +405,7 @@ onMounted(() => {
 })
 
 watch(() => systemStore.isOnline, (online) => {
-  if (online) {
+  if (online && !overviewData.value) {
     fetchData()
   }
 })
@@ -338,12 +416,14 @@ watch(wsConnected, (connected) => {
     pollTimer = null
   }
   scheduleNextPoll()
+  if (connected) {
+    toastStore.success('实时连接已建立')
+  }
 })
 
-// 监听概览数据更新时间变化：当WebSocket推送新数据导致lastUpdateTime改变时，自动刷新折线图
 watch(lastUpdateTime, (newTime, oldTime) => {
-  if (newTime && newTime !== oldTime) {
-    refreshLineChart()
+  if (newTime && newTime !== oldTime && oldTime) {
+    // 静默更新，不每次都弹toast
   }
 })
 
@@ -380,6 +460,11 @@ onUnmounted(() => {
   padding: var(--ios-spacing-xl) var(--ios-spacing-lg);
   padding-top: calc(var(--ios-nav-height) + env(safe-area-inset-top, 0px) + var(--ios-spacing-xl));
 
+  @include tablet {
+    padding: var(--ios-spacing-xl) var(--ios-spacing-lg);
+    padding-top: calc(var(--ios-nav-height) + env(safe-area-inset-top, 0px) + var(--ios-spacing-xl));
+  }
+
   @include mobile {
     padding: var(--ios-spacing-lg) var(--ios-spacing-md);
     padding-top: calc(var(--ios-nav-height) + env(safe-area-inset-top, 0px) + var(--ios-spacing-lg));
@@ -394,6 +479,10 @@ onUnmounted(() => {
   gap: var(--ios-spacing-lg);
   flex-wrap: wrap;
 
+  @include tablet {
+    margin-bottom: var(--ios-spacing-lg);
+  }
+
   @include mobile {
     flex-direction: column;
     align-items: stretch;
@@ -406,6 +495,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: var(--ios-spacing-md);
+  flex-wrap: wrap;
 }
 
 .page-title {
@@ -413,6 +503,11 @@ onUnmounted(() => {
   font-weight: 700;
   color: var(--ios-label-primary);
   letter-spacing: -0.02em;
+  margin: 0;
+
+  @include mobile {
+    font-size: var(--ios-text-2xl);
+  }
 }
 
 .update-time {
@@ -443,8 +538,66 @@ onUnmounted(() => {
 
 .header-right {
   flex-shrink: 0;
+
+  @include mobile {
+    width: 100%;
+  }
 }
 
+// Skeleton styles
+.metrics-skeleton {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--ios-spacing-lg);
+  margin-bottom: var(--ios-spacing-lg);
+
+  @include mobile {
+    grid-template-columns: 1fr;
+    gap: var(--ios-spacing-md);
+  }
+}
+
+.metric-skeleton-item {
+  background: transparent;
+  padding: 0;
+}
+
+.category-filter-skeleton {
+  display: flex;
+  justify-content: center;
+  margin-bottom: var(--ios-spacing-lg);
+}
+
+.chart-skeleton,
+.list-skeleton {
+  margin-bottom: var(--ios-spacing-xl);
+}
+
+.section-header-skeleton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--ios-spacing-md);
+}
+
+.skeleton-block {
+  background: linear-gradient(
+    90deg,
+    var(--ios-fill-primary) 25%,
+    var(--ios-fill-secondary) 50%,
+    var(--ios-fill-primary) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--ios-radius-sm);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// Loading/Error states
 .loading-state,
 .error-state {
   display: flex;
@@ -453,6 +606,7 @@ onUnmounted(() => {
   justify-content: center;
   padding: var(--ios-spacing-3xl) var(--ios-spacing-lg);
   gap: var(--ios-spacing-lg);
+  min-height: 400px;
 }
 
 .loading-text {
@@ -468,49 +622,95 @@ onUnmounted(() => {
   font-size: var(--ios-text-base);
   color: var(--ios-label-secondary);
   text-align: center;
+  max-width: 400px;
+}
+
+// Metrics
+.metrics-section {
+  margin-bottom: var(--ios-spacing-lg);
+
+  @include mobile {
+    margin-bottom: var(--ios-spacing-md);
+  }
 }
 
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
   gap: var(--ios-spacing-lg);
-  margin-bottom: var(--ios-spacing-lg);
+
+  @include tablet {
+    grid-template-columns: repeat(3, 1fr);
+  }
 
   @include mobile {
     grid-template-columns: 1fr;
     gap: var(--ios-spacing-md);
-    margin-bottom: var(--ios-spacing-md);
   }
 }
 
+// Category filter
 .category-filter {
   display: flex;
   justify-content: center;
   margin-bottom: var(--ios-spacing-lg);
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  @include ios-scrollbar;
 
   @include mobile {
     margin-bottom: var(--ios-spacing-md);
+    justify-content: flex-start;
+
+    :deep(.ios-segment-control) {
+      min-width: max-content;
+    }
   }
 }
 
+// Section header
 .section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: var(--ios-spacing-md);
+  gap: var(--ios-spacing-md);
 }
 
 .section-title {
   font-size: var(--ios-text-lg);
   font-weight: 600;
   color: var(--ios-label-primary);
+  margin: 0;
 }
 
-.section-subtitle {
+.section-subtitle,
+.section-count {
   font-size: var(--ios-text-sm);
   color: var(--ios-label-secondary);
 }
 
+.retry-btn {
+  font-size: var(--ios-text-sm);
+  color: var(--ios-blue);
+  font-weight: 500;
+  padding: var(--ios-spacing-xs) var(--ios-spacing-sm);
+  border-radius: var(--ios-radius-sm);
+  background: var(--ios-fill-primary);
+  transition: all var(--ios-duration-fast) var(--ios-ease);
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--ios-fill-secondary);
+    }
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+// Chart section
 .chart-section {
   margin-bottom: var(--ios-spacing-xl);
 
@@ -519,11 +719,35 @@ onUnmounted(() => {
   }
 }
 
-.chart-placeholder {
+.chart-loading {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 440px;
+  gap: var(--ios-spacing-md);
+
+  @include mobile {
+    height: 320px;
+  }
+}
+
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 440px;
+  gap: var(--ios-spacing-md);
+
+  @include mobile {
+    height: 320px;
+  }
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  opacity: 0.5;
 }
 
 .placeholder-text {
@@ -531,12 +755,7 @@ onUnmounted(() => {
   font-size: var(--ios-text-base);
 }
 
-.content-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: var(--ios-spacing-lg);
-}
-
+// Sectors section
 .sectors-section {
   margin-bottom: var(--ios-spacing-xl);
 
@@ -545,11 +764,60 @@ onUnmounted(() => {
   }
 }
 
+// Offline banner
+.offline-banner {
+  position: fixed;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + var(--ios-spacing-lg));
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: var(--ios-spacing-sm);
+  padding: var(--ios-spacing-sm) var(--ios-spacing-lg);
+  background: var(--ios-bg-elevated);
+  border-radius: var(--ios-radius-full);
+  box-shadow: var(--ios-shadow-lg);
+  font-size: var(--ios-text-sm);
+  font-weight: 500;
+  color: var(--ios-label-primary);
+  z-index: 100;
+  animation: slideUp var(--ios-duration-normal) var(--ios-spring);
+
+  @include mobile {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + var(--ios-spacing-md));
+    font-size: var(--ios-text-xs);
+    padding: var(--ios-spacing-xs) var(--ios-spacing-md);
+  }
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
 .ios-button {
   @include ios-button;
 }
 
 .ios-button-primary {
   @include ios-button-primary;
+}
+
+.ios-button-secondary {
+  @include ios-button-secondary;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .time-dot {
+    animation: none;
+  }
+
+  .skeleton-block {
+    animation: none;
+  }
+
+  .offline-banner {
+    animation: none;
+  }
 }
 </style>

@@ -1,21 +1,32 @@
 <template>
-  <div class="ios-segment-control" :class="{ 'many-items': resolvedOptions.length > 4 }">
+  <div 
+    class="ios-segment-control" 
+    :class="{ 'many-items': resolvedOptions.length > 4 }"
+    role="tablist"
+    :aria-label="ariaLabel"
+    @keydown="handleKeydown"
+  >
     <button
       v-for="(option, index) in resolvedOptions"
       :key="index"
       type="button"
       class="segment-item"
-      :class="{ active: modelValue === option.value || modelValue === option }"
+      :class="{ active: isActive(option) }"
+      :aria-selected="isActive(option)"
+      :tabindex="isActive(option) ? 0 : -1"
+      role="tab"
+      :aria-label="option.label || option"
       @click="handleSelect(option)"
+      @focus="handleFocus(index)"
     >
       <span class="segment-label">{{ option.label || option }}</span>
     </button>
-    <div class="segment-indicator" :style="indicatorStyle"></div>
+    <div class="segment-indicator" :style="indicatorStyle" aria-hidden="true"></div>
   </div>
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 
 const props = defineProps({
   options: {
@@ -29,10 +40,16 @@ const props = defineProps({
   full: {
     type: Boolean,
     default: false
+  },
+  ariaLabel: {
+    type: String,
+    default: '选项卡切换'
   }
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+const focusedIndex = ref(0)
 
 const resolvedOptions = computed(() => {
   return props.options.map(opt => {
@@ -64,9 +81,57 @@ const indicatorStyle = computed(() => {
   }
 })
 
+function isActive(option) {
+  return props.modelValue === option.value || props.modelValue === option || props.modelValue === option.label
+}
+
 function handleSelect(option) {
   const value = option.value !== undefined ? option.value : option
   emit('update:modelValue', value)
+}
+
+function handleFocus(index) {
+  focusedIndex.value = index
+}
+
+function handleKeydown(e) {
+  const n = count.value
+  if (n === 0) return
+
+  let newIndex = focusedIndex.value
+
+  switch (e.key) {
+    case 'ArrowLeft':
+      e.preventDefault()
+      newIndex = (focusedIndex.value - 1 + n) % n
+      break
+    case 'ArrowRight':
+      e.preventDefault()
+      newIndex = (focusedIndex.value + 1) % n
+      break
+    case 'Home':
+      e.preventDefault()
+      newIndex = 0
+      break
+    case 'End':
+      e.preventDefault()
+      newIndex = n - 1
+      break
+    case 'Enter':
+    case ' ':
+      e.preventDefault()
+      handleSelect(resolvedOptions.value[focusedIndex.value])
+      return
+    default:
+      return
+  }
+
+  focusedIndex.value = newIndex
+  const buttons = e.currentTarget.querySelectorAll('.segment-item')
+  if (buttons[newIndex]) {
+    buttons[newIndex].focus()
+  }
+  handleSelect(resolvedOptions.value[newIndex])
 }
 </script>
 
@@ -129,6 +194,11 @@ function handleSelect(option) {
 
   &:active {
     opacity: 0.7;
+  }
+
+  &:focus-visible {
+    @include ios-focus-ring;
+    z-index: 2;
   }
 }
 

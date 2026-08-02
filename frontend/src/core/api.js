@@ -3,6 +3,26 @@ import { APP_CONFIG } from './constants.js'
 
 let apiClient = null
 
+const requestCache = new Map()
+const CACHE_TTL = 5000
+
+function getCacheKey(config) {
+  return `${config.method || 'GET'}:${config.url}:${JSON.stringify(config.params || {})}`
+}
+
+function getCachedResponse(key) {
+  const cached = requestCache.get(key)
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data
+  }
+  requestCache.delete(key)
+  return null
+}
+
+function setCachedResponse(key, data) {
+  requestCache.set(key, { data, timestamp: Date.now() })
+}
+
 function getApiBaseUrl() {
   return APP_CONFIG.apiBaseUrl
 }
@@ -76,7 +96,25 @@ export function getApiClient() {
 }
 
 export async function request(config) {
-  return getApiClient()(config)
+  const method = (config.method || 'GET').toUpperCase()
+  const useCache = method === 'GET' && !config.signal
+  
+  if (useCache) {
+    const cacheKey = getCacheKey(config)
+    const cached = getCachedResponse(cacheKey)
+    if (cached) {
+      return cached
+    }
+  }
+  
+  const response = await getApiClient()(config)
+  
+  if (useCache && response?.code === 200) {
+    const cacheKey = getCacheKey(config)
+    setCachedResponse(cacheKey, response)
+  }
+  
+  return response
 }
 
 export const dashboardApi = {

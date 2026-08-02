@@ -1,34 +1,44 @@
 <template>
-  <nav class="ios-nav-bar" :class="{ 'nav-dark': themeStore.isDark }">
+  <nav class="ios-nav-bar" :class="{ 'nav-dark': themeStore.isDark }" role="navigation" aria-label="主导航">
     <div class="nav-left">
-      <button v-if="showBack" class="nav-back ios-touch-target" @click="goBack">
-        <svg width="12" height="20" viewBox="0 0 12 20" fill="none">
+      <button 
+        v-if="showBack" 
+        class="nav-back ios-touch-target" 
+        @click="goBack"
+        :aria-label="`返回上一页`"
+      >
+        <svg width="12" height="20" viewBox="0 0 12 20" fill="none" aria-hidden="true">
           <path d="M10 2L2 10L10 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
-        <span class="back-label">{{ backLabel }}</span>
+        <span class="back-label" aria-hidden="true">{{ backLabel }}</span>
       </button>
-      <div v-if="systemStore.isDesktop && systemStore.os === 'macos'" class="window-controls">
-        <button class="ios-window-btn ios-window-btn-close" @click="handleClose" title="关闭"></button>
-        <button class="ios-window-btn ios-window-btn-minimize" @click="handleMinimize" title="最小化"></button>
-        <button class="ios-window-btn ios-window-btn-maximize" @click="handleMaximize" title="最大化"></button>
+      <div v-if="systemStore.isDesktop && systemStore.os === 'macos'" class="window-controls" role="group" aria-label="窗口控制">
+        <button class="ios-window-btn ios-window-btn-close" @click="handleClose" aria-label="关闭窗口"></button>
+        <button class="ios-window-btn ios-window-btn-minimize" @click="handleMinimize" aria-label="最小化窗口"></button>
+        <button class="ios-window-btn ios-window-btn-maximize" @click="handleMaximize" aria-label="最大化窗口"></button>
       </div>
       <div class="nav-title" :class="{ 'nav-title-with-back': showBack }">
-        <span class="title-text">{{ title }}</span>
+        <span class="title-text" role="heading" aria-level="1">{{ title }}</span>
       </div>
     </div>
     <div class="nav-right">
-      <button class="theme-toggle ios-touch-target" @click="toggleTheme" :title="themeStore.isDark ? '切换到浅色模式' : '切换到深色模式'">
-        <span class="theme-icon">{{ themeStore.isDark ? '☀️' : '🌙' }}</span>
+      <button 
+        class="theme-toggle ios-touch-target" 
+        @click="toggleTheme" 
+        :aria-label="themeStore.isDark ? '切换到浅色模式' : '切换到深色模式'"
+        :aria-pressed="themeStore.isDark"
+      >
+        <span class="theme-icon" aria-hidden="true">{{ themeStore.isDark ? '☀️' : '🌙' }}</span>
       </button>
-      <div v-if="systemStore.isDesktop && systemStore.os === 'windows'" class="window-controls windows-controls">
-        <button class="win-btn" @click="handleMinimize" title="最小化">
-          <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0" y="4.5" width="10" height="1" fill="currentColor"/></svg>
+      <div v-if="systemStore.isDesktop && systemStore.os === 'windows'" class="window-controls windows-controls" role="group" aria-label="窗口控制">
+        <button class="win-btn" @click="handleMinimize" aria-label="最小化窗口">
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect x="0" y="4.5" width="10" height="1" fill="currentColor"/></svg>
         </button>
-        <button class="win-btn" @click="handleMaximize" title="最大化">
-          <svg width="10" height="10" viewBox="0 0 10 10"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1"/></svg>
+        <button class="win-btn" @click="handleMaximize" aria-label="最大化窗口">
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><rect x="0.5" y="0.5" width="9" height="9" fill="none" stroke="currentColor" stroke-width="1"/></svg>
         </button>
-        <button class="win-btn win-close" @click="handleClose" title="关闭">
-          <svg width="10" height="10" viewBox="0 0 10 10"><line x1="0" y1="0" x2="10" y2="10" stroke="currentColor" stroke-width="1"/><line x1="10" y1="0" x2="0" y2="10" stroke="currentColor" stroke-width="1"/></svg>
+        <button class="win-btn win-close" @click="handleClose" aria-label="关闭窗口">
+          <svg width="10" height="10" viewBox="0 0 10 10" aria-hidden="true"><line x1="0" y1="0" x2="10" y2="10" stroke="currentColor" stroke-width="1"/><line x1="10" y1="0" x2="0" y2="10" stroke="currentColor" stroke-width="1"/></svg>
         </button>
       </div>
     </div>

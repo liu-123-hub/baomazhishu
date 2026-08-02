@@ -122,6 +122,7 @@ export default defineConfig(({ mode }) => {
       minify: 'esbuild',
       reportCompressedSize: false,
       chunkSizeWarningLimit: 1000,
+      cssCodeSplit: false,
       rollupOptions: {
         input: { main: path.resolve(__dirname, 'index.html') },
         output: {
@@ -129,6 +130,7 @@ export default defineConfig(({ mode }) => {
             if (id.includes('node_modules')) {
               if (id.includes('echarts')) return 'vendor-echarts'
               if (id.includes('vue') || id.includes('pinia') || id.includes('vue-router')) return 'vendor-vue'
+              if (id.includes('axios') || id.includes('dayjs')) return 'vendor-utils'
               return 'vendor-deps'
             }
           }

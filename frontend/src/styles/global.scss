@@ -48,18 +48,40 @@ button {
   cursor: pointer;
   color: inherit;
   padding: 0;
+  transition: all var(--ios-duration-fast) var(--ios-ease);
+
+  &:focus-visible {
+    @include ios-focus-ring;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 input, textarea, select {
   font-family: inherit;
   font-size: inherit;
   color: inherit;
+
+  &:focus-visible {
+    @include ios-focus-ring;
+    outline-offset: 0;
+  }
 }
 
-img { max-width: 100%; height: auto; display: block; }
-svg { display: block; }
+a {
+  color: var(--ios-blue);
+  text-decoration: none;
+  transition: opacity var(--ios-duration-fast) var(--ios-ease);
 
-::selection { background: rgba(0, 122, 255, 0.2); }
+  &:hover { opacity: 0.8; }
+
+  &:focus-visible {
+    @include ios-focus-ring;
+    border-radius: var(--ios-radius-sm);
+  }
+}
 
 .ios-container {
   width: 100%;

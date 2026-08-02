@@ -1,62 +1,93 @@
 <template>
   <div class="sector-detail-view ios-animate-fade">
     <div class="detail-container">
-      <div v-if="loading" class="loading-state">
-        <div class="ios-spinner"></div>
-        <span class="loading-text">加载中...</span>
-      </div>
+      <!-- 骨架屏加载状态 -->
+      <template v-if="loading && !detail">
+        <div class="detail-skeleton">
+          <div class="sector-header-skeleton">
+            <div class="skeleton-block" style="width: 120px; height: 28px; margin: 0 auto;"></div>
+            <div class="skeleton-block" style="width: 140px; height: 70px; margin: 16px auto 0; border-radius: 16px;"></div>
+          </div>
+          <div class="metrics-grid-skeleton">
+            <IOSSkeleton v-for="i in 4" :key="i" variant="card" />
+          </div>
+          <div class="info-skeleton ios-section">
+            <IOSSkeleton variant="list" :rows="3" />
+          </div>
+          <div class="chart-skeleton ios-section">
+            <div class="section-header-skeleton">
+              <div class="skeleton-block" style="width: 80px; height: 22px;"></div>
+            </div>
+            <IOSSkeleton variant="chart" />
+          </div>
+        </div>
+      </template>
 
-      <div v-else-if="error" class="error-state">
-        <span class="error-icon">⚠️</span>
+      <!-- 错误状态 -->
+      <div v-else-if="error" class="error-state" role="alert" aria-live="assertive">
+        <span class="error-icon" aria-hidden="true">⚠️</span>
         <p class="error-text">{{ error }}</p>
-        <button class="ios-button ios-button-primary" @click="fetchDetail">重新加载</button>
+        <button
+          class="ios-button ios-button-primary"
+          @click="fetchDetail"
+          :disabled="loading"
+          aria-label="重新加载板块详情"
+        >
+          {{ loading ? '加载中...' : '重新加载' }}
+        </button>
       </div>
 
+      <!-- 详情内容 -->
       <template v-else-if="detail">
-        <div class="sector-header">
+        <header class="sector-header" role="banner">
           <div class="sector-title-row">
-            <span class="sector-dot" :style="{ backgroundColor: sectorColor }"></span>
+            <span class="sector-dot" :style="{ backgroundColor: sectorColor }" aria-hidden="true"></span>
             <h1 class="sector-name">{{ sectorName }}</h1>
           </div>
-          <div class="index-display" :class="indexLevel">
-            <span class="index-value">{{ displayIndex }}</span>
+          <div class="index-display" :class="indexLevel" :aria-label="`情绪指数 ${displayIndex}，${indexLabel}`">
+            <span class="index-value" aria-hidden="true">{{ displayIndex }}</span>
             <span class="index-label">{{ indexLabel }}</span>
           </div>
-        </div>
+        </header>
 
-        <div class="metrics-grid">
-          <IOSMetricCard
-            title="讨论帖数"
-            :value="detail.post_count"
-            color="blue"
-            icon="💬"
-          />
-          <IOSMetricCard
-            title="看涨情绪"
-            :value="detail.buy"
-            color="red"
-            icon="📈"
-          />
-          <IOSMetricCard
-            title="看跌情绪"
-            :value="detail.sell"
-            color="green"
-            icon="📉"
-          />
-          <IOSMetricCard
-            title="多头占比"
-            :value="detail.positive_ratio"
-            :subValue="'%'"
-            :color="ratioColor"
-            icon="⚖️"
-          />
-        </div>
+        <section class="metrics-section" aria-label="板块数据指标">
+          <div class="metrics-grid">
+            <IOSMetricCard
+              title="讨论帖数"
+              :value="detail.post_count"
+              color="blue"
+              icon="💬"
+            />
+            <IOSMetricCard
+              title="看涨情绪"
+              :value="detail.buy"
+              color="red"
+              icon="📈"
+            />
+            <IOSMetricCard
+              title="看跌情绪"
+              :value="detail.sell"
+              color="green"
+              icon="📉"
+            />
+            <IOSMetricCard
+              title="多头占比"
+              :value="detail.positive_ratio"
+              :subValue="'%'"
+              :color="ratioColor"
+              icon="⚖️"
+            />
+          </div>
+        </section>
 
-        <div class="info-card ios-section">
+        <section class="info-card ios-section" aria-label="板块信息">
           <IOSCard elevated>
             <div class="info-row">
               <span class="info-label">情绪趋势</span>
-              <span class="info-value" :class="trendClass">{{ trendText }}</span>
+              <span class="info-value" :class="trendClass">
+                <span :aria-hidden="true">{{ trendIcon }}</span>
+                {{ trendText }}
+              </span>
             </div>
             <div class="info-row">
               <span class="info-label">数据状态</span>
@@ -69,34 +100,51 @@
               <span class="info-value">{{ formatTime(detail.update_time) }}</span>
             </div>
           </IOSCard>
-        </div>
+        </section>
 
-        <div class="chart-section ios-section">
+        <section class="chart-section ios-section" aria-label="历史走势图">
           <div class="section-header">
             <h2 class="section-title">历史走势</h2>
+            <button
+              v-if="historyError"
+              class="retry-btn"
+              @click="() => fetchHistory(sectorCode, 30)"
+              aria-label="重新加载历史数据"
+            >
+              重试
+            </button>
           </div>
           <IOSCard elevated>
-            <IOSLineChart v-if="historyData" :data="historyData" height="320px" />
+            <div v-if="loading && !historyData" class="chart-loading">
+              <div class="ios-spinner" aria-hidden="true"></div>
+              <span class="loading-text">加载历史数据...</span>
+            </div>
+            <IOSLineChart v-else-if="historyData" :data="historyData" height="320px" />
             <div v-else class="chart-placeholder">
+              <span class="placeholder-icon" aria-hidden="true">📊</span>
               <span class="placeholder-text">
                 {{ historyError ? '历史数据加载失败' : '暂无历史数据' }}
               </span>
+              <button v-if="historyError" class="ios-button ios-button-secondary" @click="() => fetchHistory(sectorCode, 30)">
+                点击重试
+              </button>
             </div>
           </IOSCard>
-        </div>
+        </section>
       </template>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useDashboardStore } from '@/stores/dashboard'
 import { dashboardApi } from '@/core/api'
 import IOSMetricCard from '@/components/ios/IOSMetricCard.vue'
 import IOSCard from '@/components/ios/IOSCard.vue'
 import IOSLineChart from '@/components/ios/IOSLineChart.vue'
+import IOSSkeleton from '@/components/ios/IOSSkeleton.vue'
 import { SECTOR_NAMES, SECTOR_COLORS } from '@/core/constants'
 
 const route = useRoute()
@@ -146,6 +194,12 @@ const ratioColor = computed(() => {
 })
 
 const trendText = computed(() => detail.value?.trend || '平稳')
+const trendIcon = computed(() => {
+  const t = detail.value?.trend
+  if (t === '上涨') return '↑ '
+  if (t === '下跌') return '↓ '
+  return '→ '
+})
 const trendClass = computed(() => {
   const t = detail.value?.trend
   if (t === '上涨') return 'trend-up'
@@ -186,7 +240,7 @@ async function fetchDetail() {
       await fetchHistory(code, 30)
     }
   } catch (e) {
-    error.value = e?.message || '加载板块详情失败'
+    error.value = e?.userMessage || e?.message || '加载板块详情失败'
   } finally {
     loading.value = false
   }
@@ -194,6 +248,7 @@ async function fetchDetail() {
 
 async function fetchHistory(code, days = 30) {
   const requestId = ++_historyRequestId
+  historyError.value = false
   try {
     const res = await dashboardApi.getLineChart([code], days)
     if (requestId !== _historyRequestId) return
@@ -220,6 +275,10 @@ watch(sectorCode, () => {
 onMounted(() => {
   fetchDetail()
 })
+
+onUnmounted(() => {
+  _historyRequestId++
+})
 </script>
 
 <style lang="scss" scoped>
@@ -241,12 +300,64 @@ onMounted(() => {
   padding: var(--ios-spacing-xl) var(--ios-spacing-lg);
   padding-top: calc(var(--ios-nav-height) + env(safe-area-inset-top, 0px) + var(--ios-spacing-xl));
 
+  @include tablet {
+    padding: var(--ios-spacing-xl) var(--ios-spacing-lg);
+    padding-top: calc(var(--ios-nav-height) + env(safe-area-inset-top, 0px) + var(--ios-spacing-xl));
+  }
+
   @include mobile {
     padding: var(--ios-spacing-lg) var(--ios-spacing-md);
     padding-top: calc(var(--ios-nav-height) + env(safe-area-inset-top, 0px) + var(--ios-spacing-lg));
   }
 }
 
+// Skeleton styles
+.detail-skeleton {
+  .sector-header-skeleton {
+    text-align: center;
+    margin-bottom: var(--ios-spacing-xl);
+    padding: var(--ios-spacing-xl) 0;
+  }
+
+  .metrics-grid-skeleton {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--ios-spacing-md);
+    margin-bottom: var(--ios-spacing-lg);
+
+    @include mobile {
+      gap: var(--ios-spacing-sm);
+    }
+  }
+
+  .info-skeleton,
+  .chart-skeleton {
+    margin-bottom: var(--ios-spacing-lg);
+  }
+
+  .section-header-skeleton {
+    margin-bottom: var(--ios-spacing-md);
+  }
+}
+
+.skeleton-block {
+  background: linear-gradient(
+    90deg,
+    var(--ios-fill-primary) 25%,
+    var(--ios-fill-secondary) 50%,
+    var(--ios-fill-primary) 75%
+  );
+  background-size: 200% 100%;
+  border-radius: var(--ios-radius-sm);
+  animation: skeleton-pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes skeleton-pulse {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// Sector header
 .sector-header {
   text-align: center;
   margin-bottom: var(--ios-spacing-xl);
@@ -272,6 +383,7 @@ onMounted(() => {
   font-weight: 700;
   color: var(--ios-label-primary);
   letter-spacing: -0.02em;
+  margin: 0;
 }
 
 .index-display {
@@ -280,12 +392,34 @@ onMounted(() => {
   align-items: center;
   padding: var(--ios-spacing-lg) var(--ios-spacing-2xl);
   border-radius: var(--ios-radius-xl);
+  transition: background var(--ios-duration-normal) var(--ios-ease);
 
-  &.hot { background: #fef2f2; .index-value { color: var(--ios-red); } }
-  &.warm { background: #fff7ed; .index-value { color: var(--ios-orange); } }
-  &.cool { background: #eff6ff; .index-value { color: var(--ios-blue); } }
-  &.cold { background: #f9fafb; .index-value { color: var(--ios-label-secondary); } }
-  &.neutral { background: var(--ios-fill-primary); .index-value { color: var(--ios-label-secondary); } }
+  &.hot {
+    background: rgba(255, 59, 48, 0.1);
+    .index-value { color: var(--ios-red); }
+  }
+  &.warm {
+    background: rgba(255, 149, 0, 0.1);
+    .index-value { color: var(--ios-orange); }
+  }
+  &.cool {
+    background: rgba(0, 122, 255, 0.1);
+    .index-value { color: var(--ios-blue); }
+  }
+  &.cold {
+    background: var(--ios-fill-primary);
+    .index-value { color: var(--ios-label-secondary); }
+  }
+  &.neutral {
+    background: var(--ios-fill-primary);
+    .index-value { color: var(--ios-label-secondary); }
+  }
+
+  :root.dark &, [data-theme="dark"] & {
+    &.hot { background: rgba(255, 69, 58, 0.15); }
+    &.warm { background: rgba(255, 159, 10, 0.15); }
+    &.cool { background: rgba(10, 132, 255, 0.15); }
+  }
 }
 
 .index-value {
@@ -293,6 +427,10 @@ onMounted(() => {
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   line-height: 1;
+
+  @include tablet {
+    font-size: 52px;
+  }
 
   @include mobile {
     font-size: 44px;
@@ -305,18 +443,27 @@ onMounted(() => {
   margin-top: var(--ios-spacing-xs);
 }
 
+// Metrics
+.metrics-section {
+  margin-bottom: var(--ios-spacing-lg);
+}
+
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: var(--ios-spacing-md);
   margin-bottom: var(--ios-spacing-lg);
 
+  @include tablet {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
   @include mobile {
-    grid-template-columns: repeat(2, 1fr);
     gap: var(--ios-spacing-sm);
   }
 }
 
+// Info card
 .info-card {
   margin-bottom: var(--ios-spacing-lg);
 }
@@ -339,6 +486,9 @@ onMounted(() => {
 }
 
 .info-value {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-size: var(--ios-text-base);
   font-weight: 500;
   color: var(--ios-label-primary);
@@ -350,25 +500,68 @@ onMounted(() => {
   &.trend-flat { color: var(--ios-label-secondary); }
 }
 
+// Section header
 .section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: var(--ios-spacing-md);
+  gap: var(--ios-spacing-md);
 }
 
 .section-title {
   font-size: var(--ios-text-lg);
   font-weight: 600;
   color: var(--ios-label-primary);
+  margin: 0;
 }
 
+.retry-btn {
+  font-size: var(--ios-text-sm);
+  color: var(--ios-blue);
+  font-weight: 500;
+  padding: var(--ios-spacing-xs) var(--ios-spacing-sm);
+  border-radius: var(--ios-radius-sm);
+  background: var(--ios-fill-primary);
+  transition: all var(--ios-duration-fast) var(--ios-ease);
+
+  @media (hover: hover) {
+    &:hover {
+      background: var(--ios-fill-secondary);
+    }
+  }
+
+  &:active {
+    transform: scale(0.96);
+  }
+}
+
+// Chart section
 .chart-section {
   margin-bottom: var(--ios-spacing-xl);
 }
 
-.chart-placeholder {
+.chart-loading {
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
   height: 320px;
+  gap: var(--ios-spacing-md);
+}
+
+.chart-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 320px;
+  gap: var(--ios-spacing-md);
+}
+
+.placeholder-icon {
+  font-size: 48px;
+  opacity: 0.5;
 }
 
 .placeholder-text {
@@ -376,6 +569,7 @@ onMounted(() => {
   font-size: var(--ios-text-base);
 }
 
+// Error/Loading states
 .loading-state,
 .error-state {
   display: flex;
@@ -384,6 +578,7 @@ onMounted(() => {
   justify-content: center;
   padding: var(--ios-spacing-3xl) var(--ios-spacing-lg);
   gap: var(--ios-spacing-lg);
+  min-height: 400px;
 }
 
 .loading-text {
@@ -399,6 +594,7 @@ onMounted(() => {
   font-size: var(--ios-text-base);
   color: var(--ios-label-secondary);
   text-align: center;
+  max-width: 400px;
 }
 
 .ios-button {
@@ -407,5 +603,15 @@ onMounted(() => {
 
 .ios-button-primary {
   @include ios-button-primary;
+}
+
+.ios-button-secondary {
+  @include ios-button-secondary;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton-block {
+    animation: none;
+  }
 }
 </style>
