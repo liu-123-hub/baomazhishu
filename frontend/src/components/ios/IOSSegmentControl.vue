@@ -185,7 +185,6 @@ function handleSelect(option) {
   }
 }
 
-// 超小屏幕（<=360px）进一步缩小字体和间距
 @media (max-width: 360px) {
   .many-items .segment-item {
     padding: 0 2px;

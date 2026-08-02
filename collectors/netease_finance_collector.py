@@ -39,7 +39,6 @@ _LINK_PATTERN = re.compile(
 
 
 def collect_all() -> Dict[str, List[Dict]]:
-    """采集所有新闻页面，按板块关键词分类后返回。"""
     result = empty_sector_result(SECTOR_KEYWORDS)
     seen_links: set = set()
 

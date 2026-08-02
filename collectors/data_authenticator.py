@@ -29,7 +29,7 @@ LEGIT_SOURCE_NAMES = frozenset({
 
 
 class AuthenticityError(Exception):
-    """数据真实性校验失败异常。"""
+    pass
 
 
 def _parse_iso_datetime(dt_str: str) -> Optional[datetime]:
@@ -126,7 +126,6 @@ def authenticate_collected_data(
     duration_ms: Optional[float] = None,
     http_latency_ms: Optional[float] = None,
 ) -> Dict[str, Any]:
-    """对采集结果执行真实性校验，0条记录不视为通过。"""
     if collected_at is None:
         collected_at = datetime.now().isoformat()
 

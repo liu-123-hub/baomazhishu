@@ -27,7 +27,6 @@ _DEGRADED_THRESHOLD_SECONDS = _DATA_FRESHNESS_MAX_HOURS * 3600
 
 
 def _parse_iso_time(time_str: Optional[str]) -> Optional[datetime]:
-    """解析ISO时间字符串，失败返回None。"""
     if not time_str:
         return None
     try:
@@ -52,8 +51,7 @@ def _compute_is_degraded(
     json_provenance_time: Optional[str] = None,
     has_valid_data: Optional[bool] = None,
 ) -> bool:
-    """判断板块是否降级。"""
-    # source_passed=False 表示数据源真实性校验未通过，直接降级避免呈现不可信数据
+    """判断板块是否降级：真实性校验失败/无有效数据/超过72h。"""
     if source_passed is False:
         return True
 
@@ -66,7 +64,6 @@ def _compute_is_degraded(
             return True
         now = datetime.now()
         age_seconds = (now - update_dt).total_seconds()
-        # 超过 72h 的数据视为过期降级
         if age_seconds > _DEGRADED_THRESHOLD_SECONDS:
             return True
 
@@ -74,7 +71,6 @@ def _compute_is_degraded(
 
 
 def _load_from_json_file() -> Dict[str, Any]:
-    """从 JSON 文件加载最新数据。"""
     try:
         if not os.path.exists(JSON_DATA_PATH):
             logger.warning(f"JSON 数据文件不存在: {JSON_DATA_PATH}")
@@ -101,7 +97,6 @@ def _load_from_json_file() -> Dict[str, Any]:
 
 
 def _load_history_from_json() -> Dict[str, List[Dict]]:
-    """从 history.json 加载历史走势数据。"""
     try:
         if not os.path.exists(HISTORY_DATA_PATH):
             logger.warning(f"历史数据文件不存在: {HISTORY_DATA_PATH}")
@@ -171,7 +166,6 @@ def _format_update_time(dt: Optional[str]) -> Optional[str]:
 
 
 def _load_data_quality() -> Dict[str, Any]:
-    """加载数据质量校验结果。"""
     try:
         if not os.path.exists(JSON_DATA_PATH):
             return {'available': False, 'reason': '数据文件尚未生成'}
@@ -297,7 +291,6 @@ def _map_sector_row(
     has_valid_data = index_value is not None and post_count > 0
     user_discussion_raw = row.get('user_discussion_present')
     user_discussion_present = bool(user_discussion_raw) if user_discussion_raw is not None else global_has_user_discussion
-    # source_passed=0 表示来源真实性校验未通过，降级策略会据此标记板块
     source_passed_raw = row.get('source_passed')
     source_passed = bool(source_passed_raw) if source_passed_raw is not None else None
 
@@ -398,13 +391,7 @@ def _map_json_sector(
 
 
 async def _compute_dashboard_overview() -> Dict[str, Any]:
-    """计算大盘概览：数据库优先，JSON 文件降级回补。"""
-    # 双源融合降级策略：
-    # 1. 首选 DB 最新数据（结构化、可按板块独立过滤）
-    # 2. 对 DB 缺失的板块，用 dashboard_data.json 的 latest.sectors 回补
-    # 3. 若 DB 全空，则退化为纯 JSON 模式
-    # 4. 每个板块独立校验：数据新鲜度（72h阈值）、有效性（index+post_count均存在）、
-    #    来源真实性（source_passed），任一不满足则标记 is_degraded
+    """DB优先，JSON降级回补，双源融合策略。"""
     try:
         rows = await db.get_latest_sector_index()
 
@@ -584,12 +571,10 @@ def _validate_data_integrity(
 
 
 async def get_dashboard_overview() -> Dict[str, Any]:
-    """获取大盘概览（带缓存）。"""
     return await dashboard_cache.get_or_set('dashboard_overview', _compute_dashboard_overview, ttl=30)
 
 
 async def _compute_sector_detail(code: str) -> Dict[str, Any]:
-    """计算板块详情。"""
     if code not in VALID_SECTORS:
         logger.warning(f"请求了未配置的板块详情: {code}")
         return {
@@ -632,12 +617,11 @@ async def _compute_sector_detail(code: str) -> Dict[str, Any]:
 
 
 async def get_sector_detail(code: str) -> Dict[str, Any]:
-    """获取板块详情（带缓存）。"""
     return await dashboard_cache.get_or_set(f'sector_detail_{code}', lambda: _compute_sector_detail(code), ttl=60)
 
 
 async def _compute_history_trend(code: Optional[str], days: int = 7) -> Dict[str, Any]:
-    """计算历史趋势，合并数据库与 history.json 数据。"""
+    """合并数据库与 history.json 数据。"""
     if code and code not in VALID_SECTORS:
         logger.warning(f"请求了未配置板块的历史趋势: {code}")
         return {
@@ -707,7 +691,6 @@ async def _compute_history_trend(code: Optional[str], days: int = 7) -> Dict[str
 
 
 async def get_history_trend(code: Optional[str] = None, days: int = 7) -> Dict[str, Any]:
-    """获取历史趋势（带缓存）。"""
     return await dashboard_cache.get_or_set(
         f'history_trend_{code}_{days}',
         lambda: _compute_history_trend(code, days),
@@ -716,12 +699,10 @@ async def get_history_trend(code: Optional[str] = None, days: int = 7) -> Dict[s
 
 
 async def get_all_sectors_history(days: int = 7) -> Dict[str, Any]:
-    """获取所有板块历史数据。"""
     return await get_history_trend(None, days)
 
 
 async def get_line_chart_data(sectors: str, days: int = 7) -> Dict[str, Any]:
-    """获取折线图数据。"""
     sector_list = [s.strip() for s in sectors.split(',') if s.strip()]
     invalid_sectors = [s for s in sector_list if s not in VALID_SECTORS]
     if invalid_sectors:
@@ -782,7 +763,6 @@ CAPITAL_FLOW_PATH = str(settings.DATA_DIR / 'capital_flow.json')
 
 
 def _load_market_data() -> Dict[str, Any]:
-    """加载行情数据文件。"""
     try:
         if not os.path.exists(MARKET_DATA_PATH):
             logger.warning(f"行情数据文件不存在: {MARKET_DATA_PATH}")
@@ -875,7 +855,6 @@ async def get_etf_correlation(sector: str, days: int = 30) -> Dict[str, Any]:
 
 
 def _load_capital_flow() -> Dict[str, Any]:
-    """加载市场异动数据文件。"""
     try:
         if not os.path.exists(CAPITAL_FLOW_PATH):
             logger.warning(f"市场异动数据文件不存在: {CAPITAL_FLOW_PATH}")

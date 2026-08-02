@@ -1,35 +1,20 @@
-/**
- * 板块分类体系 v2.0（2026-07-30 重构）
- *
- * 两大维度：
- * - 投资风格维度：4大梯队成长赛道(T1~T4) + 价值防御(V1~V3) + 防御资产(DEF)
- * - 板块属性维度：标准行业板块(industry) vs 跨行业概念赛道(concept)
- *
- * 注意：SECTOR_NAMES 为唯一真值来源，需与 analyzer/index_calculator.py 保持一致
- */
-
 export const PLATFORM = {
   WEB: 'web',
   MOBILE: 'mobile'
 }
 
-// ──── 板块代码 → 中文名称（与后端 index_calculator.py SECTOR_NAMES 完全一致）────
 export const SECTOR_NAMES = {
-  // T1 第一梯队：AI算力硬科技
   semiconductor: '半导体',
   electronics: '电子',
   ai_computing: 'AI算力',
   cpo: 'CPO光通信',
-  // T2 第二梯队：高端制造/智能科技
   computer: '计算机',
   communication: '通信',
   military: '军工',
   robot: '机器人',
-  // T3 第三梯队：新能源/电力设备
   newenergy: '新能源',
   battery: '电池',
   power_grid: '电力设备',
-  // T4 第四梯队：消费医疗/文化传媒
   medicine: '医药',
   baijiu: '白酒',
   food: '食品饮料',
@@ -38,25 +23,20 @@ export const SECTOR_NAMES = {
   media: '传媒',
   biotech: '创新药',
   consumer: '大消费',
-  // V1 价值防御：大金融
   bank: '银行',
   securities: '券商',
   insurance: '保险',
-  // V2 价值防御：周期资源
   coal: '煤炭',
   crude_oil: '石油石化',
   nonferrous: '有色金属',
   chemical: '化工',
   steel: '钢铁',
-  // V3 价值防御：基建地产
   infrastructure: '基建',
   realestate: '房地产',
-  // DEF 防御资产/海外
   gold: '黄金',
   nasdaq: '纳斯达克'
 }
 
-// ──── 板块元数据：属性类型 + 梯队 + 产业链位置 ────
 export const SECTOR_META = {
   // T1
   semiconductor: { type: 'industry', tier: 'T1', tierName: 'AI算力硬科技', chain: '上游(芯片设计/制造/封测/设备/材料)', csrc: '电子-半导体' },
@@ -99,7 +79,6 @@ export const SECTOR_META = {
   nasdaq: { type: 'concept', tier: 'DEF', tierName: '海外资产', chain: '海外(纳斯达克100/美股科技)', csrc: null, spans: ['海外市场'] }
 }
 
-// ──── 一级分类（梯队体系）────
 export const SECTOR_CATEGORIES = [
   { code: 'T1', name: '第一梯队·AI算力硬科技', description: 'AI算力产业链：半导体/电子为核心，CPO/AI算力为跨行业概念主线，市场最强弹性', children: ['semiconductor', 'electronics', 'ai_computing', 'cpo'] },
   { code: 'T2', name: '第二梯队·高端制造/智能科技', description: '产业升级方向：计算机/通信/军工为标准行业，机器人为跨行业概念赛道', children: ['computer', 'communication', 'military', 'robot'] },
@@ -111,34 +90,23 @@ export const SECTOR_CATEGORIES = [
   { code: 'DEF', name: '防御资产/海外', description: '避险与海外配置：黄金为避险概念，纳斯达克为海外科技指数', children: ['gold', 'nasdaq'] }
 ]
 
-// ──── 板块颜色（按梯队色系，同一梯队使用同色系渐变）────
 export const SECTOR_COLORS = {
-  // T1 红色系（最热）
   semiconductor: '#dc2626', electronics: '#ef4444', ai_computing: '#f87171', cpo: '#fca5a5',
-  // T2 橙色系（高景气）
   computer: '#ea580c', communication: '#f97316', military: '#fb923c', robot: '#fdba74',
-  // T3 绿色系（成长）
   newenergy: '#15803d', battery: '#22c55e', power_grid: '#4ade80',
-  // T4 蓝色系（稳健）
   medicine: '#1d4ed8', baijiu: '#3b82f6', food: '#60a5fa', appliance: '#93c5fd',
   tourism: '#2563eb', media: '#7c3aed', biotech: '#ec4899', consumer: '#fbbf24',
-  // V1 灰色系（防御）
   bank: '#475569', securities: '#64748b', insurance: '#94a3b8',
-  // V2 暖灰/棕色系（周期）
   coal: '#57534e', crude_oil: '#78716c', nonferrous: '#a8a29e', chemical: '#d6d3d1', steel: '#78716c',
-  // V3 褐色系（稳增长）
   infrastructure: '#92400e', realestate: '#b45309',
-  // DEF 金色系
   gold: '#fbbf24', nasdaq: '#06b6d4'
 }
 
-// ──── 梯队分类颜色 ────
 export const CATEGORY_COLORS = {
   T1: '#ef4444', T2: '#f97316', T3: '#22c55e', T4: '#3b82f6',
   V1: '#64748b', V2: '#78716c', V3: '#a16207', DEF: '#eab308'
 }
 
-// 梯队中文名称映射
 export const TIER_NAMES = {
   T1: '第一梯队·AI算力硬科技',
   T2: '第二梯队·高端制造/智能科技',
@@ -150,13 +118,11 @@ export const TIER_NAMES = {
   DEF: '防御资产/海外'
 }
 
-// 板块属性类型标签
 export const SECTOR_TYPE_LABELS = {
   industry: '标准行业',
   concept: '概念赛道'
 }
 
-// 指数分级
 export const INDEX_LEVELS = {
   EXTREME_FEAR: { max: 20, label: '极度恐慌', color: '#dc2626', bg: '#fef2f2' },
   FEAR: { max: 40, label: '恐慌', color: '#ea580c', bg: '#fff7ed' },
@@ -176,7 +142,6 @@ export const APP_CONFIG = {
   maxDays: 365
 }
 
-// 工具函数
 export function getSectorType(code) {
   return SECTOR_META[code]?.type || 'industry'
 }

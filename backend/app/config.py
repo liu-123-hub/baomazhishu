@@ -1,16 +1,10 @@
-"""应用配置，支持环境变量覆盖。
-
-板块分类 v2.0：从 analyzer.index_calculator 统一导入 SECTOR_NAMES、SECTOR_CATEGORIES、
-SECTOR_META 等配置，确保前后端和采集器使用唯一真值来源。
-"""
+"""应用配置，支持环境变量覆盖。板块配置从 analyzer 统一导入。"""
 import os
 import sys
 from pathlib import Path
 from typing import List
 from pydantic_settings import BaseSettings
 
-# 从 analyzer 导入板块配置作为唯一真值来源，避免多处维护
-# config.py 在后端启动时最先加载，需自行注入根目录到 sys.path
 _PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 if str(_PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(_PROJECT_ROOT))
@@ -74,13 +68,10 @@ class Settings(BaseSettings):
     COLLECTOR_RETRY_TIMES: int = 3
     PLAYWRIGHT_HEADLESS: bool = True
     AUTO_COLLECT_INTERVAL: int = 1800
-    # 必须 < AUTO_COLLECT_INTERVAL，防止单次卡死导致周期无限堆积
     COLLECTOR_RUN_DEADLINE: int = 1500
-    # 看门狗检查间隔与告警宽限期：检测漏触发/卡死的采集周期
     WATCHDOG_CHECK_INTERVAL: int = 300
     WATCHDOG_GRACE: int = 60
 
-    # 板块分类 v2.0：从核心定义统一导入，按投资风格梯队组织
     SECTOR_CATEGORIES: list = _SECTOR_CATEGORIES
     SECTOR_NAMES: dict = _SECTOR_NAMES
     SECTOR_META: dict = _SECTOR_META

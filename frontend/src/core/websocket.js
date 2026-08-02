@@ -18,7 +18,6 @@ class WebSocketClient {
   }
 
   _getWsUrl() {
-    // Web 端 WS 地址与页面同源，由 Vite proxy /ws 转发到后端
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:'
     const host = window.location.host
     if (host) {

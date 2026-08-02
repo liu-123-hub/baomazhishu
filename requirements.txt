@@ -1,7 +1,3 @@
-# 宝妈指数系统 - 统一依赖清单
-# 依赖来源统一由 pyproject.toml 管理（[project] dependencies 运行时依赖，
-# [project.optional-dependencies] test 测试依赖），本文件仅以可编辑模式
-# 安装项目本体及测试依赖，避免与 pyproject.toml 两处维护版本号漂移。
-#
+# 依赖版本统一由 pyproject.toml 管理，本文件仅安装项目本体+测试依赖
 # 安装：pip install -r requirements.txt
 -e .[test]

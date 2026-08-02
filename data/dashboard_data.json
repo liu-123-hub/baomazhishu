@@ -1,44 +1,80 @@
 {
   "latest": {
-    "date": "2026-08-01",
-    "timestamp": "2026-08-01T19:11:45.417407",
+    "date": "2026-08-02",
+    "timestamp": "2026-08-02T09:49:50.261646",
     "sectors": {
       "semiconductor": {
-        "index": 38.8,
-        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
+        "index": 41.9,
+        "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 32,
-          "valid_posts": 32,
+          "total_posts": 36,
+          "valid_posts": 36,
           "spam_posts": 0,
-          "newbie_posts": 4,
-          "pure_newbie": 1,
-          "newbie_ratio": 12.5,
-          "avg_newbie_score": 40.0,
-          "avg_sentiment": 100.0,
-          "purity_signal": 25.0,
-          "activity": 40.0,
-          "mom_buy_index": 57.6,
-          "mom_sell_index": 0.0,
-          "buy_sell_ratio": 4.0,
-          "buy_count": 4,
-          "sell_count": 0
+          "newbie_posts": 9,
+          "pure_newbie": 3,
+          "newbie_ratio": 25.0,
+          "avg_newbie_score": 45.6,
+          "avg_sentiment": 77.8,
+          "purity_signal": 33.3,
+          "activity": 45.0,
+          "mom_buy_index": 41.4,
+          "mom_sell_index": 10.0,
+          "buy_sell_ratio": 6.0,
+          "buy_count": 6,
+          "sell_count": 1
         },
         "top_newbie_posts": [
           {
-            "title": "科技巨头算力资本开支再上调！芯片ETF东财盘中大涨7.44% - 东方财富",
-            "score": 58.0,
+            "title": "市值蒸发2万亿美元，股民送花圈，芯片股为什么暴跌？",
+            "score": 94.0,
             "level": "纯小白",
-            "reasoning": "帖子「科技巨头算力资本开支再上调！芯片ETF东财盘中大涨7.44% - 东方财富...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(大涨)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
+            "reasoning": "帖子「市值蒸发2万亿美元，股民送花圈，芯片股为什么暴跌？...」 命中3个小信号: 知识求助(6分), 情绪恐慌(5分), 市场异动(6分)。 以问句结尾，在寻求答案 含市场异动词汇(暴跌, 股民)，易引发散户跟风 综合得分94.0分， 判定为「纯小白」 (置信度: medium)。",
+            "sentiment": -1.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
+            "key_signals": [
+              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 为什么)",
+              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 暴跌)"
+            ]
+          },
+          {
+            "title": "大涨30%！万亿存储巨头，周末利好！韩国芯片出口，猛增179%",
+            "score": 54.0,
+            "level": "纯小白",
+            "reasoning": "帖子「大涨30%！万亿存储巨头，周末利好！韩国芯片出口，猛增179%...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(大涨)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
             "key_signals": [
-              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)",
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大涨)"
             ]
           },
           {
-            "title": "QDII-ETF市场日报 | 中韩半导体大涨近7%，亚太精选与日经反弹，标普油气领跌 - 新浪财经",
+            "title": "大涨30%！万亿存储巨头周末利好！韩国芯片出口猛增179%",
+            "score": 54.0,
+            "level": "纯小白",
+            "reasoning": "帖子「大涨30%！万亿存储巨头周末利好！韩国芯片出口猛增179%...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(大涨)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大涨)"
+            ]
+          },
+          {
+            "title": "韩股飙升15%创历史最大涨幅，芯片ETF“10CM”涨停 - 东方财富",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「韩股飙升15%创历史最大涨幅，芯片ETF“10CM”涨停 - 东方财富...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大涨, 涨停, 飙升)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停, 飙升)"
+            ]
+          },
+          {
+            "title": "QDII-ETF市场日报 | 中韩半导体大涨近7%，亚太精选与日经反弹，标普油气领跌 - finance.sina.co",
             "score": 38.0,
             "level": "偏小白",
             "reasoning": "帖子「QDII-ETF市场日报 | 中韩半导体大涨近7%，亚太精选与日经反弹，标普油气...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大涨)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
@@ -48,30 +84,6 @@
             "key_signals": [
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大涨)"
             ]
-          },
-          {
-            "title": "SK海力士“30CM”涨停，芯片ETF跟涨 - 东方财富",
-            "score": 38.0,
-            "level": "偏小白",
-            "reasoning": "帖子「SK海力士“30CM”涨停，芯片ETF跟涨 - 东方财富...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(涨停)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停)"
-            ]
-          },
-          {
-            "title": "台积电业绩超预期，芯片ETF华夏（159995）冲高回落，寒武纪上涨4.29%",
-            "score": 26.0,
-            "level": "中间派",
-            "reasoning": "帖子「台积电业绩超预期，芯片ETF华夏（159995）冲高回落，寒武纪上涨4.29%...」 命中1个小信号: 过度乐观(4分)。 综合得分26.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
-            ]
           }
         ]
       },
@@ -79,28 +91,28 @@
         "index": 49.3,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 38,
-          "valid_posts": 38,
+          "total_posts": 39,
+          "valid_posts": 39,
           "spam_posts": 0,
-          "newbie_posts": 18,
+          "newbie_posts": 17,
           "pure_newbie": 6,
-          "newbie_ratio": 47.4,
-          "avg_newbie_score": 43.6,
-          "avg_sentiment": 72.2,
-          "purity_signal": 33.3,
-          "activity": 47.5,
-          "mom_buy_index": 37.3,
-          "mom_sell_index": 7.0,
-          "buy_sell_ratio": 11.0,
-          "buy_count": 11,
-          "sell_count": 1
+          "newbie_ratio": 43.6,
+          "avg_newbie_score": 45.3,
+          "avg_sentiment": 76.5,
+          "purity_signal": 35.3,
+          "activity": 48.8,
+          "mom_buy_index": 36.2,
+          "mom_sell_index": 10.4,
+          "buy_sell_ratio": 5.0,
+          "buy_count": 10,
+          "sell_count": 2
         },
         "top_newbie_posts": [
           {
-            "title": "大涨原因或已找到！海外映射+政策定调，电子ETF华宝（515260）暴涨9%！PCB+半导体携手猛攻！ - 新浪财经",
+            "title": "大涨原因或已找到！海外映射+政策定调，电子ETF华宝（515260）暴涨9%！PCB+半导体携手猛攻！ - financ",
             "score": 66.0,
             "level": "纯小白",
-            "reasoning": "帖子「大涨原因或已找到！海外映射+政策定调，电子ETF华宝（515260）暴涨9%！P...」 命中1个小信号: 市场异动(6分)。 标题含3个感叹号，情绪强烈 含市场异动词汇(暴涨, 大涨)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: low)。",
+            "reasoning": "帖子「大涨原因或已找到！海外映射+政策定调，电子ETF华宝（515260）暴涨9%！P...」 命中1个小信号: 市场异动(6分)。 标题含3个感叹号，情绪强烈 含市场异动词汇(大涨, 暴涨)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -163,65 +175,26 @@
         ]
       },
       "ai_computing": {
-        "index": 52.5,
+        "index": 45.2,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 36,
-          "valid_posts": 36,
+          "total_posts": 38,
+          "valid_posts": 38,
           "spam_posts": 0,
-          "newbie_posts": 13,
-          "pure_newbie": 6,
-          "newbie_ratio": 36.1,
-          "avg_newbie_score": 50.6,
-          "avg_sentiment": 92.3,
-          "purity_signal": 46.2,
-          "activity": 45.0,
-          "mom_buy_index": 46.8,
-          "mom_sell_index": 8.2,
-          "buy_sell_ratio": 10.0,
-          "buy_count": 10,
-          "sell_count": 1
+          "newbie_posts": 12,
+          "pure_newbie": 4,
+          "newbie_ratio": 31.6,
+          "avg_newbie_score": 43.7,
+          "avg_sentiment": 83.3,
+          "purity_signal": 33.3,
+          "activity": 47.5,
+          "mom_buy_index": 45.3,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 9.0,
+          "buy_count": 9,
+          "sell_count": 0
         },
         "top_newbie_posts": [
-          {
-            "title": "暴力反弹！“AI双子星”瞩目，159363、589520盘中携手冲击10%！八一军工火力全开，华宝基金军工ETF周线连阳",
-            "score": 82.0,
-            "level": "纯小白",
-            "reasoning": "帖子「暴力反弹！“AI双子星”瞩目，159363、589520盘中携手冲击10%！八一...」 命中3个小信号: 过度乐观(4分), 短期思维(3分), 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(暴力)，易引发散户跟风 综合得分82.0分， 判定为「纯小白」 (置信度: med",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲, 暴力)",
-              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)"
-            ]
-          },
-          {
-            "title": "差点又崩了！AI算力过剩恐慌引爆芯片股抛售，韩股盘中跳水7%-市场参考 - xnews.jin10.com",
-            "score": 82.0,
-            "level": "纯小白",
-            "reasoning": "帖子「差点又崩了！AI算力过剩恐慌引爆芯片股抛售，韩股盘中跳水7%-市场参考 - xn...」 命中3个小信号: 情绪恐慌(5分), 短期思维(3分), 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(崩了, 跳水)，易引发散户跟风 综合得分82.0分， 判定为「纯小白」 (置信度:",
-            "sentiment": -1.0,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「情绪恐慌」表达明显的恐惧/焦虑/后悔情绪 (命中: 崩了)",
-              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)"
-            ]
-          },
-          {
-            "title": "从散户爆仓到巨头抄底，SK海力士上演史诗级“深V”反转，AI算力到底是泡沫还是黄金？ - 新浪财经",
-            "score": 70.0,
-            "level": "纯小白",
-            "reasoning": "帖子「从散户爆仓到巨头抄底，SK海力士上演史诗级“深V”反转，AI算力到底是泡沫还是黄...」 命中2个小信号: 身份自述(8分), 市场异动(6分)。 含市场异动词汇(散户)，易引发散户跟风 综合得分70.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「身份自述」明确自称小白/新手/刚入门/宝妈 (命中: 散户)",
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 散户)"
-            ]
-          },
           {
             "title": "AI赛道全线爆发！人工智能ETF易方达（159819）涨3.30%，算力租赁与CPO概念掀涨停潮",
             "score": 66.0,
@@ -236,7 +209,7 @@
             ]
           },
           {
-            "title": "新“易中天”来了？AI应用爆发涨停潮，光模块龙头反弹，创业板人工智能ETF华宝（159363）怒涨7.55% - 新浪财",
+            "title": "新“易中天”来了？AI应用爆发涨停潮，光模块龙头反弹，创业板人工智能ETF华宝（159363）怒涨7.55% - fin",
             "score": 58.0,
             "level": "纯小白",
             "reasoning": "帖子「新“易中天”来了？AI应用爆发涨停潮，光模块龙头反弹，创业板人工智能ETF华宝（...」 命中2个小信号: 过度乐观(4分), 市场异动(6分)。 含市场异动词汇(涨停, 涨停潮)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
@@ -246,6 +219,44 @@
             "key_signals": [
               "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 涨停潮)",
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停, 涨停潮)"
+            ]
+          },
+          {
+            "title": "涨超2.0%，人工智能ETF易方达159819冲击3连涨",
+            "score": 54.0,
+            "level": "纯小白",
+            "reasoning": "帖子「涨超2.0%，人工智能ETF易方达159819冲击3连涨...」 命中2个小信号: 过度乐观(4分), 市场异动(6分)。 含市场异动词汇(连涨)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: medium)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)",
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 连涨)"
+            ]
+          },
+          {
+            "title": "AI算力军备竞赛加速 存储芯片暴力反弹 机构紧盯多只超跌概念股 - finance.sina.com.cn",
+            "score": 54.0,
+            "level": "纯小白",
+            "reasoning": "帖子「AI算力军备竞赛加速 存储芯片暴力反弹 机构紧盯多只超跌概念股 - financ...」 命中2个小信号: 过度乐观(4分), 市场异动(6分)。 含市场异动词汇(暴力)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: medium)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 暴力)",
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 暴力)"
+            ]
+          },
+          {
+            "title": "微软单日市值暴增3万亿！人工智能ETF易方达（159819）涨8.56%，AI硬件与应用端共振大涨",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「微软单日市值暴增3万亿！人工智能ETF易方达（159819）涨8.56%，AI硬...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(大涨)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大涨)"
             ]
           }
         ]
@@ -257,15 +268,15 @@
           "total_posts": 30,
           "valid_posts": 30,
           "spam_posts": 0,
-          "newbie_posts": 23,
+          "newbie_posts": 22,
           "pure_newbie": 5,
-          "newbie_ratio": 76.7,
-          "avg_newbie_score": 41.9,
-          "avg_sentiment": 85.5,
-          "purity_signal": 21.7,
+          "newbie_ratio": 73.3,
+          "avg_newbie_score": 41.0,
+          "avg_sentiment": 92.4,
+          "purity_signal": 22.7,
           "activity": 37.5,
-          "mom_buy_index": 39.3,
-          "mom_sell_index": 14.4,
+          "mom_buy_index": 40.9,
+          "mom_sell_index": 14.8,
           "buy_sell_ratio": 3.8,
           "buy_count": 15,
           "sell_count": 4
@@ -275,7 +286,7 @@
             "title": "通信ETF大跌逼近年线，资金逆市布局超跌反弹机遇？通信ETF国泰（515880）近30日吸金超129亿元",
             "score": 58.0,
             "level": "纯小白",
-            "reasoning": "帖子「通信ETF大跌逼近年线，资金逆市布局超跌反弹机遇？通信ETF国泰（515880）...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(吸金, 逆市, 大跌)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
+            "reasoning": "帖子「通信ETF大跌逼近年线，资金逆市布局超跌反弹机遇？通信ETF国泰（515880）...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(大跌, 吸金, 逆市)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
             "sentiment": 0.33,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
@@ -285,7 +296,7 @@
             ]
           },
           {
-            "title": "新“易中天”来了？AI应用爆发涨停潮，光模块龙头反弹，创业板人工智能ETF华宝（159363）怒涨7.55% - 新浪财",
+            "title": "新“易中天”来了？AI应用爆发涨停潮，光模块龙头反弹，创业板人工智能ETF华宝（159363）怒涨7.55% - fin",
             "score": 58.0,
             "level": "纯小白",
             "reasoning": "帖子「新“易中天”来了？AI应用爆发涨停潮，光模块龙头反弹，创业板人工智能ETF华宝（...」 命中2个小信号: 过度乐观(4分), 市场异动(6分)。 含市场异动词汇(涨停, 涨停潮)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
@@ -324,7 +335,7 @@
             ]
           },
           {
-            "title": "“越跌越买”！7月以来深市ETF累计净申购超1400亿元 创业板、人工智能及通信主题ETF逆市“吸金” - 手机新浪网",
+            "title": "“越跌越买”！7月以来深市ETF累计净申购超1400亿元 创业板、人工智能及通信主题ETF逆市“吸金” - k.sina",
             "score": 50.0,
             "level": "纯小白",
             "reasoning": "帖子「“越跌越买”！7月以来深市ETF累计净申购超1400亿元 创业板、人工智能及通信...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(吸金, 逆市)，易引发散户跟风 综合得分50.0分， 判定为「纯小白」 (置信度: low)。",
@@ -338,23 +349,23 @@
         ]
       },
       "computer": {
-        "index": 51.1,
+        "index": 52.5,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 43,
-          "valid_posts": 43,
+          "total_posts": 39,
+          "valid_posts": 39,
           "spam_posts": 0,
-          "newbie_posts": 23,
+          "newbie_posts": 22,
           "pure_newbie": 3,
-          "newbie_ratio": 53.5,
-          "avg_newbie_score": 38.0,
-          "avg_sentiment": 91.3,
-          "purity_signal": 13.0,
-          "activity": 53.8,
-          "mom_buy_index": 36.0,
-          "mom_sell_index": 6.3,
-          "buy_sell_ratio": 13.0,
-          "buy_count": 13,
+          "newbie_ratio": 56.4,
+          "avg_newbie_score": 38.7,
+          "avg_sentiment": 90.9,
+          "purity_signal": 13.6,
+          "activity": 48.8,
+          "mom_buy_index": 35.2,
+          "mom_sell_index": 6.4,
+          "buy_sell_ratio": 12.0,
+          "buy_count": 12,
           "sell_count": 1
         },
         "top_newbie_posts": [
@@ -375,7 +386,7 @@
             "title": "计算机板块逆市走强，计算机ETF国泰（512720）盘中涨近2%，冲击三连涨",
             "score": 70.0,
             "level": "纯小白",
-            "reasoning": "帖子「计算机板块逆市走强，计算机ETF国泰（512720）盘中涨近2%，冲击三连涨...」 命中3个小信号: 过度乐观(4分), 短期思维(3分), 市场异动(6分)。 含市场异动词汇(连涨, 逆市)，易引发散户跟风 综合得分70.0分， 判定为「纯小白」 (置信度: medium)。",
+            "reasoning": "帖子「计算机板块逆市走强，计算机ETF国泰（512720）盘中涨近2%，冲击三连涨...」 命中3个小信号: 过度乐观(4分), 短期思维(3分), 市场异动(6分)。 含市场异动词汇(逆市, 连涨)，易引发散户跟风 综合得分70.0分， 判定为「纯小白」 (置信度: medium)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -398,22 +409,22 @@
             ]
           },
           {
-            "title": "斯坦德机器人IPO：三年亏3.47亿，现金剩7714万，创始人薪酬暴涨20倍？",
+            "title": "美国新制裁名单公布：机器人上榜不意外，思念汤圆和洽洽瓜子是什么操作？",
             "score": 46.0,
             "level": "偏小白",
-            "reasoning": "帖子「斯坦德机器人IPO：三年亏3.47亿，现金剩7714万，创始人薪酬暴涨20倍？...」 命中1个小信号: 市场异动(6分)。 以问句结尾，在寻求答案 含市场异动词汇(暴涨)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「美国新制裁名单公布：机器人上榜不意外，思念汤圆和洽洽瓜子是什么操作？...」 命中1个小信号: 市场异动(6分)。 以问句结尾，在寻求答案 含市场异动词汇(意外)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
             "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 暴涨)"
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 意外)"
             ]
           },
           {
             "title": "涨停复盘：AI应用板块大涨 算力板块反弹",
             "score": 42.0,
             "level": "偏小白",
-            "reasoning": "帖子「涨停复盘：AI应用板块大涨 算力板块反弹...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(涨停, 大涨)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「涨停复盘：AI应用板块大涨 算力板块反弹...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大涨, 涨停)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -424,7 +435,7 @@
         ]
       },
       "communication": {
-        "index": 43.6,
+        "index": 42.5,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
           "total_posts": 35,
@@ -433,22 +444,22 @@
           "newbie_posts": 16,
           "pure_newbie": 0,
           "newbie_ratio": 45.7,
-          "avg_newbie_score": 36.2,
-          "avg_sentiment": 81.2,
+          "avg_newbie_score": 37.0,
+          "avg_sentiment": 75.0,
           "purity_signal": 0.0,
           "activity": 43.8,
-          "mom_buy_index": 27.3,
-          "mom_sell_index": 18.3,
-          "buy_sell_ratio": 1.8,
-          "buy_count": 7,
-          "sell_count": 4
+          "mom_buy_index": 30.7,
+          "mom_sell_index": 14.0,
+          "buy_sell_ratio": 2.7,
+          "buy_count": 8,
+          "sell_count": 3
         },
         "top_newbie_posts": [
           {
-            "title": "通信ETF国泰（515880）涨停！美股大反攻验证AI叙事持续 - sohu.com",
+            "title": "通信ETF国泰（515880）涨停！美股大反攻验证AI叙事持续 - Sohu",
             "score": 46.0,
             "level": "偏小白",
-            "reasoning": "帖子「通信ETF国泰（515880）涨停！美股大反攻验证AI叙事持续 - sohu.c...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(涨停)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「通信ETF国泰（515880）涨停！美股大反攻验证AI叙事持续 - Sohu...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(涨停)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -482,18 +493,6 @@
             ]
           },
           {
-            "title": "港股光通信、芯片股大跌，长飞光纤光缆跌超10%，新东方狂飙近19% - 新浪财经",
-            "score": 42.0,
-            "level": "偏小白",
-            "reasoning": "帖子「港股光通信、芯片股大跌，长飞光纤光缆跌超10%，新东方狂飙近19% - 新浪财经...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(跌超, 大跌)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": -1.0,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大跌, 跌超)"
-            ]
-          },
-          {
             "title": "兆易创新等60家科技板块公司宣布回购及增持，通信ETF华夏（515050）午后跌幅收窄，自高点回调超30%",
             "score": 38.0,
             "level": "偏小白",
@@ -504,28 +503,40 @@
             "key_signals": [
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 巨震)"
             ]
+          },
+          {
+            "title": "通信概念股走低，通信、5G相关ETF跌超6% - 凤凰网",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「通信概念股走低，通信、5G相关ETF跌超6% - 凤凰网...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(跌超)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 跌超)"
+            ]
           }
         ]
       },
       "military": {
-        "index": 49.6,
+        "index": 53.3,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
           "total_posts": 34,
           "valid_posts": 34,
           "spam_posts": 0,
-          "newbie_posts": 18,
-          "pure_newbie": 5,
-          "newbie_ratio": 52.9,
-          "avg_newbie_score": 42.2,
-          "avg_sentiment": 68.5,
-          "purity_signal": 27.8,
+          "newbie_posts": 19,
+          "pure_newbie": 6,
+          "newbie_ratio": 55.9,
+          "avg_newbie_score": 44.3,
+          "avg_sentiment": 75.4,
+          "purity_signal": 31.6,
           "activity": 42.5,
-          "mom_buy_index": 22.6,
-          "mom_sell_index": 12.0,
-          "buy_sell_ratio": 3.0,
-          "buy_count": 6,
-          "sell_count": 2
+          "mom_buy_index": 24.5,
+          "mom_sell_index": 13.9,
+          "buy_sell_ratio": 2.3,
+          "buy_count": 7,
+          "sell_count": 3
         },
         "top_newbie_posts": [
           {
@@ -555,10 +566,22 @@
             ]
           },
           {
+            "title": "商业航天概念突然掉头，批量重挫逾10%，航天发展等多股跌停！军工ETF华宝（512810）创近半年新低！ - finan",
+            "score": 62.0,
+            "level": "纯小白",
+            "reasoning": "帖子「商业航天概念突然掉头，批量重挫逾10%，航天发展等多股跌停！军工ETF华宝（51...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(重挫, 突然, 新低)，易引发散户跟风 综合得分62.0分， 判定为「纯小白」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 重挫, 新低)"
+            ]
+          },
+          {
             "title": "火箭回收了，股价也“回收”了？——军工ETF（512660）大跌点评",
             "score": 58.0,
             "level": "纯小白",
-            "reasoning": "帖子「火箭回收了，股价也“回收”了？——军工ETF（512660）大跌点评...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(跌超, 拉升, 大跌)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
+            "reasoning": "帖子「火箭回收了，股价也“回收”了？——军工ETF（512660）大跌点评...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(拉升, 大跌, 跌超)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
             "sentiment": -0.33,
             "intent": "sell",
             "intent_label": "🔴 卖出",
@@ -579,53 +602,40 @@
               "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)",
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大涨)"
             ]
-          },
-          {
-            "title": "军工板块迎资金抢筹，军工ETF国泰（512660）连续5日吸金超2.6亿元",
-            "score": 54.0,
-            "level": "纯小白",
-            "reasoning": "帖子「军工板块迎资金抢筹，军工ETF国泰（512660）连续5日吸金超2.6亿元...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(抢筹, 吸金)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)",
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 吸金, 抢筹)"
-            ]
           }
         ]
       },
       "robot": {
-        "index": 36.8,
+        "index": 34.8,
         "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
         "details": {
-          "total_posts": 40,
-          "valid_posts": 40,
+          "total_posts": 37,
+          "valid_posts": 37,
           "spam_posts": 0,
-          "newbie_posts": 14,
+          "newbie_posts": 13,
           "pure_newbie": 0,
-          "newbie_ratio": 35.0,
-          "avg_newbie_score": 34.0,
-          "avg_sentiment": 71.4,
+          "newbie_ratio": 35.1,
+          "avg_newbie_score": 33.7,
+          "avg_sentiment": 61.5,
           "purity_signal": 0.0,
-          "activity": 50.0,
-          "mom_buy_index": 45.7,
+          "activity": 46.2,
+          "mom_buy_index": 36.6,
           "mom_sell_index": 0.0,
-          "buy_sell_ratio": 11.0,
-          "buy_count": 11,
+          "buy_sell_ratio": 8.0,
+          "buy_count": 8,
           "sell_count": 0
         },
         "top_newbie_posts": [
           {
-            "title": "斯坦德机器人IPO：三年亏3.47亿，现金剩7714万，创始人薪酬暴涨20倍？",
+            "title": "美国新制裁名单公布：机器人上榜不意外，思念汤圆和洽洽瓜子是什么操作？",
             "score": 46.0,
             "level": "偏小白",
-            "reasoning": "帖子「斯坦德机器人IPO：三年亏3.47亿，现金剩7714万，创始人薪酬暴涨20倍？...」 命中1个小信号: 市场异动(6分)。 以问句结尾，在寻求答案 含市场异动词汇(暴涨)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「美国新制裁名单公布：机器人上榜不意外，思念汤圆和洽洽瓜子是什么操作？...」 命中1个小信号: 市场异动(6分)。 以问句结尾，在寻求答案 含市场异动词汇(意外)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
             "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 暴涨)"
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 意外)"
             ]
           },
           {
@@ -665,33 +675,33 @@
             ]
           },
           {
-            "title": "【7.31 ETF综述】“AI交易”已见底？宇树IPO引爆机器人，创业板暴涨3%重返年线上方 - 手机新浪网",
+            "title": "人形机器人概念，超10股涨停 - finance.sina.com.cn",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「【7.31 ETF综述】“AI交易”已见底？宇树IPO引爆机器人，创业板暴涨3%...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(暴涨)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「人形机器人概念，超10股涨停 - finance.sina.com.cn...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(涨停)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
             "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 暴涨)"
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停)"
             ]
           }
         ]
       },
       "newenergy": {
-        "index": 10.6,
-        "interpretation": "🔵 极度冷清 — 小白沉默不语，可能是市场底部信号",
+        "index": 27.7,
+        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
         "details": {
-          "total_posts": 37,
-          "valid_posts": 37,
+          "total_posts": 36,
+          "valid_posts": 36,
           "spam_posts": 0,
-          "newbie_posts": 1,
+          "newbie_posts": 2,
           "pure_newbie": 0,
-          "newbie_ratio": 2.7,
-          "avg_newbie_score": 38.0,
-          "avg_sentiment": 0.0,
+          "newbie_ratio": 5.6,
+          "avg_newbie_score": 22.0,
+          "avg_sentiment": 100.0,
           "purity_signal": 0.0,
-          "activity": 46.2,
+          "activity": 45.0,
           "mom_buy_index": 0.0,
           "mom_sell_index": 0.0,
           "buy_sell_ratio": 0.0,
@@ -700,38 +710,50 @@
         },
         "top_newbie_posts": [
           {
-            "title": "比亚迪 7 月销售 41.9 万辆汽车，海外销量近 18 万辆再创历史新高",
-            "score": 38.0,
-            "level": "偏小白",
-            "reasoning": "帖子「比亚迪 7 月销售 41.9 万辆汽车，海外销量近 18 万辆再创历史新高...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(新高)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 0.0,
+            "title": "涨超2.3%，创业板新能源ETF富国(159122)盘中上涨2.33% - finance.sina.com.cn",
+            "score": 22.0,
+            "level": "中间派",
+            "reasoning": "帖子「涨超2.3%，创业板新能源ETF富国(159122)盘中上涨2.33% - fi...」 命中1个小信号: 短期思维(3分)。 综合得分22.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 1.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
             "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 新高)"
+              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)"
+            ]
+          },
+          {
+            "title": "涨超2.7%，光伏ETF富国(560230)盘中上涨2.77% - finance.sina.com.cn",
+            "score": 22.0,
+            "level": "中间派",
+            "reasoning": "帖子「涨超2.7%，光伏ETF富国(560230)盘中上涨2.77% - financ...」 命中1个小信号: 短期思维(3分)。 综合得分22.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)"
             ]
           }
         ]
       },
       "battery": {
-        "index": 35.8,
+        "index": 35.0,
         "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
         "details": {
-          "total_posts": 33,
-          "valid_posts": 33,
+          "total_posts": 34,
+          "valid_posts": 34,
           "spam_posts": 0,
           "newbie_posts": 5,
           "pure_newbie": 1,
-          "newbie_ratio": 15.2,
-          "avg_newbie_score": 48.4,
-          "avg_sentiment": 73.2,
+          "newbie_ratio": 14.7,
+          "avg_newbie_score": 40.4,
+          "avg_sentiment": 80.0,
           "purity_signal": 20.0,
-          "activity": 41.2,
-          "mom_buy_index": 37.9,
-          "mom_sell_index": 29.7,
-          "buy_sell_ratio": 1.5,
-          "buy_count": 3,
-          "sell_count": 2
+          "activity": 42.5,
+          "mom_buy_index": 47.9,
+          "mom_sell_index": 0.0,
+          "buy_sell_ratio": 4.0,
+          "buy_count": 4,
+          "sell_count": 0
         },
         "top_newbie_posts": [
           {
@@ -748,7 +770,7 @@
             ]
           },
           {
-            "title": "麦格米特涨停！新能源电池ETF华宝（159071）放量涨2.65%，机构：重申看好本轮锂电涨价周期 - 新浪财经",
+            "title": "麦格米特涨停！新能源电池ETF华宝（159071）放量涨2.65%，机构：重申看好本轮锂电涨价周期 - finance.",
             "score": 46.0,
             "level": "偏小白",
             "reasoning": "帖子「麦格米特涨停！新能源电池ETF华宝（159071）放量涨2.65%，机构：重申看...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(涨停)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
@@ -760,33 +782,7 @@
             ]
           },
           {
-            "title": "阳光电源一度大跌超7%，什么情况？电池ETF汇添富(159796)午后翻红，连续5日吸金超5.2亿元！旺季更旺，电池基本",
-            "score": 46.0,
-            "level": "偏小白",
-            "reasoning": "帖子「阳光电源一度大跌超7%，什么情况？电池ETF汇添富(159796)午后翻红，连续...」 命中1个小信号: 市场异动(6分)。 命中1个专业信号: 专业术语(-5分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(跌超, 吸金, 大跌)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 ",
-            "sentiment": -0.33,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大跌, 跌超)",
-              "「专业术语」使用PE/PB/ROE/基本面/技术面/估值等专业词汇 (命中: 基本面)"
-            ]
-          },
-          {
-            "title": "阳光电源一度大跌超7%，什么情况？电池ETF汇添富(159796)午后翻红，连续5日吸金超5.2亿元！旺季更旺，电池基本",
-            "score": 46.0,
-            "level": "偏小白",
-            "reasoning": "帖子「阳光电源一度大跌超7%，什么情况？电池ETF汇添富(159796)午后翻红，连续...」 命中1个小信号: 市场异动(6分)。 命中1个专业信号: 专业术语(-5分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(跌超, 吸金, 大跌)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 ",
-            "sentiment": -0.33,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大跌, 跌超)",
-              "「专业术语」使用PE/PB/ROE/基本面/技术面/估值等专业词汇 (命中: 基本面)"
-            ]
-          },
-          {
-            "title": "电池板块大涨，电池ETF、储能电池ETF、锂电池ETF、新能源电池ETF涨超3% - QQ News",
+            "title": "电池板块大涨，电池ETF、储能电池ETF、锂电池ETF、新能源电池ETF涨超3% - xw.qq.com",
             "score": 38.0,
             "level": "偏小白",
             "reasoning": "帖子「电池板块大涨，电池ETF、储能电池ETF、锂电池ETF、新能源电池ETF涨超3%...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大涨)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
@@ -796,28 +792,50 @@
             "key_signals": [
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大涨)"
             ]
+          },
+          {
+            "title": "锂电池板块冲高回落，储能电池ETF、电池ETF自5月高点回调20%，机构：当前是布局锂电板块良机 - Moomoo",
+            "score": 26.0,
+            "level": "中间派",
+            "reasoning": "帖子「锂电池板块冲高回落，储能电池ETF、电池ETF自5月高点回调20%，机构：当前是...」 命中1个小信号: 过度乐观(4分)。 综合得分26.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)"
+            ]
+          },
+          {
+            "title": "动力电池“梯次利用”叫停，100家合规企业名单作废！谁受益谁承压？",
+            "score": 26.0,
+            "level": "中间派",
+            "reasoning": "帖子「动力电池“梯次利用”叫停，100家合规企业名单作废！谁受益谁承压？...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": []
           }
         ]
       },
       "power_grid": {
-        "index": 48.3,
+        "index": 50.3,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 35,
-          "valid_posts": 35,
+          "total_posts": 32,
+          "valid_posts": 32,
           "spam_posts": 0,
-          "newbie_posts": 12,
-          "pure_newbie": 3,
-          "newbie_ratio": 34.3,
-          "avg_newbie_score": 43.3,
-          "avg_sentiment": 100.0,
-          "purity_signal": 25.0,
-          "activity": 43.8,
-          "mom_buy_index": 44.9,
-          "mom_sell_index": 8.5,
-          "buy_sell_ratio": 9.0,
+          "newbie_posts": 13,
+          "pure_newbie": 4,
+          "newbie_ratio": 40.6,
+          "avg_newbie_score": 43.8,
+          "avg_sentiment": 92.3,
+          "purity_signal": 30.8,
+          "activity": 40.0,
+          "mom_buy_index": 41.8,
+          "mom_sell_index": 12.3,
+          "buy_sell_ratio": 4.5,
           "buy_count": 9,
-          "sell_count": 1
+          "sell_count": 2
         },
         "top_newbie_posts": [
           {
@@ -837,7 +855,7 @@
             "title": "全国用电负荷再创新高，上半年全社会用电量同比增长5.3%，电力板块逆市活跃，电力ETF广发159611盘中最高涨超2%，",
             "score": 62.0,
             "level": "纯小白",
-            "reasoning": "帖子「全国用电负荷再创新高，上半年全社会用电量同比增长5.3%，电力板块逆市活跃，电力...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(涨停, 逆市, 新高)，易引发散户跟风 综合得分62.0分， 判定为「纯小白」 (置信度: medium)。",
+            "reasoning": "帖子「全国用电负荷再创新高，上半年全社会用电量同比增长5.3%，电力板块逆市活跃，电力...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(新高, 创新高, 涨停)，易引发散户跟风 综合得分62.0分， 判定为「纯小白」 (置信度: medium)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -860,15 +878,16 @@
             ]
           },
           {
-            "title": "7月多地电网用电负荷持续刷新历史峰值，电力行业迎AI缺电与低碳双重机遇，电力ETF广发159611连续9天净流入近20亿",
-            "score": 38.0,
-            "level": "偏小白",
-            "reasoning": "帖子「7月多地电网用电负荷持续刷新历史峰值，电力行业迎AI缺电与低碳双重机遇，电力ET...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(涨停)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
+            "title": "ETF今日收评 | 电网设备ETF涨超5%，集成电路、芯片等ETF跌超4% - 每日经济新闻",
+            "score": 50.0,
+            "level": "纯小白",
+            "reasoning": "帖子「ETF今日收评 | 电网设备ETF涨超5%，集成电路、芯片等ETF跌超4% - ...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(跌超)，易引发散户跟风 综合得分50.0分， 判定为「纯小白」 (置信度: medium)。",
+            "sentiment": 0.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
             "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停)"
+              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 今日)",
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 跌超)"
             ]
           },
           {
@@ -886,26 +905,38 @@
         ]
       },
       "medicine": {
-        "index": 32.0,
+        "index": 34.3,
         "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
         "details": {
-          "total_posts": 35,
-          "valid_posts": 35,
+          "total_posts": 39,
+          "valid_posts": 39,
           "spam_posts": 0,
-          "newbie_posts": 9,
-          "pure_newbie": 0,
-          "newbie_ratio": 25.7,
-          "avg_newbie_score": 33.6,
-          "avg_sentiment": 66.7,
-          "purity_signal": 0.0,
-          "activity": 43.8,
-          "mom_buy_index": 17.8,
-          "mom_sell_index": 9.9,
-          "buy_sell_ratio": 2.0,
-          "buy_count": 2,
+          "newbie_posts": 10,
+          "pure_newbie": 1,
+          "newbie_ratio": 25.6,
+          "avg_newbie_score": 34.0,
+          "avg_sentiment": 70.0,
+          "purity_signal": 10.0,
+          "activity": 48.8,
+          "mom_buy_index": 21.3,
+          "mom_sell_index": 9.3,
+          "buy_sell_ratio": 3.0,
+          "buy_count": 3,
           "sell_count": 1
         },
         "top_newbie_posts": [
+          {
+            "title": "成长性突出！这只医疗设备股票连续18个季度营收创新高 - NAI500",
+            "score": 50.0,
+            "level": "纯小白",
+            "reasoning": "帖子「成长性突出！这只医疗设备股票连续18个季度营收创新高 - NAI500...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(新高, 创新高)，易引发散户跟风 综合得分50.0分， 判定为「纯小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 创新高, 新高)"
+            ]
+          },
           {
             "title": "AI医疗或迎价值兑现窗口，京东健康涨超5%，港股通医疗ETF（159137）上探2.84%！规模最大医疗ETF逆市飘红 ",
             "score": 46.0,
@@ -943,45 +974,33 @@
             ]
           },
           {
-            "title": "QDII-ETF市场日报 | 标普油气领涨，中韩半导体与医药板块重挫 - stock.eastmoney.com",
+            "title": "QDII-ETF市场日报 | 标普油气领涨，中韩半导体与医药板块重挫 - 东方财富",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「QDII-ETF市场日报 | 标普油气领涨，中韩半导体与医药板块重挫 - sto...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(重挫)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「QDII-ETF市场日报 | 标普油气领涨，中韩半导体与医药板块重挫 - 东方财...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(重挫)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": -1.0,
             "intent": "sell",
             "intent_label": "🔴 卖出",
             "key_signals": [
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 重挫)"
             ]
-          },
-          {
-            "title": "安徽宏宇五洲医疗器械股份有限公司股票交易异常波动公告 - 新浪财经",
-            "score": 38.0,
-            "level": "偏小白",
-            "reasoning": "帖子「安徽宏宇五洲医疗器械股份有限公司股票交易异常波动公告 - 新浪财经...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(异常)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 异常)"
-            ]
           }
         ]
       },
       "baijiu": {
-        "index": 42.5,
+        "index": 41.9,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 36,
-          "valid_posts": 36,
+          "total_posts": 38,
+          "valid_posts": 38,
           "spam_posts": 0,
           "newbie_posts": 10,
           "pure_newbie": 3,
-          "newbie_ratio": 27.8,
+          "newbie_ratio": 26.3,
           "avg_newbie_score": 43.4,
           "avg_sentiment": 80.0,
           "purity_signal": 30.0,
-          "activity": 45.0,
+          "activity": 47.5,
           "mom_buy_index": 37.7,
           "mom_sell_index": 14.8,
           "buy_sell_ratio": 3.0,
@@ -993,7 +1012,7 @@
             "title": "异动！600199，直线涨停！白酒股，盘中拉升！ - 东方财富",
             "score": 78.0,
             "level": "纯小白",
-            "reasoning": "帖子「异动！600199，直线涨停！白酒股，盘中拉升！ - 东方财富...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 标题含3个感叹号，情绪强烈 含市场异动词汇(涨停, 拉升)，易引发散户跟风 综合得分78.0分， 判定为「纯小白」 (置信度: medium)。",
+            "reasoning": "帖子「异动！600199，直线涨停！白酒股，盘中拉升！ - 东方财富...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 标题含3个感叹号，情绪强烈 含市场异动词汇(拉升, 涨停)，易引发散户跟风 综合得分78.0分， 判定为「纯小白」 (置信度: medium)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1016,10 +1035,10 @@
             ]
           },
           {
-            "title": "多股涨停！白酒股，逆市爆发 - 新浪财经",
+            "title": "多股涨停！白酒股，逆市爆发 - finance.sina.com.cn",
             "score": 50.0,
             "level": "纯小白",
-            "reasoning": "帖子「多股涨停！白酒股，逆市爆发 - 新浪财经...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(涨停, 逆市)，易引发散户跟风 综合得分50.0分， 判定为「纯小白」 (置信度: low)。",
+            "reasoning": "帖子「多股涨停！白酒股，逆市爆发 - finance.sina.com.cn...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(涨停, 逆市)，易引发散户跟风 综合得分50.0分， 判定为「纯小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1031,7 +1050,7 @@
             "title": "白酒股异动拉升 舍得酒业涨停 - 证券之星",
             "score": 42.0,
             "level": "偏小白",
-            "reasoning": "帖子「白酒股异动拉升 舍得酒业涨停 - 证券之星...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(涨停, 拉升)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「白酒股异动拉升 舍得酒业涨停 - 证券之星...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(拉升, 涨停)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1054,23 +1073,23 @@
         ]
       },
       "food": {
-        "index": 43.2,
+        "index": 43.6,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 36,
-          "valid_posts": 36,
+          "total_posts": 35,
+          "valid_posts": 35,
           "spam_posts": 0,
           "newbie_posts": 14,
           "pure_newbie": 4,
-          "newbie_ratio": 38.9,
+          "newbie_ratio": 40.0,
           "avg_newbie_score": 41.9,
           "avg_sentiment": 64.3,
           "purity_signal": 28.6,
-          "activity": 45.0,
-          "mom_buy_index": 28.4,
+          "activity": 43.8,
+          "mom_buy_index": 24.8,
           "mom_sell_index": 7.8,
-          "buy_sell_ratio": 6.0,
-          "buy_count": 6,
+          "buy_sell_ratio": 5.0,
+          "buy_count": 5,
           "sell_count": 1
         },
         "top_newbie_posts": [
@@ -1139,23 +1158,23 @@
         ]
       },
       "appliance": {
-        "index": 30.2,
+        "index": 32.6,
         "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
         "details": {
-          "total_posts": 34,
-          "valid_posts": 34,
+          "total_posts": 33,
+          "valid_posts": 33,
           "spam_posts": 0,
-          "newbie_posts": 6,
+          "newbie_posts": 7,
           "pure_newbie": 1,
-          "newbie_ratio": 17.6,
-          "avg_newbie_score": 29.3,
-          "avg_sentiment": 66.7,
-          "purity_signal": 16.7,
-          "activity": 42.5,
-          "mom_buy_index": 12.8,
-          "mom_sell_index": 12.8,
-          "buy_sell_ratio": 1.0,
-          "buy_count": 1,
+          "newbie_ratio": 21.2,
+          "avg_newbie_score": 30.6,
+          "avg_sentiment": 71.4,
+          "purity_signal": 14.3,
+          "activity": 41.2,
+          "mom_buy_index": 19.1,
+          "mom_sell_index": 11.5,
+          "buy_sell_ratio": 2.0,
+          "buy_count": 2,
           "sell_count": 1
         },
         "top_newbie_posts": [
@@ -1185,6 +1204,18 @@
             ]
           },
           {
+            "title": "7月27日春光科技涨停：机器人，小米概念股，小家电概念热股_个股掘金 - stock.stockstar.com",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「7月27日春光科技涨停：机器人，小米概念股，小家电概念热股_个股掘金 - sto...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(涨停)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停)"
+            ]
+          },
+          {
             "title": "家电板块表现活跃，家电ETF国泰（159996）盘中上涨2.7%",
             "score": 22.0,
             "level": "中间派",
@@ -1207,39 +1238,27 @@
             "key_signals": [
               "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)"
             ]
-          },
-          {
-            "title": "家电ETF国泰（159996）盘中上涨1.4%，以旧换新与龙头盈利韧性受关注",
-            "score": 22.0,
-            "level": "中间派",
-            "reasoning": "帖子「家电ETF国泰（159996）盘中上涨1.4%，以旧换新与龙头盈利韧性受关注...」 命中1个小信号: 短期思维(3分)。 综合得分22.0分， 判定为「中间派」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)"
-            ]
           }
         ]
       },
       "tourism": {
-        "index": 43.8,
+        "index": 43.3,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 35,
-          "valid_posts": 35,
+          "total_posts": 34,
+          "valid_posts": 34,
           "spam_posts": 0,
-          "newbie_posts": 10,
+          "newbie_posts": 9,
           "pure_newbie": 2,
-          "newbie_ratio": 28.6,
+          "newbie_ratio": 26.5,
           "avg_newbie_score": 37.6,
           "avg_sentiment": 100.0,
-          "purity_signal": 20.0,
-          "activity": 43.8,
-          "mom_buy_index": 41.9,
+          "purity_signal": 22.2,
+          "activity": 42.5,
+          "mom_buy_index": 40.3,
           "mom_sell_index": 0.0,
-          "buy_sell_ratio": 7.0,
-          "buy_count": 7,
+          "buy_sell_ratio": 6.0,
+          "buy_count": 6,
           "sell_count": 0
         },
         "top_newbie_posts": [
@@ -1273,7 +1292,7 @@
             "title": "ETF收评| 科创50指数午后狂涨超8%，半导体板块大爆发，多只半导体ETF、半导体设备ETF涨停 - TradingV",
             "score": 42.0,
             "level": "偏小白",
-            "reasoning": "帖子「ETF收评| 科创50指数午后狂涨超8%，半导体板块大爆发，多只半导体ETF、半...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(涨停, 狂涨)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「ETF收评| 科创50指数午后狂涨超8%，半导体板块大爆发，多只半导体ETF、半...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(狂涨, 涨停)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1282,10 +1301,10 @@
             ]
           },
           {
-            "title": "酒店板块集体大涨，旅游ETF华夏（562510）涨超2% - 新浪财经",
+            "title": "酒店板块集体大涨，旅游ETF华夏（562510）涨超2% - finance.sina.com.cn",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「酒店板块集体大涨，旅游ETF华夏（562510）涨超2% - 新浪财经...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大涨)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「酒店板块集体大涨，旅游ETF华夏（562510）涨超2% - finance.s...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大涨)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1294,33 +1313,33 @@
             ]
           },
           {
-            "title": "商业航天概念走强，通用航空ETF基金(159230)涨3.84%，7日吸金1.39亿 - Jiemian.com",
+            "title": "7月29日东百集团涨停：新零售，免税店概念，福建自贸/海西概念概念热股_个股掘金 - stock.stockstar.c",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「商业航天概念走强，通用航空ETF基金(159230)涨3.84%，7日吸金1.3...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(吸金)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「7月29日东百集团涨停：新零售，免税店概念，福建自贸/海西概念概念热股_个股掘金...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(涨停)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
             "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 吸金)"
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停)"
             ]
           }
         ]
       },
       "media": {
-        "index": 35.4,
+        "index": 35.6,
         "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
         "details": {
-          "total_posts": 34,
-          "valid_posts": 34,
+          "total_posts": 33,
+          "valid_posts": 33,
           "spam_posts": 0,
           "newbie_posts": 5,
           "pure_newbie": 0,
-          "newbie_ratio": 14.7,
+          "newbie_ratio": 15.2,
           "avg_newbie_score": 38.0,
           "avg_sentiment": 100.0,
           "purity_signal": 0.0,
-          "activity": 42.5,
+          "activity": 41.2,
           "mom_buy_index": 47.7,
           "mom_sell_index": 0.0,
           "buy_sell_ratio": 4.0,
@@ -1353,10 +1372,10 @@
             ]
           },
           {
-            "title": "传媒ETF领涨；沪市红利低波ETF持续“吸金” - 同花顺",
+            "title": "传媒ETF领涨；沪市红利低波ETF持续“吸金” - 同花顺财经",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「传媒ETF领涨；沪市红利低波ETF持续“吸金” - 同花顺...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(吸金)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「传媒ETF领涨；沪市红利低波ETF持续“吸金” - 同花顺财经...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(吸金)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1391,23 +1410,23 @@
         ]
       },
       "biotech": {
-        "index": 41.7,
+        "index": 41.8,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 34,
-          "valid_posts": 34,
+          "total_posts": 36,
+          "valid_posts": 36,
           "spam_posts": 0,
-          "newbie_posts": 12,
+          "newbie_posts": 14,
           "pure_newbie": 4,
-          "newbie_ratio": 35.3,
-          "avg_newbie_score": 37.0,
-          "avg_sentiment": 66.7,
-          "purity_signal": 33.3,
-          "activity": 42.5,
-          "mom_buy_index": 32.7,
+          "newbie_ratio": 38.9,
+          "avg_newbie_score": 36.3,
+          "avg_sentiment": 64.3,
+          "purity_signal": 28.6,
+          "activity": 45.0,
+          "mom_buy_index": 32.3,
           "mom_sell_index": 0.0,
-          "buy_sell_ratio": 6.0,
-          "buy_count": 6,
+          "buy_sell_ratio": 7.0,
+          "buy_count": 7,
           "sell_count": 0
         },
         "top_newbie_posts": [
@@ -1428,7 +1447,7 @@
             "title": "大盘调整，创新药跟跌，百济神州跌超4%，科创创新药ETF汇添富(589120)跌超4%，融资余额迭创新高！恒瑞医药舒地胰",
             "score": 54.0,
             "level": "纯小白",
-            "reasoning": "帖子「大盘调整，创新药跟跌，百济神州跌超4%，科创创新药ETF汇添富(589120)跌...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(跌超, 新高, 创新高)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: low)。",
+            "reasoning": "帖子「大盘调整，创新药跟跌，百济神州跌超4%，科创创新药ETF汇添富(589120)跌...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(新高, 创新高, 跌超)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
@@ -1462,10 +1481,10 @@
             ]
           },
           {
-            "title": "港股通创新药ETF易方达（159316）近一周吸金超9100万 - 新浪财经",
+            "title": "港股通创新药ETF易方达（159316）近一周吸金超9100万 - finance.sina.com.cn",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「港股通创新药ETF易方达（159316）近一周吸金超9100万 - 新浪财经...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(吸金)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「港股通创新药ETF易方达（159316）近一周吸金超9100万 - financ...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(吸金)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1476,23 +1495,23 @@
         ]
       },
       "consumer": {
-        "index": 59.4,
-        "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
+        "index": 61.6,
+        "interpretation": "🟠 高度警惕 — 小白大量涌入，市场情绪过热，建议大幅减仓",
         "details": {
-          "total_posts": 35,
-          "valid_posts": 35,
+          "total_posts": 31,
+          "valid_posts": 31,
           "spam_posts": 0,
-          "newbie_posts": 17,
-          "pure_newbie": 10,
-          "newbie_ratio": 48.6,
-          "avg_newbie_score": 54.0,
-          "avg_sentiment": 88.2,
-          "purity_signal": 58.8,
-          "activity": 43.8,
-          "mom_buy_index": 44.4,
+          "newbie_posts": 18,
+          "pure_newbie": 9,
+          "newbie_ratio": 58.1,
+          "avg_newbie_score": 52.2,
+          "avg_sentiment": 88.9,
+          "purity_signal": 50.0,
+          "activity": 38.8,
+          "mom_buy_index": 38.5,
           "mom_sell_index": 0.0,
-          "buy_sell_ratio": 12.0,
-          "buy_count": 12,
+          "buy_sell_ratio": 11.0,
+          "buy_count": 11,
           "sell_count": 0
         },
         "top_newbie_posts": [
@@ -1563,20 +1582,20 @@
         ]
       },
       "bank": {
-        "index": 58.9,
+        "index": 55.4,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 35,
-          "valid_posts": 35,
+          "total_posts": 41,
+          "valid_posts": 41,
           "spam_posts": 0,
-          "newbie_posts": 16,
+          "newbie_posts": 17,
           "pure_newbie": 10,
-          "newbie_ratio": 45.7,
-          "avg_newbie_score": 50.1,
-          "avg_sentiment": 93.8,
-          "purity_signal": 62.5,
-          "activity": 43.8,
-          "mom_buy_index": 49.2,
+          "newbie_ratio": 41.5,
+          "avg_newbie_score": 49.4,
+          "avg_sentiment": 88.2,
+          "purity_signal": 58.8,
+          "activity": 51.2,
+          "mom_buy_index": 46.6,
           "mom_sell_index": 0.0,
           "buy_sell_ratio": 13.0,
           "buy_count": 13,
@@ -1587,7 +1606,7 @@
             "title": "银行ETF（512800）反弹新高！标的指数7月以来已涨近12%",
             "score": 66.0,
             "level": "纯小白",
-            "reasoning": "帖子「银行ETF（512800）反弹新高！标的指数7月以来已涨近12%...」 命中2个小信号: 过度乐观(4分), 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(逆市, 新高)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: medium)。",
+            "reasoning": "帖子「银行ETF（512800）反弹新高！标的指数7月以来已涨近12%...」 命中2个小信号: 过度乐观(4分), 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(新高, 逆市)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: medium)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1600,7 +1619,7 @@
             "title": "银行重返C位，工行、建行创新高！百亿银行ETF华宝512800逆市大涨2.56%，突破年内高点！",
             "score": 66.0,
             "level": "纯小白",
-            "reasoning": "帖子「银行重返C位，工行、建行创新高！百亿银行ETF华宝512800逆市大涨2.56%...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(大涨, 逆市, 新高)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: low)。",
+            "reasoning": "帖子「银行重返C位，工行、建行创新高！百亿银行ETF华宝512800逆市大涨2.56%...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(大涨, 创新高, 逆市)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1612,7 +1631,7 @@
             "title": "20天14阳！银行ETF（512800）逆市冲高1.3%，创本轮反弹新高",
             "score": 66.0,
             "level": "纯小白",
-            "reasoning": "帖子「20天14阳！银行ETF（512800）逆市冲高1.3%，创本轮反弹新高...」 命中2个小信号: 过度乐观(4分), 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(逆市, 新高)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: medium)。",
+            "reasoning": "帖子「20天14阳！银行ETF（512800）逆市冲高1.3%，创本轮反弹新高...」 命中2个小信号: 过度乐观(4分), 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(新高, 逆市)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: medium)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1622,10 +1641,10 @@
             ]
           },
           {
-            "title": "银行重返C位，工行、建行创新高！百亿银行ETF华宝（512800）逆市大涨2.56%，突破年内高点！ - 新浪财经",
+            "title": "银行重返C位，工行、建行创新高！百亿银行ETF华宝（512800）逆市大涨2.56%，突破年内高点！ - finance",
             "score": 66.0,
             "level": "纯小白",
-            "reasoning": "帖子「银行重返C位，工行、建行创新高！百亿银行ETF华宝（512800）逆市大涨2.5...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(大涨, 逆市, 新高)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: low)。",
+            "reasoning": "帖子「银行重返C位，工行、建行创新高！百亿银行ETF华宝（512800）逆市大涨2.5...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(大涨, 创新高, 逆市)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -1649,38 +1668,26 @@
         ]
       },
       "securities": {
-        "index": 48.1,
+        "index": 46.9,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 38,
-          "valid_posts": 38,
+          "total_posts": 36,
+          "valid_posts": 36,
           "spam_posts": 0,
-          "newbie_posts": 14,
-          "pure_newbie": 4,
-          "newbie_ratio": 36.8,
-          "avg_newbie_score": 42.2,
-          "avg_sentiment": 92.9,
-          "purity_signal": 28.6,
-          "activity": 47.5,
-          "mom_buy_index": 47.4,
+          "newbie_posts": 15,
+          "pure_newbie": 3,
+          "newbie_ratio": 41.7,
+          "avg_newbie_score": 39.8,
+          "avg_sentiment": 86.7,
+          "purity_signal": 20.0,
+          "activity": 45.0,
+          "mom_buy_index": 44.0,
           "mom_sell_index": 0.0,
           "buy_sell_ratio": 11.0,
           "buy_count": 11,
           "sell_count": 0
         },
         "top_newbie_posts": [
-          {
-            "title": "沪指翻红重回3800点！华林证券涨停，“旗手”证券ETF汇添富(560090)涨超2%，连续3日吸金！券商护盘回购潮汹涌",
-            "score": 58.0,
-            "level": "纯小白",
-            "reasoning": "帖子「沪指翻红重回3800点！华林证券涨停，“旗手”证券ETF汇添富(560090)涨...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(涨停, 吸金)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停, 吸金)"
-            ]
-          },
           {
             "title": "证券板块逆市走强，证券ETF国泰（512880）近20日吸金超64亿元",
             "score": 54.0,
@@ -1730,43 +1737,42 @@
             "key_signals": [
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 逆市, 拉升)"
             ]
-          }
-        ]
-      },
-      "insurance": {
-        "index": 45.2,
-        "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
-        "details": {
-          "total_posts": 35,
-          "valid_posts": 35,
-          "spam_posts": 0,
-          "newbie_posts": 9,
-          "pure_newbie": 3,
-          "newbie_ratio": 25.7,
-          "avg_newbie_score": 39.8,
-          "avg_sentiment": 100.0,
-          "purity_signal": 33.3,
-          "activity": 43.8,
-          "mom_buy_index": 52.6,
-          "mom_sell_index": 0.0,
-          "buy_sell_ratio": 8.0,
-          "buy_count": 8,
-          "sell_count": 0
-        },
-        "top_newbie_posts": [
+          },
           {
-            "title": "A股收报：创业板指冲高回落涨超3%！AI应用概念大涨，煤炭、保险等跌幅居前 - 东方财富",
-            "score": 62.0,
-            "level": "纯小白",
-            "reasoning": "帖子「A股收报：创业板指冲高回落涨超3%！AI应用概念大涨，煤炭、保险等跌幅居前 - ...」 命中2个小信号: 过度乐观(4分), 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(大涨)，易引发散户跟风 综合得分62.0分， 判定为「纯小白」 (置信度: medium)。",
+            "title": "午后异动拉升，顶流券商ETF华宝（512000）涨近2%，251.2亿元并购落地，券商整合再提速！资金密集关注 - fi",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「午后异动拉升，顶流券商ETF华宝（512000）涨近2%，251.2亿元并购落地...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(拉升)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
             "key_signals": [
-              "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)",
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大涨)"
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 拉升)"
             ]
-          },
+          }
+        ]
+      },
+      "insurance": {
+        "index": 42.2,
+        "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
+        "details": {
+          "total_posts": 34,
+          "valid_posts": 34,
+          "spam_posts": 0,
+          "newbie_posts": 7,
+          "pure_newbie": 2,
+          "newbie_ratio": 20.6,
+          "avg_newbie_score": 38.6,
+          "avg_sentiment": 100.0,
+          "purity_signal": 28.6,
+          "activity": 42.5,
+          "mom_buy_index": 43.0,
+          "mom_sell_index": 11.6,
+          "buy_sell_ratio": 5.0,
+          "buy_count": 5,
+          "sell_count": 1
+        },
+        "top_newbie_posts": [
           {
             "title": "证券行业并购整合提速，证券ETF易方达（512570）标的指数早盘逆市涨超1%",
             "score": 54.0,
@@ -1816,42 +1822,42 @@
             "key_signals": [
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 吸金)"
             ]
+          },
+          {
+            "title": "A股收评：三大指数飘绿，超3600只个股下跌；酒类、汽车、银行全天走高，油气、保险、电信板块上涨；通信设备、半导体大跌 ",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「A股收评：三大指数飘绿，超3600只个股下跌；酒类、汽车、银行全天走高，油气、保...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大跌)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": -1.0,
+            "intent": "sell",
+            "intent_label": "🔴 卖出",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大跌)"
+            ]
           }
         ]
       },
       "coal": {
-        "index": 49.1,
+        "index": 47.2,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 34,
-          "valid_posts": 34,
+          "total_posts": 35,
+          "valid_posts": 35,
           "spam_posts": 0,
           "newbie_posts": 15,
-          "pure_newbie": 3,
-          "newbie_ratio": 44.1,
-          "avg_newbie_score": 39.2,
+          "pure_newbie": 2,
+          "newbie_ratio": 42.9,
+          "avg_newbie_score": 37.6,
           "avg_sentiment": 93.3,
-          "purity_signal": 20.0,
-          "activity": 42.5,
-          "mom_buy_index": 44.7,
+          "purity_signal": 13.3,
+          "activity": 43.8,
+          "mom_buy_index": 40.8,
           "mom_sell_index": 0.0,
-          "buy_sell_ratio": 11.0,
-          "buy_count": 11,
+          "buy_sell_ratio": 10.0,
+          "buy_count": 10,
           "sell_count": 0
         },
         "top_newbie_posts": [
-          {
-            "title": "山西煤炭安监新政落地，供给硬约束持续！杰瑞股份涨停，能源ETF汇添富(159930)震荡收涨，近10日大举吸金超3亿元！",
-            "score": 58.0,
-            "level": "纯小白",
-            "reasoning": "帖子「山西煤炭安监新政落地，供给硬约束持续！杰瑞股份涨停，能源ETF汇添富(15993...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(涨停, 吸金)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停, 吸金)"
-            ]
-          },
           {
             "title": "煤炭板块强势拉升，煤炭ETF国泰（515220）盘中大涨超5%",
             "score": 54.0,
@@ -1901,27 +1907,39 @@
             "key_signals": [
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 逆市, 吸金)"
             ]
+          },
+          {
+            "title": "资金抢筹布局煤炭板块，煤炭ETF国泰（515220）近10日吸金超27亿元",
+            "score": 42.0,
+            "level": "偏小白",
+            "reasoning": "帖子「资金抢筹布局煤炭板块，煤炭ETF国泰（515220）近10日吸金超27亿元...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(吸金, 抢筹)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 吸金, 抢筹)"
+            ]
           }
         ]
       },
       "crude_oil": {
-        "index": 41.3,
+        "index": 43.4,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 35,
-          "valid_posts": 35,
+          "total_posts": 34,
+          "valid_posts": 34,
           "spam_posts": 0,
-          "newbie_posts": 6,
-          "pure_newbie": 4,
-          "newbie_ratio": 17.1,
-          "avg_newbie_score": 57.7,
-          "avg_sentiment": 50.0,
-          "purity_signal": 66.7,
-          "activity": 43.8,
-          "mom_buy_index": 44.8,
-          "mom_sell_index": 13.2,
-          "buy_sell_ratio": 4.0,
-          "buy_count": 4,
+          "newbie_posts": 8,
+          "pure_newbie": 5,
+          "newbie_ratio": 23.5,
+          "avg_newbie_score": 55.2,
+          "avg_sentiment": 54.1,
+          "purity_signal": 62.5,
+          "activity": 42.5,
+          "mom_buy_index": 48.6,
+          "mom_sell_index": 10.9,
+          "buy_sell_ratio": 6.0,
+          "buy_count": 6,
           "sell_count": 1
         },
         "top_newbie_posts": [
@@ -1965,6 +1983,18 @@
             ]
           },
           {
+            "title": "【美股收评】特朗普停火信号点燃市场！美股连涨两日、原油ETF量价齐创新高、耐克大跌15% - FX168财经",
+            "score": 58.0,
+            "level": "纯小白",
+            "reasoning": "帖子「【美股收评】特朗普停火信号点燃市场！美股连涨两日、原油ETF量价齐创新高、耐克大...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(新高, 创新高, 大跌)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: low)。",
+            "sentiment": 0.33,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 连涨, 创新高)"
+            ]
+          },
+          {
             "title": "地缘冲突引爆原油市场，19只上市油气基金全线涨停，机构解读多空博弈 - 财联社",
             "score": 54.0,
             "level": "纯小白",
@@ -1976,35 +2006,23 @@
               "「过度乐观」非理性乐观（梭哈/稳赚/必涨/躺赚） (命中: 冲)",
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停)"
             ]
-          },
-          {
-            "title": "涨停、溢价、停牌！石油变“黄金”？超90亿资金涌入油气ETF - 新京报",
-            "score": 46.0,
-            "level": "偏小白",
-            "reasoning": "帖子「涨停、溢价、停牌！石油变“黄金”？超90亿资金涌入油气ETF - 新京报...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(涨停)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停)"
-            ]
           }
         ]
       },
       "nonferrous": {
-        "index": 41.6,
+        "index": 41.9,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 34,
-          "valid_posts": 34,
+          "total_posts": 33,
+          "valid_posts": 33,
           "spam_posts": 0,
           "newbie_posts": 11,
           "pure_newbie": 2,
-          "newbie_ratio": 32.4,
+          "newbie_ratio": 33.3,
           "avg_newbie_score": 38.1,
           "avg_sentiment": 81.8,
           "purity_signal": 18.2,
-          "activity": 42.5,
+          "activity": 41.2,
           "mom_buy_index": 33.8,
           "mom_sell_index": 8.9,
           "buy_sell_ratio": 6.0,
@@ -2078,19 +2096,19 @@
         ]
       },
       "chemical": {
-        "index": 40.4,
+        "index": 41.0,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 36,
-          "valid_posts": 36,
+          "total_posts": 34,
+          "valid_posts": 34,
           "spam_posts": 0,
           "newbie_posts": 9,
           "pure_newbie": 4,
-          "newbie_ratio": 25.0,
+          "newbie_ratio": 26.5,
           "avg_newbie_score": 41.6,
           "avg_sentiment": 66.7,
           "purity_signal": 44.4,
-          "activity": 45.0,
+          "activity": 42.5,
           "mom_buy_index": 14.0,
           "mom_sell_index": 0.0,
           "buy_sell_ratio": 1.0,
@@ -2099,7 +2117,7 @@
         },
         "top_newbie_posts": [
           {
-            "title": "化工板块逆市显韧性，华宝基金化工ETF（516020）盘中涨超1%！“击球区”已至？ - 新浪财经",
+            "title": "化工板块逆市显韧性，华宝基金化工ETF（516020）盘中涨超1%！“击球区”已至？ - finance.sina.co",
             "score": 58.0,
             "level": "纯小白",
             "reasoning": "帖子「化工板块逆市显韧性，华宝基金化工ETF（516020）盘中涨超1%！“击球区”已...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(逆市)，易引发散户跟风 综合得分58.0分， 判定为「纯小白」 (置信度: medium)。",
@@ -2166,23 +2184,23 @@
         ]
       },
       "steel": {
-        "index": 48.3,
+        "index": 47.3,
         "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
           "total_posts": 34,
           "valid_posts": 34,
           "spam_posts": 0,
-          "newbie_posts": 9,
+          "newbie_posts": 11,
           "pure_newbie": 5,
-          "newbie_ratio": 26.5,
-          "avg_newbie_score": 46.4,
-          "avg_sentiment": 88.9,
-          "purity_signal": 55.6,
+          "newbie_ratio": 32.4,
+          "avg_newbie_score": 44.8,
+          "avg_sentiment": 81.8,
+          "purity_signal": 45.5,
           "activity": 42.5,
-          "mom_buy_index": 46.7,
+          "mom_buy_index": 43.8,
           "mom_sell_index": 0.0,
-          "buy_sell_ratio": 7.0,
-          "buy_count": 7,
+          "buy_sell_ratio": 8.0,
+          "buy_count": 8,
           "sell_count": 0
         },
         "top_newbie_posts": [
@@ -2216,7 +2234,7 @@
             "title": "资金抢筹钢铁板块，钢铁ETF国泰（515210）连续3日“吸金”",
             "score": 54.0,
             "level": "纯小白",
-            "reasoning": "帖子「资金抢筹钢铁板块，钢铁ETF国泰（515210）连续3日“吸金”...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(抢筹, 吸金)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: medium)。",
+            "reasoning": "帖子「资金抢筹钢铁板块，钢铁ETF国泰（515210）连续3日“吸金”...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(吸金, 抢筹)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: medium)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -2254,7 +2272,7 @@
         ]
       },
       "infrastructure": {
-        "index": 23.0,
+        "index": 22.8,
         "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
         "details": {
           "total_posts": 26,
@@ -2263,7 +2281,7 @@
           "newbie_posts": 5,
           "pure_newbie": 0,
           "newbie_ratio": 19.2,
-          "avg_newbie_score": 29.2,
+          "avg_newbie_score": 28.4,
           "avg_sentiment": 40.0,
           "purity_signal": 0.0,
           "activity": 32.5,
@@ -2275,10 +2293,10 @@
         },
         "top_newbie_posts": [
           {
-            "title": "广发基金的基建ETF广发（516970）主力资金流出244.8万元 - cj.sina.cn",
+            "title": "广发基金的基建ETF广发（516970）主力资金流出244.8万元 - finance.sina.com.cn",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「广发基金的基建ETF广发（516970）主力资金流出244.8万元 - cj.s...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(资金流出)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「广发基金的基建ETF广发（516970）主力资金流出244.8万元 - fina...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(资金流出)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "neutral",
             "intent_label": "⚪ 观望",
@@ -2299,16 +2317,6 @@
             ]
           },
           {
-            "title": "工程机械ETF招商（560920）午后涨2.25%！新基建+出海驱动挖机上半年销量高增，三一重工、潍柴动力涨超3%！ -",
-            "score": 26.0,
-            "level": "中间派",
-            "reasoning": "帖子「工程机械ETF招商（560920）午后涨2.25%！新基建+出海驱动挖机上半年销...」 未命中明确的信号词，内容较短或信息不足。 根据有限信息判定为中间派。",
-            "sentiment": 1.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": []
-          },
-          {
             "title": "行业ETF风向标丨化工ETF（159870）半日成交超10亿元，4只基建ETF半日涨幅超1.5%",
             "score": 22.0,
             "level": "中间派",
@@ -2318,6 +2326,18 @@
             "intent_label": "⚪ 观望",
             "key_signals": [
               "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 今日)"
+            ]
+          },
+          {
+            "title": "涨超2.1%，建材ETF富国(516750)盘中上涨2.11% - finance.sina.com.cn",
+            "score": 22.0,
+            "level": "中间派",
+            "reasoning": "帖子「涨超2.1%，建材ETF富国(516750)盘中上涨2.11% - financ...」 命中1个小信号: 短期思维(3分)。 综合得分22.0分， 判定为「中间派」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)"
             ]
           },
           {
@@ -2335,31 +2355,31 @@
         ]
       },
       "realestate": {
-        "index": 31.7,
-        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
+        "index": 40.9,
+        "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
         "details": {
-          "total_posts": 34,
-          "valid_posts": 34,
+          "total_posts": 30,
+          "valid_posts": 30,
           "spam_posts": 0,
-          "newbie_posts": 9,
-          "pure_newbie": 2,
-          "newbie_ratio": 26.5,
-          "avg_newbie_score": 35.4,
-          "avg_sentiment": 44.4,
-          "purity_signal": 22.2,
-          "activity": 42.5,
-          "mom_buy_index": 28.6,
+          "newbie_posts": 11,
+          "pure_newbie": 3,
+          "newbie_ratio": 36.7,
+          "avg_newbie_score": 37.7,
+          "avg_sentiment": 63.6,
+          "purity_signal": 27.3,
+          "activity": 37.5,
+          "mom_buy_index": 33.8,
           "mom_sell_index": 0.0,
-          "buy_sell_ratio": 4.0,
-          "buy_count": 4,
+          "buy_sell_ratio": 6.0,
+          "buy_count": 6,
           "sell_count": 0
         },
         "top_newbie_posts": [
           {
-            "title": "直线拉升！000736，涨停！房地产板块，连续走强！ - 新浪财经",
+            "title": "直线拉升！000736，涨停！房地产板块，连续走强！ - finance.sina.com.cn",
             "score": 66.0,
             "level": "纯小白",
-            "reasoning": "帖子「直线拉升！000736，涨停！房地产板块，连续走强！ - 新浪财经...」 命中1个小信号: 市场异动(6分)。 标题含3个感叹号，情绪强烈 含市场异动词汇(涨停, 拉升)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: low)。",
+            "reasoning": "帖子「直线拉升！000736，涨停！房地产板块，连续走强！ - finance.sin...」 命中1个小信号: 市场异动(6分)。 标题含3个感叹号，情绪强烈 含市场异动词汇(拉升, 涨停)，易引发散户跟风 综合得分66.0分， 判定为「纯小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -2381,7 +2401,32 @@
             ]
           },
           {
-            "title": "大多数都是业绩巨亏损的股票房地产都开始走连续创新高走势图了没有任何理由业主全世界 - caifuhao.eastmone",
+            "title": "南方基金旗下房地产ETF南方(512200)标的指数盘中逆市涨近2%，房地产市场筑底回稳态势增强 - xw.qq.com",
+            "score": 50.0,
+            "level": "纯小白",
+            "reasoning": "帖子「南方基金旗下房地产ETF南方(512200)标的指数盘中逆市涨近2%，房地产市场...」 命中2个小信号: 短期思维(3分), 市场异动(6分)。 含市场异动词汇(逆市)，易引发散户跟风 综合得分50.0分， 判定为「纯小白」 (置信度: medium)。",
+            "sentiment": 1.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「短期思维」关注明天/后天/今天涨跌，非长期视角 (命中: 盘中)",
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 逆市)"
+            ]
+          },
+          {
+            "title": "万科A，直线涨停！地产股爆发 - 证券时报",
+            "score": 46.0,
+            "level": "偏小白",
+            "reasoning": "帖子「万科A，直线涨停！地产股爆发 - 证券时报...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(涨停)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停)"
+            ]
+          },
+          {
+            "title": "大多数都是业绩巨亏损的股票房地产都开始走连续创新高走势图了没有任何理由业主全世界 - 财富号",
             "score": 42.0,
             "level": "偏小白",
             "reasoning": "帖子「大多数都是业绩巨亏损的股票房地产都开始走连续创新高走势图了没有任何理由业主全世界...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(新高, 创新高)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
@@ -2391,52 +2436,27 @@
             "key_signals": [
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 创新高, 新高)"
             ]
-          },
-          {
-            "title": "爱丽家居：股票交易严重异常波动 8月3日起停牌核查",
-            "score": 38.0,
-            "level": "偏小白",
-            "reasoning": "帖子「爱丽家居：股票交易严重异常波动 8月3日起停牌核查...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(异常)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 0.0,
-            "intent": "neutral",
-            "intent_label": "⚪ 观望",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 异常)"
-            ]
-          },
-          {
-            "title": "南方基金旗下房地产ETF南方512200直线拉升涨超3%，机构：地产板块估值筑底、配置价值凸显",
-            "score": 30.0,
-            "level": "中间派",
-            "reasoning": "帖子「南方基金旗下房地产ETF南方512200直线拉升涨超3%，机构：地产板块估值筑底...」 命中1个小信号: 市场异动(6分)。 命中1个专业信号: 专业术语(-5分)。 含市场异动词汇(拉升)，易引发散户跟风 综合得分30.0分， 判定为「中间派」 (置信度: medium)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 拉升)",
-              "「专业术语」使用PE/PB/ROE/基本面/技术面/估值等专业词汇 (命中: 估值)"
-            ]
           }
         ]
       },
       "gold": {
-        "index": 40.1,
-        "interpretation": "🟡 开始升温 — 小白活跃度明显上升，需保持关注",
+        "index": 35.9,
+        "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
         "details": {
-          "total_posts": 33,
-          "valid_posts": 33,
+          "total_posts": 34,
+          "valid_posts": 34,
           "spam_posts": 0,
-          "newbie_posts": 9,
+          "newbie_posts": 8,
           "pure_newbie": 1,
-          "newbie_ratio": 27.3,
-          "avg_newbie_score": 39.2,
-          "avg_sentiment": 88.9,
-          "purity_signal": 11.1,
-          "activity": 41.2,
-          "mom_buy_index": 33.7,
-          "mom_sell_index": 9.9,
-          "buy_sell_ratio": 5.0,
-          "buy_count": 5,
+          "newbie_ratio": 23.5,
+          "avg_newbie_score": 38.3,
+          "avg_sentiment": 75.0,
+          "purity_signal": 12.5,
+          "activity": 42.5,
+          "mom_buy_index": 30.7,
+          "mom_sell_index": 10.7,
+          "buy_sell_ratio": 4.0,
+          "buy_count": 4,
           "sell_count": 1
         },
         "top_newbie_posts": [
@@ -2466,10 +2486,10 @@
             ]
           },
           {
-            "title": "金价二季度跌去30% ，黄金ETF却持续吸金！基金经理给出最新判断 - 新浪财经",
+            "title": "金价二季度跌去30% ，黄金ETF却持续吸金！基金经理给出最新判断 - finance.sina.com.cn",
             "score": 46.0,
             "level": "偏小白",
-            "reasoning": "帖子「金价二季度跌去30% ，黄金ETF却持续吸金！基金经理给出最新判断 - 新浪财经...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(吸金)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「金价二季度跌去30% ，黄金ETF却持续吸金！基金经理给出最新判断 - fina...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(吸金)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
@@ -2478,67 +2498,54 @@
             ]
           },
           {
-            "title": "金价二季度跌去30% ，黄金ETF却持续吸金！基金经理给出最新判断 - 新浪财经",
-            "score": 46.0,
-            "level": "偏小白",
-            "reasoning": "帖子「金价二季度跌去30% ，黄金ETF却持续吸金！基金经理给出最新判断 - 新浪财经...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(吸金)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 吸金)"
-            ]
-          },
-          {
-            "title": "重仓黄金股的基金，悄悄大涨 - finance.ifeng.com",
+            "title": "重仓黄金股的基金，悄悄大涨 - 凤凰网",
             "score": 38.0,
             "level": "偏小白",
-            "reasoning": "帖子「重仓黄金股的基金，悄悄大涨 - finance.ifeng.com...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大涨)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「重仓黄金股的基金，悄悄大涨 - 凤凰网...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大涨)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 1.0,
             "intent": "buy",
             "intent_label": "🟢 买入",
             "key_signals": [
               "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大涨)"
             ]
+          },
+          {
+            "title": "留还是抛？现货黄金创年内新低，黄金基金收益由正转负 - 京报网",
+            "score": 38.0,
+            "level": "偏小白",
+            "reasoning": "帖子「留还是抛？现货黄金创年内新低，黄金基金收益由正转负 - 京报网...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(新低)，易引发散户跟风 综合得分38.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 新低)"
+            ]
           }
         ]
       },
       "nasdaq": {
-        "index": 37.4,
+        "index": 30.5,
         "interpretation": "🟢 正常区间 — 小白参与度适中，无需特别操作",
         "details": {
-          "total_posts": 38,
-          "valid_posts": 38,
+          "total_posts": 39,
+          "valid_posts": 39,
           "spam_posts": 0,
-          "newbie_posts": 9,
+          "newbie_posts": 7,
           "pure_newbie": 2,
-          "newbie_ratio": 23.7,
-          "avg_newbie_score": 45.1,
-          "avg_sentiment": 66.7,
-          "purity_signal": 22.2,
-          "activity": 47.5,
-          "mom_buy_index": 22.0,
-          "mom_sell_index": 35.6,
-          "buy_sell_ratio": 0.6,
-          "buy_count": 3,
-          "sell_count": 5
+          "newbie_ratio": 17.9,
+          "avg_newbie_score": 42.0,
+          "avg_sentiment": 42.9,
+          "purity_signal": 28.6,
+          "activity": 48.8,
+          "mom_buy_index": 21.4,
+          "mom_sell_index": 21.4,
+          "buy_sell_ratio": 1.0,
+          "buy_count": 2,
+          "sell_count": 2
         },
         "top_newbie_posts": [
           {
-            "title": "全球科技股反弹！为什么SK海力士30%涨停，德明利今天却炸板翻绿？",
-            "score": 78.0,
-            "level": "纯小白",
-            "reasoning": "帖子「全球科技股反弹！为什么SK海力士30%涨停，德明利今天却炸板翻绿？...」 命中2个小信号: 知识求助(6分), 市场异动(6分)。 以问句结尾，在寻求答案 标题含1个感叹号，情绪强烈 含市场异动词汇(涨停)，易引发散户跟风 综合得分78.0分， 判定为「纯小白」 (置信度: medium)。",
-            "sentiment": 1.0,
-            "intent": "buy",
-            "intent_label": "🟢 买入",
-            "key_signals": [
-              "「知识求助」在问基础问题（怎么买/在哪看/什么意思） (命中: 为什么)",
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 涨停)"
-            ]
-          },
-          {
-            "title": "正式纳入纳指100，商业航天继续回调！华宝基金通用航空ETF（159231）再跌2%，资金抢筹1000万份！ - 新浪财",
+            "title": "正式纳入纳指100，商业航天继续回调！华宝基金通用航空ETF（159231）再跌2%，资金抢筹1000万份！ - fin",
             "score": 54.0,
             "level": "纯小白",
             "reasoning": "帖子「正式纳入纳指100，商业航天继续回调！华宝基金通用航空ETF（159231）再跌...」 命中1个小信号: 市场异动(6分)。 标题含2个感叹号，情绪强烈 含市场异动词汇(抢筹)，易引发散户跟风 综合得分54.0分， 判定为「纯小白」 (置信度: low)。",
@@ -2550,22 +2557,34 @@
             ]
           },
           {
-            "title": "苹果净利润大增27%，股价为何大跌？",
+            "title": "科技股突然暴涨，下周还能追吗？",
+            "score": 50.0,
+            "level": "纯小白",
+            "reasoning": "帖子「科技股突然暴涨，下周还能追吗？...」 命中1个小信号: 市场异动(6分)。 以问句结尾，在寻求答案 含市场异动词汇(突然, 暴涨)，易引发散户跟风 综合得分50.0分， 判定为「纯小白」 (置信度: low)。",
+            "sentiment": 1.0,
+            "intent": "buy",
+            "intent_label": "🟢 买入",
+            "key_signals": [
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 暴涨, 突然)"
+            ]
+          },
+          {
+            "title": "史上罕见，科技股回购潮！这些公司回购+增持双管齐下（附名单）",
             "score": 46.0,
             "level": "偏小白",
-            "reasoning": "帖子「苹果净利润大增27%，股价为何大跌？...」 命中1个小信号: 市场异动(6分)。 以问句结尾，在寻求答案 含市场异动词汇(大跌)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
-            "sentiment": -1.0,
-            "intent": "sell",
-            "intent_label": "🔴 卖出",
+            "reasoning": "帖子「史上罕见，科技股回购潮！这些公司回购+增持双管齐下（附名单）...」 命中1个小信号: 市场异动(6分)。 标题含1个感叹号，情绪强烈 含市场异动词汇(罕见)，易引发散户跟风 综合得分46.0分， 判定为「偏小白」 (置信度: low)。",
+            "sentiment": 0.0,
+            "intent": "neutral",
+            "intent_label": "⚪ 观望",
             "key_signals": [
-              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 大跌)"
+              "「市场异动」新闻/讨论提及极端涨跌或罕见波动，易引发散户情绪 (命中: 罕见)"
             ]
           },
           {
             "title": "美股收盘：道指跌超2%、纳斯达克100指数进入回调Roundhill存储ETF跌超6%光通信、存储板块继续大跌 - 财联",
             "score": 42.0,
             "level": "偏小白",
-            "reasoning": "帖子「美股收盘：道指跌超2%、纳斯达克100指数进入回调Roundhill存储ETF跌...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(跌超, 大跌)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「美股收盘：道指跌超2%、纳斯达克100指数进入回调Roundhill存储ETF跌...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大跌, 跌超)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": -1.0,
             "intent": "sell",
             "intent_label": "🔴 卖出",
@@ -2577,7 +2596,7 @@
             "title": "半导体抛售潮拖累美股，纳指100一度跌2%，中概再逆市涨，黄金大跌破4000 - 华尔街见闻",
             "score": 42.0,
             "level": "偏小白",
-            "reasoning": "帖子「半导体抛售潮拖累美股，纳指100一度跌2%，中概再逆市涨，黄金大跌破4000 -...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(逆市, 大跌)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
+            "reasoning": "帖子「半导体抛售潮拖累美股，纳指100一度跌2%，中概再逆市涨，黄金大跌破4000 -...」 命中1个小信号: 市场异动(6分)。 含市场异动词汇(大跌, 逆市)，易引发散户跟风 综合得分42.0分， 判定为「偏小白」 (置信度: low)。",
             "sentiment": 0.0,
             "intent": "sell",
             "intent_label": "🔴 卖出",
@@ -2661,7 +2680,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 38.8
+        "index": 42.7
+      },
+      {
+        "date": "2026-08-02",
+        "index": 41.9
       }
     ],
     "electronics": [
@@ -2715,6 +2738,10 @@
       },
       {
         "date": "2026-08-01",
+        "index": 48.7
+      },
+      {
+        "date": "2026-08-02",
         "index": 49.3
       }
     ],
@@ -2729,7 +2756,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 52.5
+        "index": 50.8
+      },
+      {
+        "date": "2026-08-02",
+        "index": 45.2
       }
     ],
     "cpo": [
@@ -2803,6 +2834,10 @@
       },
       {
         "date": "2026-08-01",
+        "index": 60.2
+      },
+      {
+        "date": "2026-08-02",
         "index": 61.5
       }
     ],
@@ -2857,7 +2892,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 51.1
+        "index": 50.3
+      },
+      {
+        "date": "2026-08-02",
+        "index": 52.5
       }
     ],
     "communication": [
@@ -2911,7 +2950,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 43.6
+        "index": 43.8
+      },
+      {
+        "date": "2026-08-02",
+        "index": 42.5
       }
     ],
     "military": [
@@ -2925,7 +2968,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 49.6
+        "index": 51.0
+      },
+      {
+        "date": "2026-08-02",
+        "index": 53.3
       }
     ],
     "robot": [
@@ -2939,7 +2986,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 36.8
+        "index": 38.1
+      },
+      {
+        "date": "2026-08-02",
+        "index": 34.8
       }
     ],
     "newenergy": [
@@ -3002,6 +3053,10 @@
       {
         "date": "2026-08-01",
         "index": 10.6
+      },
+      {
+        "date": "2026-08-02",
+        "index": 27.7
       }
     ],
     "battery": [
@@ -3015,7 +3070,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 35.8
+        "index": 36.5
+      },
+      {
+        "date": "2026-08-02",
+        "index": 35.0
       }
     ],
     "power_grid": [
@@ -3029,7 +3088,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 48.3
+        "index": 48.7
+      },
+      {
+        "date": "2026-08-02",
+        "index": 50.3
       }
     ],
     "medicine": [
@@ -3083,7 +3146,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 32.0
+        "index": 29.6
+      },
+      {
+        "date": "2026-08-02",
+        "index": 34.3
       }
     ],
     "baijiu": [
@@ -3138,6 +3205,10 @@
       {
         "date": "2026-08-01",
         "index": 42.5
+      },
+      {
+        "date": "2026-08-02",
+        "index": 41.9
       }
     ],
     "food": [
@@ -3191,7 +3262,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 43.2
+        "index": 45.9
+      },
+      {
+        "date": "2026-08-02",
+        "index": 43.6
       }
     ],
     "appliance": [
@@ -3245,7 +3320,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 30.2
+        "index": 31.4
+      },
+      {
+        "date": "2026-08-02",
+        "index": 32.6
       }
     ],
     "tourism": [
@@ -3299,7 +3378,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 43.8
+        "index": 42.5
+      },
+      {
+        "date": "2026-08-02",
+        "index": 43.3
       }
     ],
     "media": [
@@ -3353,7 +3436,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 35.4
+        "index": 35.1
+      },
+      {
+        "date": "2026-08-02",
+        "index": 35.6
       }
     ],
     "biotech": [
@@ -3415,7 +3502,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 41.7
+        "index": 38.2
+      },
+      {
+        "date": "2026-08-02",
+        "index": 41.8
       }
     ],
     "consumer": [
@@ -3477,7 +3568,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 59.4
+        "index": 59.3
+      },
+      {
+        "date": "2026-08-02",
+        "index": 61.6
       }
     ],
     "bank": [
@@ -3539,7 +3634,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 58.9
+        "index": 56.5
+      },
+      {
+        "date": "2026-08-02",
+        "index": 55.4
       }
     ],
     "securities": [
@@ -3601,7 +3700,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 48.1
+        "index": 47.4
+      },
+      {
+        "date": "2026-08-02",
+        "index": 46.9
       }
     ],
     "insurance": [
@@ -3656,6 +3759,10 @@
       {
         "date": "2026-08-01",
         "index": 45.2
+      },
+      {
+        "date": "2026-08-02",
+        "index": 42.2
       }
     ],
     "coal": [
@@ -3710,6 +3817,10 @@
       {
         "date": "2026-08-01",
         "index": 49.1
+      },
+      {
+        "date": "2026-08-02",
+        "index": 47.2
       }
     ],
     "crude_oil": [
@@ -3723,7 +3834,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 41.3
+        "index": 42.7
+      },
+      {
+        "date": "2026-08-02",
+        "index": 43.4
       }
     ],
     "nonferrous": [
@@ -3777,7 +3892,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 41.6
+        "index": 41.9
+      },
+      {
+        "date": "2026-08-02",
+        "index": 41.9
       }
     ],
     "chemical": [
@@ -3832,6 +3951,10 @@
       {
         "date": "2026-08-01",
         "index": 40.4
+      },
+      {
+        "date": "2026-08-02",
+        "index": 41.0
       }
     ],
     "steel": [
@@ -3886,6 +4009,10 @@
       {
         "date": "2026-08-01",
         "index": 48.3
+      },
+      {
+        "date": "2026-08-02",
+        "index": 47.3
       }
     ],
     "infrastructure": [
@@ -3939,7 +4066,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 23.0
+        "index": 26.6
+      },
+      {
+        "date": "2026-08-02",
+        "index": 22.8
       }
     ],
     "realestate": [
@@ -3993,7 +4124,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 31.7
+        "index": 32.8
+      },
+      {
+        "date": "2026-08-02",
+        "index": 40.9
       }
     ],
     "gold": [
@@ -4067,7 +4202,11 @@
       },
       {
         "date": "2026-08-01",
-        "index": 40.1
+        "index": 39.2
+      },
+      {
+        "date": "2026-08-02",
+        "index": 35.9
       }
     ],
     "nasdaq": [
@@ -4141,18 +4280,22 @@
       },
       {
         "date": "2026-08-01",
-        "index": 37.4
+        "index": 34.0
+      },
+      {
+        "date": "2026-08-02",
+        "index": 30.5
       }
     ]
   },
-  "record_count": 18,
+  "record_count": 19,
   "data_sources": {
     "东方财富股吧": {
       "name": "东方财富股吧",
       "status": "success",
       "count": 302,
       "error": "",
-      "duration": 12.82
+      "duration": 12.73
     },
     "小红书": {
       "name": "小红书",
@@ -4166,28 +4309,28 @@
       "status": "success",
       "count": 703,
       "error": "",
-      "duration": 79.21
+      "duration": 126.88
     },
     "网易财经": {
       "name": "网易财经",
       "status": "success",
       "count": 21,
       "error": "",
-      "duration": 0.58
+      "duration": 0.62
     },
     "东方财富资讯": {
       "name": "东方财富资讯",
       "status": "success",
       "count": 12,
       "error": "",
-      "duration": 1.17
+      "duration": 1.13
     },
     "同花顺财经": {
       "name": "同花顺财经",
       "status": "success",
-      "count": 46,
+      "count": 41,
       "error": "",
-      "duration": 2.35
+      "duration": 2.27
     },
     "雪球社区": {
       "name": "雪球社区",
@@ -4206,12 +4349,12 @@
     "市场异动数据(AKShare)": {
       "name": "市场异动数据(AKShare)",
       "status": "success",
-      "count": 5930,
+      "count": 6029,
       "error": "",
       "duration": 0.02
     }
   },
-  "generated_at": "2026-08-01T19:11:48.786791",
+  "generated_at": "2026-08-02T09:49:52.085284",
   "data_provenance": {
     "is_real_data": true,
     "has_user_discussion": true,
@@ -4220,99 +4363,99 @@
     "source_count": 7,
     "passed_count": 5,
     "passed_with_data_count": 5,
-    "total_records": 1084,
+    "total_records": 1079,
     "performance_stats": {
-      "total_collection_duration_ms": 96120.3,
-      "avg_source_duration_ms": 13731.5,
-      "max_source_duration_ms": 79205.5,
+      "total_collection_duration_ms": 143632.6,
+      "avg_source_duration_ms": 20518.9,
+      "max_source_duration_ms": 126884.2,
       "min_source_duration_ms": 0.1,
-      "avg_http_latency_ms": 7260.0,
-      "max_http_latency_ms": 12081.2
+      "avg_http_latency_ms": 8091.8,
+      "max_http_latency_ms": 12931.0
     },
     "fingerprints": [
       {
         "source_name": "东方财富股吧",
-        "fingerprint": "826a5e49ff19648e4f7851c6383a274e043590037db3ce248a077adf23473f7b",
+        "fingerprint": "c3c1404a41b77f47457bcb3962c732d84d4a0b8145db962196746273c29b6db4",
         "record_count": 302,
         "passed": true,
         "issues": [],
-        "collected_at": "2026-08-01T19:10:21.918156",
-        "checked_at": "2026-08-01T19:10:21.920213",
-        "duration_ms": 12819.3,
-        "http_latency_ms": 12081.2
+        "collected_at": "2026-08-02T09:47:39.148179",
+        "checked_at": "2026-08-02T09:47:39.150160",
+        "duration_ms": 12730.6,
+        "http_latency_ms": 12931.0
       },
       {
         "source_name": "小红书",
-        "fingerprint": "c79889fd04199410c8d2a706984c756353290c552dd128bf5b4e6f1b0dca3ae2",
+        "fingerprint": "5b20f52f17601ba01857e5dc4b5d9cafcb56ece07fc763d01ae1c7d860a00886",
         "record_count": 0,
         "passed": false,
         "issues": [
           "小红书: 采集记录数为 0，可能被风控/限流或网络异常，标记为未通过"
         ],
-        "collected_at": "2026-08-01T19:10:21.920471",
-        "checked_at": "2026-08-01T19:10:21.920531",
+        "collected_at": "2026-08-02T09:47:39.150487",
+        "checked_at": "2026-08-02T09:47:39.150570",
         "duration_ms": 0.1,
         "http_latency_ms": 0
       },
       {
         "source_name": "Google News",
-        "fingerprint": "9bb6066ceb7c0bb6c2df9d9f43d657e91f5af405cd7f923261d28ec756da8502",
+        "fingerprint": "8a80e0524879e9b589531479132ae4940d72a1e3482cfb4a077740dc4a963517",
         "record_count": 703,
         "passed": true,
         "issues": [],
-        "collected_at": "2026-08-01T19:11:41.130122",
-        "checked_at": "2026-08-01T19:11:41.135902",
-        "duration_ms": 79205.5,
-        "http_latency_ms": 9577.5
+        "collected_at": "2026-08-02T09:49:46.039137",
+        "checked_at": "2026-08-02T09:49:46.045558",
+        "duration_ms": 126884.2,
+        "http_latency_ms": 12638.8
       },
       {
         "source_name": "网易财经",
-        "fingerprint": "85fc55732a729f08fbb5ed25d1eb77f8f89aff8b042cfede9fd90fd04b404e1c",
+        "fingerprint": "689e414a66f3964085531d5eff0086c6f36eac09107af9ee87c606780591a68b",
         "record_count": 21,
         "passed": true,
         "issues": [],
-        "collected_at": "2026-08-01T19:11:41.714125",
-        "checked_at": "2026-08-01T19:11:41.714370",
-        "duration_ms": 577.8,
-        "http_latency_ms": 7654.6
+        "collected_at": "2026-08-02T09:49:46.665818",
+        "checked_at": "2026-08-02T09:49:46.666041",
+        "duration_ms": 619.8,
+        "http_latency_ms": 8316.5
       },
       {
         "source_name": "东方财富资讯",
-        "fingerprint": "0ab321b30cdfdab0e18a7b44d35a3b40661f971114f6682cc08f420039da774b",
+        "fingerprint": "daba2f34fb961460ba7571e8ac38ff65058ae3b4740c4fe3b80956f6761e1ad1",
         "record_count": 12,
         "passed": true,
         "issues": [],
-        "collected_at": "2026-08-01T19:11:42.882822",
-        "checked_at": "2026-08-01T19:11:42.883103",
-        "duration_ms": 1168.2,
-        "http_latency_ms": 6093.1
+        "collected_at": "2026-08-02T09:49:47.797585",
+        "checked_at": "2026-08-02T09:49:47.797783",
+        "duration_ms": 1131.2,
+        "http_latency_ms": 6505.5
       },
       {
         "source_name": "同花顺财经",
-        "fingerprint": "982683c7d94e003ae2f4e31cf651fdc5ff6c6661593c966454f53dddb1f8442b",
-        "record_count": 46,
+        "fingerprint": "0cc8cd8950e366d7a4a4d10c8a8028809c53ac36bb77d2ec85e246a32d9160d9",
+        "record_count": 41,
         "passed": true,
         "issues": [],
-        "collected_at": "2026-08-01T19:11:45.232960",
-        "checked_at": "2026-08-01T19:11:45.233390",
-        "duration_ms": 2349.3,
-        "http_latency_ms": 4811.1
+        "collected_at": "2026-08-02T09:49:50.064931",
+        "checked_at": "2026-08-02T09:49:50.065276",
+        "duration_ms": 2266.6,
+        "http_latency_ms": 4926.9
       },
       {
         "source_name": "雪球社区",
-        "fingerprint": "a4c121a481c596031f11bad3618bed9e315c8e7dcc6a62328b2b0487ccc92212",
+        "fingerprint": "a0c63a6f6b602ebf26330021ca6f7f6cfb67a131feaa5eec8729a30634f0a868",
         "record_count": 0,
         "passed": false,
         "issues": [
           "雪球社区: 采集记录数为 0，可能被风控/限流或网络异常，标记为未通过"
         ],
-        "collected_at": "2026-08-01T19:11:45.233586",
-        "checked_at": "2026-08-01T19:11:45.233643",
+        "collected_at": "2026-08-02T09:49:50.065565",
+        "checked_at": "2026-08-02T09:49:50.065627",
         "duration_ms": 0.1,
-        "http_latency_ms": 10602.2
+        "http_latency_ms": 11323.6
       }
     ],
-    "generated_at": "2026-08-01T19:11:48.786842"
+    "generated_at": "2026-08-02T09:49:52.085328"
   },
   "is_real_data": true,
   "data_quality": {
@@ -4327,9 +4470,9 @@
     },
     "capital_flow": {
       "stats": {
-        "limit_up_days": 32,
-        "limit_up_total_stocks": 2499,
-        "limit_up_valid_days": 32,
+        "limit_up_days": 33,
+        "limit_up_total_stocks": 2598,
+        "limit_up_valid_days": 33,
         "dtl_trade_days": 34,
         "dtl_total_stocks": 3431,
         "dtl_valid_days": 34,
@@ -4339,63 +4482,63 @@
     },
     "url_validation": {
       "enabled": true,
-      "checked_at": "2026-08-01T19:11:48",
+      "checked_at": "2026-08-02T09:49:52",
       "sample_size": 5,
       "total_urls_found": 5,
       "reachable_count": 5,
       "unreachable_count": 0,
       "skipped_count": 0,
       "reachability_ratio": 1.0,
-      "avg_latency_ms": 659.3,
+      "avg_latency_ms": 347.3,
       "results": [
         {
-          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE85OUR3NXpkaEdxM0d0N19lUTB1bVozTW56NGJ6MUlVOFZNSHF2MkFnV09PR3dMUmlkM2YwNG1qTFM1OG56b1htT2pQMlNhSlBhcGlYTmVIbS1vNzBEVmVoLVR3?oc=5",
+          "url": "https://www.163.com/dy/article/L397DIVD05315IF2.html",
           "reachable": true,
           "status_code": 200,
-          "latency_ms": 743.0,
+          "latency_ms": 121.4,
           "error": null,
-          "checked_at": "2026-08-01T19:11:46",
+          "checked_at": "2026-08-02T09:49:50",
+          "source_platform": "netease_finance"
+        },
+        {
+          "url": "http://finance.eastmoney.com/a/202607293825456430.html",
+          "reachable": true,
+          "status_code": 200,
+          "latency_ms": 159.5,
+          "error": null,
+          "checked_at": "2026-08-02T09:49:50",
+          "source_platform": "guba"
+        },
+        {
+          "url": "https://news.google.com/rss/articles/CBMiYkFVX3lxTE9TRzlOQ1VraGZTSnFCekhITjBPX3ZqeElDOWVFRzFDa1pkWllvdGNsb1dGU19MWkttZnN5X0t1RmxLbzdJZmZ2dENJZ25meHZkczFyNUVwR0cxUU90by1BTHBR?oc=5",
+          "reachable": true,
+          "status_code": 200,
+          "latency_ms": 1182.7,
+          "error": null,
+          "checked_at": "2026-08-02T09:49:51",
           "source_platform": "google_news_rss"
         },
         {
-          "url": "https://news.google.com/rss/articles/CBMiU0FVX3lxTE05MnNmUVozZmUwbVJwaGhyRzRDYUZOV0tRVThBVG1DYmpBX0J5RENrQUI2RzRmVzhsT1pXSnhaTDJvWVhJNWp2S1FWMEJnUHFSU0pZ?oc=5",
+          "url": "http://finance.eastmoney.com/a/202607303826656449.html",
           "reachable": true,
           "status_code": 200,
-          "latency_ms": 590.7,
+          "latency_ms": 142.6,
           "error": null,
-          "checked_at": "2026-08-01T19:11:46",
-          "source_platform": "google_news_rss"
+          "checked_at": "2026-08-02T09:49:51",
+          "source_platform": "guba"
         },
         {
-          "url": "https://news.google.com/rss/articles/CBMiekFVX3lxTE9ZbEtQV1dRM0ZUbWR1dUo3eGN6SWs4ZzJNRTFLdFFSTE1aenVQYlI0NnVjTGRZamFtTjFESlhDTDhzME0xVVJjazRhY3k5bFRhQ19aazh6aDZUTjBKbGdISVJ5X1RrLW5obURQT0RtS0tDMERFWmREeGdR?oc=5",
+          "url": "http://stock.10jqka.com.cn/20260801/c678604467.shtml",
           "reachable": true,
           "status_code": 200,
-          "latency_ms": 716.9,
+          "latency_ms": 130.5,
           "error": null,
-          "checked_at": "2026-08-01T19:11:47",
-          "source_platform": "google_news_rss"
-        },
-        {
-          "url": "https://news.google.com/rss/articles/CBMiV0FVX3lxTFBNM290LVh6RE10d0t5dEpUMlFPZjhIcHNJWmM4TnRsemFmZ1M1eFJ6VTNiTGUxS1V0eTMtSWh0S1NXRjdMWVd1MkxpSW13dnJ2WjBJUjdIWQ?oc=5",
-          "reachable": true,
-          "status_code": 200,
-          "latency_ms": 623.7,
-          "error": null,
-          "checked_at": "2026-08-01T19:11:48",
-          "source_platform": "google_news_rss"
-        },
-        {
-          "url": "https://news.google.com/rss/articles/CBMiiAFBVV95cUxOZnhVWFA3d2NiSTVPVV9jX19WRENJRlFvd1F1ZjZXXzlubU1GVzF3MzM2eWlQV2R1ZnBQZ0xUZHF5MV9OeXlQcEc4UWkyNWVoaEJLeXIybXlRRk9nUC1CbGJOSjhoYVIzaDlVRy1hV1E0aFl4NUxJdUtUN1pubEFsN2pWQ0t2eUh0?oc=5",
-          "reachable": true,
-          "status_code": 200,
-          "latency_ms": 622.0,
-          "error": null,
-          "checked_at": "2026-08-01T19:11:48",
-          "source_platform": "google_news_rss"
+          "checked_at": "2026-08-02T09:49:52",
+          "source_platform": "ths_finance"
         }
       ],
       "status": "healthy"
     },
-    "checked_at": "2026-08-01T19:11:48.791468"
+    "checked_at": "2026-08-02T09:49:52.089738"
   }
 }

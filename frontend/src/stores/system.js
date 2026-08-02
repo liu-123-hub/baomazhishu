@@ -9,7 +9,6 @@ export const useSystemStore = defineStore('system', () => {
   const isMaximized = ref(false)
   const nativeApis = ref(null)
 
-  // 真实网络连接状态（浏览器/系统层面）
   const isOnline = ref(true)
 
   function setPlatformInfo(info) {
@@ -29,7 +28,6 @@ export const useSystemStore = defineStore('system', () => {
       isOnline.value = navigator.onLine
     }
     if (typeof window !== 'undefined') {
-      // 先移除旧监听器，避免 HMR 或重复挂载导致监听器堆积
       window.removeEventListener('online', handleOnline)
       window.removeEventListener('offline', handleOffline)
       window.addEventListener('online', handleOnline)
@@ -37,7 +35,6 @@ export const useSystemStore = defineStore('system', () => {
     }
   }
 
-  // 显式清理网络监听器，供组件 onUnmounted 调用
   function cleanupNetworkStatus() {
     if (typeof window !== 'undefined') {
       window.removeEventListener('online', handleOnline)

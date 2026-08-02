@@ -6,14 +6,11 @@ import json
 
 @dataclass
 class Signal:
-    """单个判定信号。"""
     name: str
     weight: float
     description: str
 
-# NEWBIE_SIGNALS：均为正权重(+2~+8)，小白特征加项；权重越大代表该特征越能佐证"小白"身份。
-# PRO_SIGNALS：均为负权重(-2~-5)，专业特征减项；用于抵消误判，权重绝对值越大代表该特征越"硬核专业"。
-# 最终判定阈值：raw_score * 4 + 10 映射到 0-100，≥50=纯小白，≥35=偏小白，≥20=中间派，≥10=偏专业，<10=专业投资者
+# 权重体系：NEWBIE正权重(+2~+8)，PRO负权重(-2~-5)；最终raw_score*4+10映射到0-100
 NEWBIE_SIGNALS = [
     Signal("身份自述", 8, "明确自称小白/新手/刚入门/宝妈"),
     Signal("知识求助", 6, "在问基础问题（怎么买/在哪看/什么意思）"),
@@ -86,7 +83,6 @@ SELL_KEYWORDS = [
 
 @dataclass
 class AnalysisResult:
-    """单条帖子的分析结果。"""
     post_id: str
     title: str
     platform: str
@@ -108,7 +104,7 @@ class AnalysisResult:
 
 
 def analyze_post(post: Dict, sector: str) -> AnalysisResult:
-    """对单条帖子执行关键词匹配→打分→分级→情绪/意图识别，返回结构化结果。"""
+    """关键词匹配→打分→分级→情绪/意图识别，返回结构化结果。"""
     title = post.get("title", "")
     content = post.get("content", "")
     full_text = f"{title} {content}" if content else title
@@ -192,10 +188,8 @@ def analyze_post(post: Dict, sector: str) -> AnalysisResult:
     total_pro = abs(sum(s[2] for s in matched_pro))
     
     is_news_platform = post.get("platform", "") in ("guba", "google_news", "netease", "eastmoney", "sina", "tonghuashun", "ths_finance")
-    # 新闻平台天然带专业写作风格，不能因此减小白分，故 pro 惩罚系数从 0.8 降到 0.4
     pro_penalty = total_pro * (0.4 if is_news_platform else 0.8)
     
-    # 放大系数 *4：让典型小白帖(15~20原始分) 映射到 70~90 区间；+10 保底偏移避免 0 分堆积
     raw_score = total_newbie - pro_penalty
     result.newbie_score = max(0, min(100, raw_score * 4 + 10))
     
@@ -260,7 +254,6 @@ def _generate_reasoning(
     total_pro: float,
     result: AnalysisResult,
 ) -> str:
-    """拼接命中信号、附加原因与分级结论，返回人类可读推理解释。"""
     parts = []
     
     parts.append(f"帖子「{title[:40]}...」")
@@ -289,7 +282,7 @@ def _generate_reasoning(
 
 
 def _analyze_sentiment(text: str) -> float:
-    """基于贪婪/恐惧关键词词频计算情绪极性，返回 -1.0(极端恐惧) 到 +1.0(极端贪婪)。"""
+    """基于贪婪/恐惧词频计算情绪极性，范围[-1.0, +1.0]。"""
     greed_words = [
         "冲", "梭哈", "稳赚", "必涨", "躺赚", "满仓", "抄底", "起飞", "暴涨", "翻倍", "赚了", "盈利",
         "涨停", "飙升", "大涨", "拉升", "疯涨", "连涨", "创新高", "吸金", "爆买", "抢筹", "逆市",
@@ -311,7 +304,6 @@ def _analyze_sentiment(text: str) -> float:
 
 
 def analyze_sector(posts: List[Dict], sector: str) -> List[AnalysisResult]:
-    """批量分析单板块帖子列表，按小白分降序返回。"""
     results = []
     for post in posts:
         result = analyze_post(post, sector)
@@ -322,7 +314,6 @@ def analyze_sector(posts: List[Dict], sector: str) -> List[AnalysisResult]:
 
 
 def analyze_all(sector_data: Dict[str, List[Dict]]) -> Dict[str, List[AnalysisResult]]:
-    """遍历全部板块执行 analyze_sector，打印进度日志并返回分板块结果字典。"""
     all_results = {}
     for sector, posts in sector_data.items():
         print(f"  分析 {sector}: {len(posts)} 条帖子...")

@@ -77,7 +77,6 @@ def validate_post(post: Dict, source_name: str, sector: str) -> List[str]:
 
 
 def validate_dashboard_for_sync(dashboard: Dict) -> Tuple[bool, List[str]]:
-    """校验dashboard数据合法性，仅通过校验才允许覆盖本地数据。"""
     issues: List[str] = []
 
     if not isinstance(dashboard, dict):
@@ -141,7 +140,6 @@ def validate_dashboard_for_sync(dashboard: Dict) -> Tuple[bool, List[str]]:
 def validate_source_posts(
     source_name: str, source_posts: Dict[str, List[Dict]]
 ) -> Tuple[Dict[str, List[Dict]], List[str]]:
-    """校验单个数据源的板块数据，返回清洗后的结果。"""
     cleaned: Dict[str, List[Dict]] = {}
     issues: List[str] = []
 

@@ -19,7 +19,6 @@ from collectors.data_validation import validate_dashboard_for_sync
 
 
 def make_valid_dashboard() -> dict:
-    """构造一个能通过 validate_dashboard_for_sync 校验的合法 dashboard。"""
     return {
         "record_count": 1,
         "latest": {
@@ -57,14 +56,12 @@ def make_valid_dashboard() -> dict:
 
 
 def make_degraded_dashboard() -> dict:
-    """构造一个降级 dashboard（无用户讨论数据），应被校验门拒绝。"""
     dashboard = make_valid_dashboard()
     dashboard["data_provenance"]["has_user_discussion"] = False
     return dashboard
 
 
 def make_empty_dashboard() -> dict:
-    """构造一个空 dashboard（无板块数据），应被校验门拒绝。"""
     return {
         "record_count": 0,
         "latest": {"date": "", "sectors": {}},
@@ -76,40 +73,34 @@ class TestValidateDashboardForSync:
     """validate_dashboard_for_sync校验逻辑测试。"""
 
     def test_valid_dashboard_passes(self):
-        """合法 dashboard（有板块、有帖子、有用户讨论）应通过校验。"""
         dashboard = make_valid_dashboard()
         is_valid, issues = validate_dashboard_for_sync(dashboard)
         assert is_valid is True
         assert issues == []
 
     def test_empty_dashboard_rejected(self):
-        """空 dashboard（无板块数据）应被拒绝。"""
         dashboard = make_empty_dashboard()
         is_valid, issues = validate_dashboard_for_sync(dashboard)
         assert is_valid is False
         assert any("sectors" in issue for issue in issues)
 
     def test_degraded_dashboard_rejected(self):
-        """降级dashboard（无用户讨论）应被拒绝。"""
         dashboard = make_degraded_dashboard()
         is_valid, issues = validate_dashboard_for_sync(dashboard)
         assert is_valid is False
         assert any("has_user_discussion" in issue or "降级" in issue for issue in issues)
 
     def test_non_dict_rejected(self):
-        """非字典结构应被立即拒绝。"""
         is_valid, issues = validate_dashboard_for_sync("not a dict")
         assert is_valid is False
         assert any("字典结构" in issue for issue in issues)
 
     def test_missing_top_level_fields_rejected(self):
-        """缺少顶层字段应被拒绝。"""
         is_valid, issues = validate_dashboard_for_sync({"latest": {}})
         assert is_valid is False
         assert any("record_count" in issue for issue in issues)
 
     def test_all_sectors_zero_posts_rejected(self):
-        """所有板块 total_posts=0 应被拒绝。"""
         dashboard = make_valid_dashboard()
         for s in dashboard["latest"]["sectors"].values():
             s["details"]["total_posts"] = 0
@@ -120,7 +111,6 @@ class TestValidateDashboardForSync:
 
 @pytest.fixture
 def small_interval(monkeypatch):
-    """缩小定时采集间隔和重试次数，加速测试。"""
     monkeypatch.setattr(settings, "AUTO_COLLECT_INTERVAL", 0.3)
     monkeypatch.setattr(settings, "COLLECTOR_RETRY_TIMES", 0)
     return 0.3
@@ -128,7 +118,6 @@ def small_interval(monkeypatch):
 
 def _make_recording_run_once(collector: AutoCollector, calls: List[dict],
                               fail_indices: set = None, exc: Exception = None):
-    """生成记录调用并可控失败的run_once替身。"""
     fail_indices = fail_indices or set()
 
     async def mock_run_once(trigger: str = "scheduled"):
@@ -152,11 +141,9 @@ def _make_recording_run_once(collector: AutoCollector, calls: List[dict],
 
 
 class TestStartupTrigger:
-    """程序启动触发首次数据更新测试。"""
 
     @pytest.mark.asyncio
     async def test_startup_triggers_first_update(self, small_interval, monkeypatch):
-        """启动后应立即触发一次 trigger='startup' 的数据更新。"""
         collector = AutoCollector()
         calls: List[dict] = []
         monkeypatch.setattr(collector, "run_once", _make_recording_run_once(collector, calls))
@@ -172,12 +159,10 @@ class TestStartupTrigger:
 
 
 class TestPeriodicTriggerThreeCycles:
-    """连续3个定时周期触发时间测试。"""
 
     @pytest.mark.asyncio
     async def test_three_periodic_cycles_with_timing(self, small_interval, monkeypatch):
-        """验证连续 3 个定时周期的触发间隔符合配置的时间要求。"""
-        interval = small_interval  # 0.3 秒
+        interval = small_interval
         collector = AutoCollector()
         calls: List[dict] = []
         monkeypatch.setattr(collector, "run_once", _make_recording_run_once(collector, calls))
@@ -211,12 +196,10 @@ class TestPeriodicTriggerThreeCycles:
 
 
 class TestPeriodicTimerStabilityOnException:
-    """异常场景下定时器稳定性测试。"""
 
     @pytest.mark.asyncio
     async def test_timer_survives_exception_and_continues(self, small_interval, monkeypatch):
-        """定时器在某次更新异常后不应终止，下一个周期仍能正常触发。"""
-        interval = small_interval  # 0.3 秒
+        interval = small_interval
         collector = AutoCollector()
         calls: List[dict] = []
 
@@ -247,7 +230,6 @@ class TestPeriodicTimerStabilityOnException:
 
     @pytest.mark.asyncio
     async def test_timer_survives_consecutive_exceptions(self, small_interval, monkeypatch):
-        """连续多次异常后定时器仍不应终止。"""
         interval = small_interval
         collector = AutoCollector()
         calls: List[dict] = []
@@ -271,30 +253,22 @@ class TestPeriodicTimerStabilityOnException:
         assert calls[4]["index"] == 5
 
 
-# ============================================================
-# 场景 4：单次采集运行超时（deadline）机制
-# ============================================================
-
 class TestRunDeadline:
-    """验证 run_in_executor 的 deadline 超时保护：卡死的采集应被放弃，执行器重建。"""
+    """验证run_in_executor的deadline超时保护。"""
 
     @pytest.mark.asyncio
     async def test_deadline_timeout_recreates_executor_and_sets_failed(self, monkeypatch):
-        """采集超过 COLLECTOR_RUN_DEADLINE 应被放弃，执行器被重建，状态置为 FAILED。"""
         collector = AutoCollector()
         old_executor = collector._executor
 
-        # 设置极短的 deadline（0.2s）和不重试
         monkeypatch.setattr(settings, "COLLECTOR_RUN_DEADLINE", 0.2)
         monkeypatch.setattr(settings, "COLLECTOR_RETRY_TIMES", 0)
 
-        # _run_pipeline_sync 模拟卡死（sleep 时间 > deadline）
         def slow_pipeline():
             time.sleep(0.5)
             return {}
         monkeypatch.setattr(collector, "_run_pipeline_sync", slow_pipeline)
 
-        # 预检设为即时返回，避免真实网络调用拖慢测试
         async def mock_health_check():
             return {
                 "details": [],
@@ -304,7 +278,6 @@ class TestRunDeadline:
         import collectors.source_health_check as shc
         monkeypatch.setattr(shc, "run_health_check", mock_health_check)
 
-        # 直接调用 run_once 隔离测试 deadline（run_once 内部捕获异常并置 FAILED，不向上抛出）
         await collector.run_once(trigger="test")
 
         status = await collector.get_status()
@@ -314,41 +287,30 @@ class TestRunDeadline:
         assert "采集超时" in status.get("error", ""), (
             f"错误信息应包含'采集超时'，实际: {status.get('error')}"
         )
-        # 关键断言：执行器已被重建（新对象），确保下一周期不会被卡死线程阻塞
         assert collector._executor is not old_executor, (
             "超时后执行器应被重建为新对象，避免卡死线程阻塞后续周期"
         )
 
-        # 等待孤儿线程结束，避免 pytest 退出时被非守护线程挂起
         await asyncio.sleep(0.4)
 
 
-# ============================================================
-# 场景 5：看门狗漏触发检测
-# ============================================================
-
 class TestWatchdogMissedRun:
-    """验证看门狗在长期无成功运行时发出 ERROR 告警（"a job that never fires emits no error"）。"""
+    """验证看门狗在长期无成功运行时发出ERROR告警。"""
 
     @pytest.mark.asyncio
     async def test_watchdog_alerts_when_no_success_past_threshold(self, monkeypatch, caplog):
-        """自启动以来从未成功且 uptime 超过阈值时，看门狗应记录漏触发告警。"""
         collector = AutoCollector()
 
-        # 设置极小的阈值：missed_threshold = 0.1+0.1+0.1 = 0.3s
         monkeypatch.setattr(settings, "WATCHDOG_CHECK_INTERVAL", 0.1)
         monkeypatch.setattr(settings, "AUTO_COLLECT_INTERVAL", 0.1)
         monkeypatch.setattr(settings, "COLLECTOR_RUN_DEADLINE", 0.1)
         monkeypatch.setattr(settings, "WATCHDOG_GRACE", 0.1)
 
-        # 进程启动时刻设为 1 秒前（uptime=1s > missed_threshold=0.3s）
         collector._process_start_time = time.monotonic() - 1.0
-        # last_success_at 保持 None（从未成功过）
 
         caplog.set_level(logging.ERROR)
 
         watchdog_task = asyncio.create_task(collector._watchdog_loop())
-        # 等待看门狗完成至少一次检查（首次 sleep 0.1s + 检查逻辑）
         await asyncio.sleep(0.35)
         watchdog_task.cancel()
         try:
@@ -356,7 +318,6 @@ class TestWatchdogMissedRun:
         except asyncio.CancelledError:
             pass
 
-        # 验证漏触发告警已记录
         alert_messages = [r.message for r in caplog.records if "漏触发告警" in r.message]
         assert len(alert_messages) >= 1, (
             f"应记录至少 1 条漏触发告警，实际: {caplog.records}"
@@ -364,22 +325,19 @@ class TestWatchdogMissedRun:
 
     @pytest.mark.asyncio
     async def test_watchdog_no_alert_when_within_threshold(self, monkeypatch, caplog):
-        """uptime 未超过阈值时，看门狗不应发出漏触发告警（避免误报）。"""
         collector = AutoCollector()
 
         monkeypatch.setattr(settings, "WATCHDOG_CHECK_INTERVAL", 0.1)
         monkeypatch.setattr(settings, "AUTO_COLLECT_INTERVAL", 0.1)
         monkeypatch.setattr(settings, "COLLECTOR_RUN_DEADLINE", 0.1)
         monkeypatch.setattr(settings, "WATCHDOG_GRACE", 0.1)
-        # missed_threshold = 0.3s
 
-        # 进程刚启动（uptime ≈ 0s < 0.3s），不应告警
         collector._process_start_time = time.monotonic()
 
         caplog.set_level(logging.ERROR)
 
         watchdog_task = asyncio.create_task(collector._watchdog_loop())
-        await asyncio.sleep(0.25)  # 看门狗检查一次，但 uptime 仍 < 阈值
+        await asyncio.sleep(0.25)
         watchdog_task.cancel()
         try:
             await watchdog_task
@@ -392,40 +350,27 @@ class TestWatchdogMissedRun:
         )
 
 
-# ============================================================
-# 场景 6：启动采集任务未预期异常的处理
-# ============================================================
-
 class TestStartupTaskExceptionHandling:
-    """验证 run_with_retry 抛出未预期异常时，启动包装器将状态置为 FAILED。
-
-    关键修复点：若不包裹，_periodic_loop 会在初始轮询中无限等待
-    SUCCESS/FAILED 状态，导致定时器永远无法进入周期循环（静默挂起故障）。
-    """
+    """验证run_with_retry抛出未预期异常时，启动包装器将状态置为FAILED。"""
 
     @pytest.mark.asyncio
     async def test_startup_exception_sets_failed_status(self, monkeypatch):
-        """启动任务未预期异常后，状态应被显式置为 FAILED。"""
         collector = AutoCollector()
         monkeypatch.setattr(settings, "AUTO_COLLECT_INTERVAL", 0.3)
         monkeypatch.setattr(settings, "COLLECTOR_RETRY_TIMES", 0)
 
-        # run_with_retry 抛出未预期异常（模拟 run_once 之外的未预期崩溃）
         async def failing_run_with_retry(trigger="scheduled"):
             raise RuntimeError("模拟启动采集未预期崩溃")
         monkeypatch.setattr(collector, "run_with_retry", failing_run_with_retry)
 
         await collector.start(delayed_start=False)
 
-        # 等待启动任务执行（_immediate_startup 立即调用 run_with_retry）
         await asyncio.sleep(0.2)
 
         status = await collector.get_status()
-        # 关键断言：状态应为 FAILED（而非 IDLE/RUNNING），否则 _periodic_loop 会无限等待
         assert status["status"] == collector.STATUS_FAILED, (
             f"启动异常后状态应为 FAILED，实际: {status['status']}"
         )
-        # step 字段标识启动失败路径，message 字段包含未预期异常描述
         assert status.get("step") == "启动失败", (
             f"step 应为'启动失败'，实际: {status.get('step')}"
         )
@@ -437,18 +382,15 @@ class TestStartupTaskExceptionHandling:
 
     @pytest.mark.asyncio
     async def test_periodic_loop_recovers_after_startup_exception(self, monkeypatch):
-        """启动异常置 FAILED 后，_periodic_loop 应能退出初始等待并进入周期循环。"""
         collector = AutoCollector()
         monkeypatch.setattr(settings, "AUTO_COLLECT_INTERVAL", 0.3)
         monkeypatch.setattr(settings, "COLLECTOR_RETRY_TIMES", 0)
 
-        # 首次 run_with_retry（startup）抛异常，后续 run_with_retry（scheduled）正常
         call_count = {"n": 0}
         async def run_with_retry(trigger="scheduled"):
             call_count["n"] += 1
             if call_count["n"] == 1:
                 raise RuntimeError("模拟启动崩溃")
-            # 后续 scheduled 调用走正常路径：调用 run_once（mock 为成功）
             await collector.run_once(trigger=trigger)
 
         async def mock_run_once(trigger="scheduled"):
@@ -464,13 +406,10 @@ class TestStartupTaskExceptionHandling:
 
         await collector.start(delayed_start=False)
 
-        # 等待：启动异常(0.2s) + _periodic_loop 轮询发现 FAILED(最多2s) + 首个周期(0.3s)
-        # 为加速，将轮询等待也缩短：直接等待足够时间
         await asyncio.sleep(0.2 + 2.2 + 0.4)
 
         await collector.close()
 
-        # 验证：startup 调用了 1 次，且后续有 scheduled 调用（说明 _periodic_loop 恢复了）
         assert call_count["n"] >= 2, (
             f"启动异常后 _periodic_loop 应恢复并触发后续周期，"
             f"实际 run_with_retry 调用 {call_count['n']} 次"

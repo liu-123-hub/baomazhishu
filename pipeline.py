@@ -34,13 +34,12 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 
 class DataSourceStatus:
-    """数据源状态追踪器，聚合各源成功/失败/条数/耗时并生成汇总字符串。"""
+    """聚合各源采集结果并生成汇总。"""
     
     def __init__(self):
         self.sources: Dict[str, Dict] = {}
     
     def add_source(self, name: str, status: str, count: int = 0, error: str = "", duration: float = 0.0):
-        """登记单个数据源的采集结果（success/failed/skipped/partial）。"""
         self.sources[name] = {
             "name": name,
             "status": status,
@@ -50,7 +49,6 @@ class DataSourceStatus:
         }
     
     def get_summary(self) -> str:
-        """格式化输出各源状态图标 + 条数 + 耗时 + 错误，含累计总条数。"""
         lines = []
         total_count = 0
         for name, info in self.sources.items():
@@ -69,7 +67,6 @@ class DataSourceStatus:
         return "\n".join(lines)
     
     def has_data(self) -> bool:
-        """只要有任一数据源拿到 >0 条数据即返回 True。"""
         return any(info["count"] > 0 for info in self.sources.values())
 
 
@@ -82,7 +79,7 @@ def _merge_sector_posts(
     duration_ms: Optional[float] = None,
     http_latency_ms: Optional[float] = None,
 ) -> int:
-    """单源合并策略：字段校验→去重→真实性校验→按 sector 键 extend 追加到 all_posts（不覆盖），返回本次有效条数。"""
+    """校验→去重→鉴真→按sector合并，返回有效条数。"""
     cleaned_posts, issues = validate_source_posts(source_name, source_posts)
 
     issue_count = len([i for i in issues if "缺少字段" in i or "数据已过期" in i or "重复" in i])
@@ -112,7 +109,7 @@ def _merge_sector_posts(
 
 
 def _write_dashboard_data(dashboard: Dict):
-    """原子写入仪表盘 JSON（tmp + os.replace），避免写入中断损坏。"""
+    """tmp + os.replace 原子写入，避免中断损坏。"""
     os.makedirs(DATA_DIR, exist_ok=True)
     dashboard_file = os.path.join(DATA_DIR, "dashboard_data.json")
     tmp_file = dashboard_file + ".tmp"
@@ -123,14 +120,7 @@ def _write_dashboard_data(dashboard: Dict):
 
 
 def run_pipeline() -> Dict:
-    """执行完整流程：0连通性预检→1九路真实采集(按 sector extend 合并)→2规则分析→3四维权重指数→4历史存储→5仪表盘数据+质量校验。"""
-    # 流程说明：
-    # 第0步 连通性预检：异步探测各数据源可达性，结果存入 health_latency_map 透传给后续真实性校验
-    # 第1步 九路采集（7路帖子 + 行情 + 异动）：每路独立采集→_merge_sector_posts 校验+鉴真→按 sector extend 合并到 all_posts（同源同板块不覆盖只追加）
-    # 第2步 多维度分析：analyze_all 遍历板块，每条帖子打分分级
-    # 第3步 指数计算：compute_sector_index 按四维权重合成 0-100 指数
-    # 第4步 存储历史：add_record 同日覆盖，保证重复执行幂等
-    # 第5步 前端数据：get_dashboard_data + 数据源状态 + 真实性溯源 + URL抽样/行情/异动质量校验
+    """连通性预检→九路采集→规则分析→指数计算→历史存储→仪表盘输出。"""
     print("=" * 65)
     print("   👩‍👧 宝妈指数 · 真实数据采集与分析")
     print(f"   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -138,7 +128,6 @@ def run_pipeline() -> Dict:
     
     status_tracker = DataSourceStatus()
     auth_reports: List = []
-    # health_latency_map：连通性预检测得的 HTTP 延迟(ms)，后续作为 authenticate_collected_data 真实性校验的佐证输入（采集耗时 vs 预检延迟偏差过大可能为伪造）
     health_latency_map: Dict[str, float] = {}
 
     print("\n🔌 第0步: 数据源连通性预检")
@@ -313,7 +302,6 @@ def run_pipeline() -> Dict:
             duration_ms=xq_community_duration * 1000,
             http_latency_ms=health_latency_map.get(XUEQIU_COMMUNITY),
         )
-        # 雪球 WAF 加强后搜索 API 需登录，0 条数据视为 skipped 而非 partial
         status_tracker.add_source(
             XUEQIU_COMMUNITY,
             "skipped" if xq_community_count == 0 else "success",
@@ -479,7 +467,7 @@ def run_pipeline() -> Dict:
     return dashboard
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":
     try:
         dashboard = run_pipeline()
     except RuntimeError as e:

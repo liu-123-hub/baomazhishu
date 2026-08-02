@@ -70,6 +70,7 @@ def _check_single_url(url: str, timeout: int = DEFAULT_TIMEOUT) -> Dict[str, Any
                 result["reachable"] = True
                 return result
             elif resp.status_code == 405:
+                # HEAD被禁用时降级用GET探测（仅读取headers，不下载body）
                 try:
                     start = time.time()
                     resp_get = requests.get(

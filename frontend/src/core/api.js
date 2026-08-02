@@ -4,7 +4,6 @@ import { APP_CONFIG } from './constants.js'
 let apiClient = null
 
 function getApiBaseUrl() {
-  // Web 端通过 Vite proxy 转发到后端，直接使用相对路径
   return APP_CONFIG.apiBaseUrl
 }
 

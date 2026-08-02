@@ -13,7 +13,6 @@ from collectors.registry import PROBE_CONFIG
 
 
 async def _probe_http_head(name: str, url: str, timeout: float, expected_status) -> Dict:
-    """通过 HTTP HEAD 请求探测数据源连通性。"""
     start = time.time()
     try:
         async with httpx.AsyncClient(
@@ -70,7 +69,6 @@ async def _probe_http_head(name: str, url: str, timeout: float, expected_status)
 
 
 async def _probe_env_key(name: str, env_key: str, fallback_url: str, timeout: float) -> Dict:
-    """依赖环境变量配置的数据源探测：先检查 Key 是否配置，再校验目标服务可达性。"""
     start = time.time()
     key_value = os.environ.get(env_key, "")
     if not key_value:
@@ -86,7 +84,6 @@ async def _probe_env_key(name: str, env_key: str, fallback_url: str, timeout: fl
 
 
 async def check_source_connectivity() -> List[Dict]:
-    """对所有数据源执行连通性预检。"""
     tasks = []
     for name, cfg in PROBE_CONFIG.items():
         method = cfg["method"]
@@ -101,12 +98,10 @@ async def check_source_connectivity() -> List[Dict]:
 
 
 def get_reachable_sources(results: List[Dict]) -> List[str]:
-    """从探测结果中提取可达的数据源名称列表。"""
     return [r["name"] for r in results if r["status"] == "reachable"]
 
 
 def get_summary(results: List[Dict]) -> Dict:
-    """生成探测结果摘要。"""
     total = len(results)
     reachable = sum(1 for r in results if r["status"] == "reachable")
     unreachable = sum(1 for r in results if r["status"] == "unreachable")
@@ -122,7 +117,6 @@ def get_summary(results: List[Dict]) -> Dict:
 
 
 async def run_health_check() -> Dict:
-    """执行完整的数据源连通性预检流程，返回包含详细结果与摘要的字典。"""
     results = await check_source_connectivity()
     summary = get_summary(results)
     return {

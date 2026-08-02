@@ -27,8 +27,6 @@ class Database:
         conn = await aiosqlite.connect(self.db_path)
         conn.row_factory = aiosqlite.Row
         try:
-            # WAL 提升并发读写；busy_timeout 避免写锁冲突时立即失败；
-            # synchronous=NORMAL 在 WAL 下兼顾性能与持久性
             await conn.execute("PRAGMA journal_mode=WAL")
             await conn.execute("PRAGMA busy_timeout=5000")
             await conn.execute("PRAGMA synchronous=NORMAL")
@@ -61,7 +59,6 @@ class Database:
                 )
             """)
 
-            # schema 迁移：逐个 ALTER TABLE 新增字段，旧版本库静默忽略（列已存在）
             for col_def in (
                 ("data_source", "TEXT DEFAULT 'pipeline_collect'"),
                 ("data_fingerprint", "TEXT DEFAULT ''"),
@@ -73,7 +70,6 @@ class Database:
                 except Exception:
                     pass
 
-            # 建 UNIQUE 索引前先清历史重复数据，保证 (sector_code, record_date) 唯一
             await conn.execute("""
                 DELETE FROM sector_index
                 WHERE id NOT IN (

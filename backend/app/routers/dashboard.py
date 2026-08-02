@@ -1,4 +1,3 @@
-"""仪表盘路由。"""
 from fastapi import APIRouter, Query
 from app.data_service import (
     get_dashboard_overview,

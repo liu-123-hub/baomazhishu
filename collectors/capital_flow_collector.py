@@ -16,7 +16,6 @@ DEFAULT_LOOKBACK_DAYS = 30
 
 
 def load_capital_flow() -> Dict:
-    """加载已有的市场异动数据文件。"""
     if os.path.exists(CAPITAL_FLOW_FILE):
         with open(CAPITAL_FLOW_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -29,7 +28,6 @@ def load_capital_flow() -> Dict:
 
 
 def save_capital_flow(data: Dict):
-    """原子写入市场异动数据文件。"""
     os.makedirs(DATA_DIR, exist_ok=True)
     tmp_file = CAPITAL_FLOW_FILE + ".tmp"
     with open(tmp_file, "w", encoding="utf-8") as f:
@@ -38,7 +36,6 @@ def save_capital_flow(data: Dict):
 
 
 def _fetch_limit_up_pool(trade_date: str) -> Optional[List[Dict]]:
-    """通过 AKShare 获取指定交易日涨停池数据。"""
     for attempt in range(MAX_RETRIES + 1):
         try:
             df = akshare.stock_zt_pool_em(date=trade_date)
@@ -76,7 +73,6 @@ def _fetch_limit_up_pool(trade_date: str) -> Optional[List[Dict]]:
 
 
 def collect_limit_up_pool(start_date: Optional[str] = None, end_date: Optional[str] = None) -> Dict[str, List[Dict]]:
-    """采集最近 N 天的涨停池数据，按交易日聚合。"""
     if end_date is None:
         end_date = datetime.now().strftime("%Y-%m-%d")
     if start_date is None:
@@ -98,11 +94,7 @@ def collect_limit_up_pool(start_date: Optional[str] = None, end_date: Optional[s
 
 
 def _fetch_dragon_tiger_list(trade_date: str) -> Optional[List[Dict]]:
-    """通过 AKShare 获取指定交易日龙虎榜数据。
-
-    非交易日（周末/节假日）调用时 akshare 内部会抛出 KeyError('股票代码')，
-    必须显式捕获并返回 None，避免中断整个采集流程。
-    """
+    """非交易日调用会抛KeyError('股票代码')，需显式捕获返回None。"""
     REQUIRED_COLUMNS = ("股票代码", "股票名称", "收盘价", "对应值", "成交量", "成交额", "指标")
     for attempt in range(MAX_RETRIES + 1):
         try:
@@ -145,7 +137,6 @@ def _fetch_dragon_tiger_list(trade_date: str) -> Optional[List[Dict]]:
 
 
 def collect_dragon_tiger_list(start_date: Optional[str] = None, end_date: Optional[str] = None) -> Dict[str, List[Dict]]:
-    """采集最近 N 天的龙虎榜数据，按交易日聚合。"""
     if end_date is None:
         end_date = datetime.now().strftime("%Y-%m-%d")
     if start_date is None:
@@ -167,13 +158,11 @@ def collect_dragon_tiger_list(start_date: Optional[str] = None, end_date: Option
 
 
 def _generate_trade_dates(end_date: str, days: int) -> List[str]:
-    """生成最近 N 个自然日对应的交易日字符串（YYYYMMDD）。"""
     end_dt = datetime.strptime(end_date, "%Y-%m-%d")
     return [(end_dt - timedelta(days=i)).strftime("%Y%m%d") for i in range(days)]
 
 
 def _to_float(value) -> Optional[float]:
-    """安全转换为浮点数，失败返回 None。"""
     if value is None:
         return None
     try:
@@ -183,7 +172,6 @@ def _to_float(value) -> Optional[float]:
 
 
 def _to_int(value) -> Optional[int]:
-    """安全转换为整数，失败返回 None。"""
     if value is None:
         return None
     try:
@@ -193,7 +181,6 @@ def _to_int(value) -> Optional[int]:
 
 
 def _should_update(existing: Dict) -> bool:
-    """判断是否需要更新：今天尚未更新或从未更新。"""
     last = existing.get("last_update")
     if not last:
         return True
@@ -202,7 +189,6 @@ def _should_update(existing: Dict) -> bool:
 
 
 def collect_all(start_date: Optional[str] = None, end_date: Optional[str] = None, force: bool = False) -> Dict:
-    """采集所有市场异动数据，支持增量更新（按日期去重合并）。"""
     if end_date is None:
         end_date = datetime.now().strftime("%Y-%m-%d")
     if start_date is None:
@@ -255,7 +241,6 @@ def collect_all(start_date: Optional[str] = None, end_date: Optional[str] = None
 
 
 def validate_capital_flow(data: Dict) -> Dict:
-    """校验市场异动数据完整性：必填字段、数值合法性、日期升序。"""
     issues = []
     stats = {
         "limit_up_days": 0,

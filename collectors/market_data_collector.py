@@ -1,7 +1,4 @@
-"""行情数据采集器，基于 AKShare（新浪财经数据源）获取 ETF 和指数日线。
-
-板块分类 v2.0：ETF映射覆盖所有标准行业板块，概念赛道使用最接近的行业ETF代理。
-"""
+"""行情数据采集器，基于 AKShare（新浪财经数据源）获取 ETF 和指数日线。"""
 import json
 import os
 import sys
@@ -11,7 +8,6 @@ from typing import Dict, List, Optional
 
 import akshare
 
-# 导入项目根目录，以便从analyzer导入核心配置
 PROJECT_ROOT = os.path.dirname(os.path.dirname(__file__))
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
@@ -21,49 +17,36 @@ from analyzer.index_calculator import SECTOR_NAMES, SECTOR_META, get_sector_type
 DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 MARKET_DATA_FILE = os.path.join(DATA_DIR, "market_data.json")
 
-# ============================================================
-# 板块→ETF映射（覆盖所有板块）
-# 标准行业板块：使用对应行业ETF
-# 跨行业概念板块：使用最具代表性的代理ETF
-# ============================================================
 SECTOR_ETF_MAP = {
-    # ── T1 第一梯队：AI算力硬科技 ──
     "semiconductor":  {"code": "159995", "name": "芯片ETF",     "ak_symbol": "sz159995"},
     "electronics":    {"code": "159997", "name": "电子ETF",     "ak_symbol": "sz159997"},
-    "ai_computing":   {"code": "159819", "name": "人工智能ETF", "ak_symbol": "sz159819"},  # 概念赛道代理
-    "cpo":            {"code": "515880", "name": "通信ETF",     "ak_symbol": "sh515880"},  # 概念赛道代理
-    # ── T2 第二梯队：高端制造/智能科技 ──
+    "ai_computing":   {"code": "159819", "name": "人工智能ETF", "ak_symbol": "sz159819"},
+    "cpo":            {"code": "515880", "name": "通信ETF",     "ak_symbol": "sh515880"},
     "computer":       {"code": "512720", "name": "计算机ETF",   "ak_symbol": "sh512720"},
     "communication":  {"code": "515050", "name": "5G通信ETF",   "ak_symbol": "sh515050"},
     "military":       {"code": "512660", "name": "军工ETF",     "ak_symbol": "sh512660"},
-    "robot":          {"code": "562500", "name": "机器人ETF",   "ak_symbol": "sh562500"},  # 概念赛道
-    # ── T3 第三梯队：新能源/电力设备 ──
+    "robot":          {"code": "562500", "name": "机器人ETF",   "ak_symbol": "sh562500"},
     "newenergy":      {"code": "516160", "name": "新能源ETF",   "ak_symbol": "sh516160"},
     "battery":        {"code": "159755", "name": "电池ETF",     "ak_symbol": "sz159755"},
     "power_grid":     {"code": "159611", "name": "电网ETF",     "ak_symbol": "sz159611"},
-    # ── T4 第四梯队：消费医疗/文化传媒 ──
     "medicine":       {"code": "512010", "name": "医药ETF",     "ak_symbol": "sh512010"},
     "baijiu":         {"code": "512690", "name": "酒ETF",       "ak_symbol": "sh512690"},
     "food":           {"code": "515080", "name": "食品ETF",     "ak_symbol": "sh515080"},
     "appliance":      {"code": "159996", "name": "家电ETF",     "ak_symbol": "sz159996"},
     "tourism":        {"code": "159766", "name": "旅游ETF",     "ak_symbol": "sz159766"},
     "media":          {"code": "512980", "name": "传媒ETF",     "ak_symbol": "sh512980"},
-    "biotech":        {"code": "159992", "name": "创新药ETF",   "ak_symbol": "sz159992"},  # 概念赛道
-    "consumer":       {"code": "159928", "name": "消费ETF",     "ak_symbol": "sz159928"},  # 概念赛道
-    # ── V1 价值防御：大金融 ──
+    "biotech":        {"code": "159992", "name": "创新药ETF",   "ak_symbol": "sz159992"},
+    "consumer":       {"code": "159928", "name": "消费ETF",     "ak_symbol": "sz159928"},
     "bank":           {"code": "512800", "name": "银行ETF",     "ak_symbol": "sh512800"},
     "securities":     {"code": "512880", "name": "证券ETF",     "ak_symbol": "sh512880"},
     "insurance":      {"code": "512570", "name": "保险ETF",     "ak_symbol": "sh512570"},
-    # ── V2 价值防御：周期资源 ──
     "coal":           {"code": "515220", "name": "煤炭ETF",     "ak_symbol": "sh515220"},
     "crude_oil":      {"code": "501018", "name": "原油基金",    "ak_symbol": "sh501018"},
     "nonferrous":     {"code": "512400", "name": "有色ETF",     "ak_symbol": "sh512400"},
     "chemical":       {"code": "516220", "name": "化工ETF",     "ak_symbol": "sh516220"},
     "steel":          {"code": "515210", "name": "钢铁ETF",     "ak_symbol": "sh515210"},
-    # ── V3 价值防御：基建地产 ──
     "infrastructure": {"code": "516950", "name": "基建ETF",     "ak_symbol": "sh516950"},
     "realestate":     {"code": "512200", "name": "房地产ETF",   "ak_symbol": "sh512200"},
-    # ── DEF 防御资产/海外 ──
     "gold":           {"code": "518880", "name": "黄金ETF",     "ak_symbol": "sh518880"},
     "nasdaq":         {"code": "513100", "name": "纳指ETF",     "ak_symbol": "sh513100"},
 }
@@ -79,7 +62,6 @@ MAX_RETRIES = 2
 
 
 def load_market_data() -> Dict:
-    """加载已有的行情数据文件。"""
     if os.path.exists(MARKET_DATA_FILE):
         with open(MARKET_DATA_FILE, "r", encoding="utf-8") as f:
             return json.load(f)
@@ -92,7 +74,6 @@ def load_market_data() -> Dict:
 
 
 def save_market_data(data: Dict):
-    """原子写入行情数据文件。"""
     os.makedirs(DATA_DIR, exist_ok=True)
     tmp_file = MARKET_DATA_FILE + ".tmp"
     with open(tmp_file, "w", encoding="utf-8") as f:
@@ -101,7 +82,6 @@ def save_market_data(data: Dict):
 
 
 def _fetch_etf_daily(ak_symbol: str, start_date: str, end_date: str) -> Optional[List[Dict]]:
-    """通过 AKShare 获取 ETF 日线行情，按日期范围过滤。"""
     for attempt in range(MAX_RETRIES + 1):
         try:
             df = akshare.fund_etf_hist_sina(symbol=ak_symbol)
@@ -147,7 +127,6 @@ def _fetch_etf_daily(ak_symbol: str, start_date: str, end_date: str) -> Optional
 
 
 def collect_etf_data(start_date: Optional[str] = None, end_date: Optional[str] = None) -> Dict[str, List[Dict]]:
-    """采集所有板块 ETF 的日线行情数据。"""
     if end_date is None:
         end_date = datetime.now().strftime("%Y-%m-%d")
     if start_date is None:
@@ -171,7 +150,6 @@ def collect_etf_data(start_date: Optional[str] = None, end_date: Optional[str] =
 
 
 def _fetch_index_daily(index_code: str, start_date: str, end_date: str) -> Optional[List[Dict]]:
-    """通过 AKShare stock_zh_index_daily 获取指数日线行情。"""
     for attempt in range(MAX_RETRIES + 1):
         try:
             df = akshare.stock_zh_index_daily(symbol=index_code)
@@ -216,7 +194,6 @@ def _fetch_index_daily(index_code: str, start_date: str, end_date: str) -> Optio
 
 
 def collect_benchmark_indices(start_date: Optional[str] = None, end_date: Optional[str] = None) -> Dict:
-    """采集市场基准指数日线行情。"""
     if end_date is None:
         end_date = datetime.now().strftime("%Y-%m-%d")
     if start_date is None:
@@ -239,7 +216,6 @@ def collect_benchmark_indices(start_date: Optional[str] = None, end_date: Option
 
 
 def _should_update(existing: Dict) -> bool:
-    """判断是否需要更新：今天尚未更新或从未更新。"""
     last = existing.get("last_update")
     if not last:
         return True
@@ -248,7 +224,6 @@ def _should_update(existing: Dict) -> bool:
 
 
 def collect_all(start_date: Optional[str] = None, end_date: Optional[str] = None, force: bool = False) -> Dict:
-    """采集所有行情数据（ETF + 指数），支持增量更新（按日期去重合并）。"""
     if end_date is None:
         end_date = datetime.now().strftime("%Y-%m-%d")
     if start_date is None:
@@ -300,7 +275,6 @@ def collect_all(start_date: Optional[str] = None, end_date: Optional[str] = None
 
 
 def validate_market_data(data: Dict) -> Dict:
-    """校验行情数据完整性：板块覆盖、OHLC逻辑、涨跌幅、日期排序。"""
     issues = []
     stats = {"total_sectors": 0, "total_records": 0, "valid_sectors": 0, "issues": 0}
 

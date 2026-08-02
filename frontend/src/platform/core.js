@@ -1,10 +1,3 @@
-/**
- * 平台适配层（Web 专用）
- *
- * 原跨平台（Tauri/Electron/Capacitor）打包方案已移除，仅保留 Web 端。
- * 仍保留 platform 接口与 OS/移动端 UA 识别，供 UI 层判断触屏/移动布局使用。
- */
-
 const PLATFORM_TYPES = {
   WEB: 'web',
   MOBILE: 'mobile'
@@ -24,7 +17,6 @@ let currentOS = OS_TYPES.UNKNOWN
 let nativeApis = null
 
 function detectPlatform() {
-  // 仅通过 UA 区分移动端浏览器与桌面 Web，原生壳已移除
   if (typeof window !== 'undefined') {
     const ua = navigator.userAgent.toLowerCase()
     if (/mobile|android|iphone|ipad|ipod/i.test(ua)) {
@@ -63,7 +55,6 @@ function initPlatform() {
   }
 }
 
-// Web 端原生能力降级实现：通知/存储/文件/窗口等均使用浏览器 API
 function createFallbackApis() {
   return {
     async readFile() { return null },

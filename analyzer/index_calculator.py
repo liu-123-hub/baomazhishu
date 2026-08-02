@@ -1,10 +1,4 @@
-"""宝妈指数计算引擎，各板块独立计算并维护历史曲线。
-
-板块分类体系 v2.0（2026-07-30 重构）:
-- 两大维度：投资风格维度（4大梯队成长赛道 + 价值防御） + 板块属性维度（标准行业 vs 跨行业概念）
-- 双重归属：每条帖子可同时归入最多3个板块（1个主行业 + 最多2个概念赛道）
-- 上下游产业链：每个板块在SECTOR_META中标记产业链位置
-"""
+"""宝妈指数计算引擎，各板块独立计算并维护历史曲线。基于T1~T4成长梯队+V1~V3价值防御+DEF防御资产的分类体系。"""
 from datetime import datetime, date
 from typing import Dict, List, Optional
 import json
@@ -12,25 +6,22 @@ import os
 
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 
-# ============================================================
-# 板块代码 → 中文显示名称（唯一真值来源，所有其他文件从此处导入）
-# ============================================================
 SECTOR_NAMES = {
-    # ── 第一梯队 T1：AI算力硬科技（市场最强主线，弹性最大）──
+    # ── T1：AI算力硬科技 ──
     "semiconductor": "半导体",
     "electronics": "电子",
     "ai_computing": "AI算力",
     "cpo": "CPO光通信",
-    # ── 第二梯队 T2：高端制造/智能科技（产业升级β）──
+    # ── T2：高端制造/智能科技 ──
     "computer": "计算机",
     "communication": "通信",
     "military": "军工",
     "robot": "机器人",
-    # ── 第三梯队 T3：新能源/电力设备（产业趋势β）──
+    # ── T3：新能源/电力设备 ──
     "newenergy": "新能源",
     "battery": "电池",
     "power_grid": "电力设备",
-    # ── 第四梯队 T4：消费医疗/文化传媒（稳健成长）──
+    # ── T4：消费医疗/文化传媒 ──
     "medicine": "医药",
     "baijiu": "白酒",
     "food": "食品饮料",
@@ -39,31 +30,26 @@ SECTOR_NAMES = {
     "media": "传媒",
     "biotech": "创新药",
     "consumer": "大消费",
-    # ── 价值防御板块：大金融 ──
+    # ── V1：大金融 ──
     "bank": "银行",
     "securities": "券商",
     "insurance": "保险",
-    # ── 价值防御板块：周期资源 ──
+    # ── V2：周期资源 ──
     "coal": "煤炭",
     "crude_oil": "石油石化",
     "nonferrous": "有色金属",
     "chemical": "化工",
     "steel": "钢铁",
-    # ── 价值防御板块：基建地产 ──
+    # ── V3：基建地产 ──
     "infrastructure": "基建",
     "realestate": "房地产",
-    # ── 防御资产/海外 ──
+    # ── DEF：防御资产/海外 ──
     "gold": "黄金",
     "nasdaq": "纳斯达克",
 }
 
-# ============================================================
-# 板块元数据：属性界定 + 梯队归属 + 产业链位置 + 关联行业
-# sector_type: "industry" = 证监会标准行业板块, "concept" = 跨行业概念赛道
-# tier: "T1"~"T4" 成长梯队, "V1"~"V3" 价值防御层, "DEF" 防御资产
-# ============================================================
 SECTOR_META = {
-    # ──── T1 第一梯队：AI算力硬科技 ────
+    # ──── T1 ────
     "semiconductor": {
         "sector_type": "industry",
         "tier": "T1",
@@ -99,7 +85,7 @@ SECTOR_META = {
         "related_industries": ["electronics", "communication", "semiconductor"],
     },
 
-    # ──── T2 第二梯队：高端制造/智能科技 ────
+    # ──── T2 ────
     "computer": {
         "sector_type": "industry",
         "tier": "T2",
@@ -134,7 +120,7 @@ SECTOR_META = {
         "related_industries": ["electronics", "computer", "military"],
     },
 
-    # ──── T3 第三梯队：新能源/电力设备 ────
+    # ──── T3 ────
     "newenergy": {
         "sector_type": "industry",
         "tier": "T3",
@@ -160,7 +146,7 @@ SECTOR_META = {
         "related_concepts": [],
     },
 
-    # ──── T4 第四梯队：消费医疗/文化传媒 ────
+    # ──── T4 ────
     "medicine": {
         "sector_type": "industry",
         "tier": "T4",
@@ -228,7 +214,7 @@ SECTOR_META = {
         "related_industries": ["baijiu", "food", "appliance", "tourism"],
     },
 
-    # ──── V1 价值防御：大金融 ────
+    # ──── V1 ────
     "bank": {
         "sector_type": "industry",
         "tier": "V1",
@@ -254,7 +240,7 @@ SECTOR_META = {
         "related_concepts": [],
     },
 
-    # ──── V2 价值防御：周期资源 ────
+    # ──── V2 ────
     "coal": {
         "sector_type": "industry",
         "tier": "V2",
@@ -296,7 +282,7 @@ SECTOR_META = {
         "related_concepts": [],
     },
 
-    # ──── V3 价值防御：基建地产 ────
+    # ──── V3 ────
     "infrastructure": {
         "sector_type": "industry",
         "tier": "V3",
@@ -314,7 +300,7 @@ SECTOR_META = {
         "related_concepts": [],
     },
 
-    # ──── DEF 防御资产/海外 ────
+    # ──── DEF ────
     "gold": {
         "sector_type": "concept",
         "tier": "DEF",
@@ -335,9 +321,6 @@ SECTOR_META = {
     },
 }
 
-# ============================================================
-# 分类体系（一级分类 → 板块列表），按投资风格组织
-# ============================================================
 SECTOR_CATEGORIES = [
     {
         "code": "T1",
@@ -389,35 +372,30 @@ SECTOR_CATEGORIES = [
     },
 ]
 
-# 板块属性类型
 INDUSTRY_SECTORS = [code for code, meta in SECTOR_META.items() if meta["sector_type"] == "industry"]
 CONCEPT_SECTORS = [code for code, meta in SECTOR_META.items() if meta["sector_type"] == "concept"]
 
-# 梯队颜色（前端使用）
 TIER_COLORS = {
-    "T1": "#ef4444",  # 红色-最热
-    "T2": "#f97316",  # 橙色-高景气
-    "T3": "#22c55e",  # 绿色-成长
-    "T4": "#3b82f6",  # 蓝色-稳健
-    "V1": "#64748b",  # 灰色-防御
-    "V2": "#78716c",  # 暖灰-周期
-    "V3": "#a16207",  # 褐色-稳增长
-    "DEF": "#eab308",  # 金色-避险
+    "T1": "#ef4444",
+    "T2": "#f97316",
+    "T3": "#22c55e",
+    "T4": "#3b82f6",
+    "V1": "#64748b",
+    "V2": "#78716c",
+    "V3": "#a16207",
+    "DEF": "#eab308",
 }
 
 
 def get_sector_type(code: str) -> str:
-    """获取板块属性类型：industry=标准行业, concept=跨行业概念"""
     return SECTOR_META.get(code, {}).get("sector_type", "industry")
 
 
 def get_sector_tier(code: str) -> str:
-    """获取板块所属梯队：T1~T4, V1~V3, DEF"""
     return SECTOR_META.get(code, {}).get("tier", "T4")
 
 
 def get_related_sectors(code: str) -> List[str]:
-    """获取关联板块（双重归属建议）"""
     meta = SECTOR_META.get(code, {})
     if meta.get("sector_type") == "concept":
         return meta.get("related_industries", [])
@@ -446,7 +424,7 @@ def _empty_details() -> Dict:
 
 
 def compute_sector_index(analysis_results: List) -> Dict:
-    """计算单个板块的宝妈指数(0-100)，四个维度加权计算。"""
+    """四维权重：小白占比40%+平均小白分25%+情绪强度20%+纯度信号15%。买卖指数：参与占比50%+小白烈度修正30%+关键词强度20%。"""
     if not analysis_results:
         return {
             "index": 0,
@@ -474,7 +452,6 @@ def compute_sector_index(analysis_results: List) -> Dict:
     purity_signal = (len(pure_newbie) / max(newbie_count, 1)) * 100 if newbie_count > 0 else 0
     activity_signal = min(100, len(valid_posts) / 80 * 100)
     
-    # 四维权重：小白占比40%(覆盖广度) + 平均小白分25%(个体烈度) + 情绪强度20%(情绪化程度) + 纯度信号15%(极端小白比例)
     index = (
         newbie_ratio * 0.40 +
         avg_newbie_score * 0.25 +
@@ -492,7 +469,6 @@ def compute_sector_index(analysis_results: List) -> Dict:
     buy_intensity = sum(r.intent_strength for r in newbie_buy) / max(len(newbie_buy), 1)
     sell_intensity = sum(r.intent_strength for r in newbie_sell) / max(len(newbie_sell), 1)
     
-    # 买/卖指数权重：参与占比50% + 小白烈度修正30% + 关键词强度20%
     mom_buy_index = round(min(100, (
         buy_ratio * 100 * 0.50 +
         (avg_newbie_score / 100) * buy_ratio * 30 * 0.30 +
@@ -544,7 +520,6 @@ def compute_sector_index(analysis_results: List) -> Dict:
 
 
 def interpret_index(index: float) -> str:
-    """将指数数值映射为五级中文解读标签。"""
     if index >= 75:
         return "🔴 极度狂热 — 擦鞋童时刻！小白情绪爆表，历史级别的危险信号"
     elif index >= 60:
@@ -558,7 +533,7 @@ def interpret_index(index: float) -> str:
 
 
 def load_history() -> Dict:
-    """读取历史指数记录，自动对同日期记录去重（保留时间戳最新者）。"""
+    """同日期记录去重，保留时间戳最新者。"""
     history_file = os.path.join(DATA_DIR, "history.json")
     if os.path.exists(history_file):
         with open(history_file, 'r', encoding='utf-8') as f:
@@ -594,7 +569,7 @@ def load_history() -> Dict:
 
 
 def save_history(history: Dict):
-    """原子写入历史记录到 JSON 文件（tmp + replace 避免写入中断损坏）。"""
+    """tmp + replace 原子写入避免文件损坏。"""
     history_file = os.path.join(DATA_DIR, "history.json")
     os.makedirs(DATA_DIR, exist_ok=True)
     tmp_file = history_file + ".tmp"
@@ -604,7 +579,7 @@ def save_history(history: Dict):
 
 
 def add_record(sector_indices: Dict[str, Dict], analysis_results: Dict):
-    """追加当日指数快照，同日重复执行会覆盖旧记录。"""
+    """追加当日指数快照，同日重复执行覆盖旧记录。"""
     history = load_history()
     
     record = {
@@ -633,7 +608,6 @@ def _empty_sector_data() -> Dict:
 
 
 def get_dashboard_data() -> Dict:
-    """组装前端仪表盘所需结构：最新快照 + 各板块历史序列 + 记录数。"""
     history = load_history()
     records = history.get("records", [])
 

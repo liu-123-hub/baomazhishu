@@ -1,4 +1,3 @@
-"""系统管理路由。"""
 import sys
 from datetime import datetime, timedelta
 
@@ -90,7 +89,6 @@ async def trigger_collection():
         endpoint="/api/v1/system/collect/trigger",
         status="success",
     )
-    # 保持任务引用至 _collect_tasks：避免被 GC 回收且异常可追溯
     task = asyncio.create_task(auto_collector.run_with_retry(trigger="manual"))
     task.add_done_callback(_collect_task_done)
     _collect_tasks.add(task)
@@ -107,7 +105,7 @@ _collect_tasks: set = set()
 
 
 def _collect_task_done(task):
-    """采集任务完成回调：记录异常并从集合移除。"""
+    """记录异常并从集合移除。"""
     _collect_tasks.discard(task)
     if task.cancelled():
         return

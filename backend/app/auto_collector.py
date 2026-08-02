@@ -20,7 +20,7 @@ if _PROJECT_ROOT not in sys.path:
 
 
 class AutoCollector:
-    """自动数据采集器，支持启动全量采集和定时采集。"""
+    """自动数据采集器：全量采集 + 定时采集 + 看门狗。"""
 
     STATUS_IDLE = "idle"
     STATUS_RUNNING = "running"
@@ -46,14 +46,11 @@ class AutoCollector:
             "preflight": [],
             "provenance": {},
         }
-        # _lock 保护 _status 读写一致性，避免广播与周期任务并发写冲突
         self._lock = asyncio.Lock()
-        # max_workers=1 保证采集串行执行，避免多实例并发导致资源耗尽
         self._executor = ThreadPoolExecutor(max_workers=1, thread_name_prefix="auto_collect_")
         self._periodic_task: Optional[asyncio.Task] = None
         self._startup_task: Optional[asyncio.Task] = None
         self._watchdog_task: Optional[asyncio.Task] = None
-        # 进程启动时刻，用于看门狗判定"自启动以来从未成功运行过"的漏触发场景
         self._process_start_time = time.monotonic()
 
     async def get_status(self) -> Dict[str, Any]:
@@ -94,8 +91,6 @@ class AutoCollector:
 
         provenance = dashboard.get("data_provenance") or {}
         has_user_discussion = provenance.get("has_user_discussion", True)
-        # 所有用户讨论源均返回 0 条时，本次采集质量降级；
-        # 跳过 DB 同步以保留上次优质数据，仅写审计日志留痕
         if not has_user_discussion:
             logger.warning(
                 "所有用户讨论源（股吧/小红书/雪球）均返回 0 条记录，"
@@ -182,7 +177,7 @@ class AutoCollector:
         logger.info(f"数据库同步完成: {synced_count}个板块写入, {skipped_count}个跳过")
 
     async def run_once(self, trigger: str = "scheduled"):
-        """执行一次完整的自动采集流程。"""
+        """执行一次完整采集：预检→采集→校验→同步DB→清缓存。"""
         run_start_time = time.monotonic()
         await self._update_status(
             status=self.STATUS_RUNNING,
@@ -220,8 +215,6 @@ class AutoCollector:
         try:
             await self._update_status(progress=20, step="执行采集", message="正在从多个真实数据源采集市场数据，请稍候...")
             loop = asyncio.get_event_loop()
-            # 设置显式 deadline，避免单个卡死的网络请求让后续周期无限堆积；
-            # 超时后放弃当前运行并重置执行器，使下一个周期能立即开始
             deadline = settings.COLLECTOR_RUN_DEADLINE
             try:
                 dashboard = await asyncio.wait_for(
@@ -229,8 +222,6 @@ class AutoCollector:
                     timeout=deadline,
                 )
             except asyncio.TimeoutError:
-                # 重置执行器：旧的单工作线程已被卡死，若不重建则后续 run_in_executor
-                # 会排在卡死线程之后无限等待，导致周期全部失效
                 self._executor.shutdown(wait=False)
                 self._executor = ThreadPoolExecutor(
                     max_workers=1, thread_name_prefix="auto_collect_"
@@ -246,7 +237,6 @@ class AutoCollector:
             if not dashboard or not isinstance(dashboard, dict):
                 raise RuntimeError("采集返回数据格式异常")
 
-            # 数据合法性校验门：仅当校验通过才覆盖本地数据，避免无效数据污染
             from collectors.data_validation import validate_dashboard_for_sync
             is_valid, validation_issues = validate_dashboard_for_sync(dashboard)
             if not is_valid:
@@ -274,7 +264,6 @@ class AutoCollector:
             await self._update_status(progress=80, step="同步数据库", message="正在将最新数据同步到本地数据库...")
             await self._sync_latest_to_db(dashboard)
 
-            # 采集成功后清空缓存，确保下次读取是最新数据
             await dashboard_cache.clear()
 
             record_count = dashboard.get("record_count", 0)
@@ -367,20 +356,12 @@ class AutoCollector:
                 )
 
     async def _watchdog_loop(self):
-        """看门狗循环：检测漏触发/卡死的采集周期。
-
-        检测两类静默故障：
-        1. missed-run：自启动以来或在一个完整周期+deadline+宽限期之后，仍无成功运行
-        2. stuck-run：当前状态为 RUNNING 但已远超 deadline，说明 deadline 机制本身
-           被绕过（例如事件循环阻塞），需人工介入
-        """
+        """看门狗：检测漏触发（missed-run）和卡死（stuck-run）。"""
         check_interval = settings.WATCHDOG_CHECK_INTERVAL
         interval = settings.AUTO_COLLECT_INTERVAL
         deadline = settings.COLLECTOR_RUN_DEADLINE
         grace = settings.WATCHDOG_GRACE
-        # 漏触发阈值 = 一个周期 + 一次最长运行 + 宽限期
         missed_threshold = interval + deadline + grace
-        # 卡死阈值 = 单次最长运行 + 宽限期
         stuck_threshold = deadline + grace
 
         logger.info(
@@ -399,7 +380,6 @@ class AutoCollector:
                 status = await self.get_status()
                 now_mono = time.monotonic()
 
-                # 检测 1：stuck-run（当前运行卡死）
                 started_at_iso = status.get("started_at")
                 if status.get("status") == self.STATUS_RUNNING and started_at_iso:
                     try:
@@ -415,7 +395,6 @@ class AutoCollector:
                     except (ValueError, TypeError):
                         pass
 
-                # 检测 2：missed-run（漏触发/长期无成功）
                 last_success_iso = status.get("last_success_at")
                 if last_success_iso:
                     try:
@@ -432,7 +411,6 @@ class AutoCollector:
                     except (ValueError, TypeError):
                         pass
                 else:
-                    # 自启动以来从未成功过：检查进程运行时长是否超过阈值
                     uptime = now_mono - self._process_start_time
                     if uptime > missed_threshold:
                         logger.error(
@@ -443,19 +421,12 @@ class AutoCollector:
                 logger.info("看门狗循环已停止")
                 raise
             except Exception as e:
-                # 看门狗自身异常不得导致循环终止
                 logger.exception(f"看门狗检查发生未预期异常，将在下个周期继续: {e}")
 
     async def start(self, delayed_start: bool = False, delay_seconds: float = 5.0):
         self._process_start_time = time.monotonic()
 
         async def _delayed_startup():
-            """启动触发任务，包裹 try/except 确保异常会将状态置为 FAILED。
-
-            若不包裹，run_with_retry 抛出的未预期异常会让本协程静默死亡，
-            而 _periodic_loop 会在初始轮询中无限等待 SUCCESS/FAILED 状态，导致
-            定时器永远无法进入周期循环（静默挂起故障）。
-            """
             try:
                 await asyncio.sleep(delay_seconds)
                 await self.run_with_retry(trigger="startup")

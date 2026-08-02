@@ -7,7 +7,6 @@ from fastapi import WebSocket
 
 logger = logging.getLogger(__name__)
 
-# 连接数上限，防止恶意客户端耗尽资源
 MAX_CONNECTIONS = 50
 
 
@@ -31,10 +30,6 @@ class ConnectionManager:
         self.active_connections.discard(websocket)
         logger.info(f"WebSocket 连接断开，当前连接数: {len(self.active_connections)}")
 
-    # 广播遍历不持锁：set 在 for 期间若被修改会抛异常，
-    # 但 connect/disconnect 均通过 discard/add（广播时其他连接的 connect/disconnect
-    # 不会修改正在迭代的 set 迭代器语义，因为 set 本身是可变对象）；
-    # 若某连接 send_json 失败，会在本次循环后统一清理。
     async def broadcast(self, message: dict):
         disconnected = set()
         for connection in self.active_connections:
@@ -60,7 +55,6 @@ class ConnectionManager:
             await websocket.send_json(message)
         except Exception as e:
             logger.warning(f"WebSocket 发送个人消息失败: {e}")
-            # 必须显式 await disconnect，否则协程不执行，死连接无法清理
             await self.disconnect(websocket)
 
     @property
