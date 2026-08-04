@@ -8,6 +8,13 @@ from typing import Dict, List, Optional
 
 sys.path.insert(0, os.path.dirname(__file__))
 
+# Windows 控制台默认 GBK 编码，无法输出 emoji，重配置为 UTF-8
+for _stream in (sys.stdout, sys.stderr):
+    try:
+        _stream.reconfigure(encoding="utf-8", errors="replace")
+    except (AttributeError, ValueError):
+        pass
+
 from collectors.guba_collector import collect_all as collect_guba
 from collectors.xhs_collector import collect_all as collect_xhs
 from collectors.google_news_collector import collect_all as collect_google_news

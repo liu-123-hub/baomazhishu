@@ -26,7 +26,7 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch, nextTick } from 'vue'
 
 const props = defineProps({
   options: {
@@ -129,10 +129,15 @@ function handleKeydown(e) {
   focusedIndex.value = newIndex
   const buttons = e.currentTarget.querySelectorAll('.segment-item')
   if (buttons[newIndex]) {
-    buttons[newIndex].focus()
+    nextTick(() => {
+      buttons[newIndex].focus({ preventScroll: true })
+    })
   }
-  handleSelect(resolvedOptions.value[newIndex])
 }
+
+watch(activeIndex, (newActive) => {
+  focusedIndex.value = newActive
+})
 </script>
 
 <style lang="scss" scoped>

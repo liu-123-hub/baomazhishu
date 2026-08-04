@@ -32,6 +32,38 @@ body {
 
 #app { position: relative; }
 
+// 焦点安全机制：指针用户（鼠标/触摸）模式下，抑制不必要的焦点视觉
+html.user-is-pointer {
+  button,
+  a,
+  [role="button"],
+  .segment-item,
+  .theme-toggle,
+  .win-btn,
+  .retry-btn,
+  .sector-chevron,
+  .nav-back,
+  .ios-window-btn {
+    &:focus,
+    &:focus-visible,
+    &:active:focus {
+      outline: none !important;
+      box-shadow: none !important;
+    }
+  }
+}
+
+// 仅在键盘用户模式下显示焦点环
+html.user-is-keyboard {
+  button:focus-visible,
+  a:focus-visible,
+  [role="button"]:focus-visible,
+  .segment-item:focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    @include ios-focus-ring;
+  }
+}
+
 a {
   color: var(--ios-blue);
   text-decoration: none;
@@ -57,6 +89,16 @@ button {
   &:focus:not(:focus-visible) {
     outline: none;
   }
+
+  &:focus {
+    outline: none;
+  }
+
+  &:active,
+  &:active:focus {
+    outline: none;
+    box-shadow: none;
+  }
 }
 
 input, textarea, select {
@@ -67,6 +109,10 @@ input, textarea, select {
   &:focus-visible {
     @include ios-focus-ring;
     outline-offset: 0;
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
   }
 }
 
@@ -80,6 +126,10 @@ a {
   &:focus-visible {
     @include ios-focus-ring;
     border-radius: var(--ios-radius-sm);
+  }
+
+  &:focus:not(:focus-visible) {
+    outline: none;
   }
 }
 

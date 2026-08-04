@@ -5,10 +5,11 @@ import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from logging.handlers import RotatingFileHandler
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
+from fastapi.staticfiles import StaticFiles
 
 from .config import settings
 from .database import db
@@ -188,14 +189,7 @@ def create_app() -> FastAPI:
 
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
-    @app.get("/")
-    async def root():
-        return {
-            "name": settings.PROJECT_NAME,
-            "version": "1.0.0",
-            "docs": "/docs",
-            "api_prefix": settings.API_V1_PREFIX,
-        }
+    _configure_static(app)
 
     @app.websocket("/ws")
     async def websocket_endpoint(websocket: WebSocket):
@@ -229,6 +223,45 @@ def create_app() -> FastAPI:
             await manager.disconnect(websocket)
 
     return app
+
+
+def _configure_static(app: FastAPI) -> None:
+    """挂载前端静态资源并配置 SPA 路由回退。
+
+    - 存在 STATIC_DIR（已构建前端）时：托管 /assets，根路径返回 index.html，
+      其余未匹配路径回退到 index.html 以支持前端路由；/api/* 仍返回 JSON 404
+    - 开发模式且未构建前端时：根路径返回服务信息 JSON
+    """
+    static_dir = settings.STATIC_DIR
+    index_html = static_dir / "index.html" if static_dir else None
+
+    if not (static_dir and static_dir.is_dir() and index_html and index_html.is_file()):
+        @app.get("/", include_in_schema=False)
+        async def root():
+            return {
+                "name": settings.PROJECT_NAME,
+                "version": "1.0.0",
+                "docs": "/docs",
+                "api_prefix": settings.API_V1_PREFIX,
+            }
+        return
+
+    assets_dir = static_dir / "assets"
+    if assets_dir.is_dir():
+        app.mount("/assets", StaticFiles(directory=str(assets_dir)), name="assets")
+
+    index_path = str(index_html)
+
+    @app.get("/", include_in_schema=False)
+    async def _spa_root():
+        return FileResponse(index_path)
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def _spa_fallback(full_path: str):
+        # /api 与 /ws 已由专用路由处理；落到此处且以 api/ 开头视为未知 API，返回 JSON 404
+        if full_path.startswith("api/"):
+            raise HTTPException(status_code=404, detail="Not Found")
+        return FileResponse(index_path)
 
 
 app = create_app()
