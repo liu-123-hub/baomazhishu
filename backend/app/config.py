@@ -13,6 +13,15 @@ from typing import List
 from pydantic_settings import BaseSettings
 
 
+# 清除可能被其他应用注入的冲突环境变量，防止 DB_PATH 等被覆盖
+# BaseSettings 会自动从环境变量加载同名配置项，需在 Settings 实例化前移除
+for _conflict_var in ("DB_PATH", "DATABASE_URL", "DATA_DIR", "BACKEND_DIR", "STATIC_DIR"):
+    _conflict_val = os.environ.get(_conflict_var, "")
+    # 仅当环境变量指向项目目录之外时才移除（允许用户通过 .env 显式覆盖）
+    if _conflict_val and "baomazhishu" not in _conflict_val.lower():
+        os.environ.pop(_conflict_var, None)
+
+
 def _is_frozen() -> bool:
     """是否运行于 PyInstaller 打包环境中。"""
     return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")

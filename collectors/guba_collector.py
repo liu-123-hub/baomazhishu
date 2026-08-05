@@ -15,37 +15,53 @@ if PROJECT_ROOT not in sys.path:
 from analyzer.index_calculator import SECTOR_NAMES
 
 SECTOR_ETF = {
-    "semiconductor":  {"name": "半导体",   "code": "159995"},
-    "electronics":    {"name": "电子",     "code": "159997"},
-    "ai_computing":   {"name": "AI算力",   "code": "159819"},
-    "cpo":            {"name": "CPO光通信","code": "515880"},
-    "computer":       {"name": "计算机",   "code": "512720"},
-    "communication":  {"name": "通信",     "code": "515050"},
-    "military":       {"name": "军工",     "code": "512660"},
-    "robot":          {"name": "机器人",   "code": "562500"},
-    "newenergy":      {"name": "新能源",   "code": "516160"},
-    "battery":        {"name": "电池",     "code": "159755"},
-    "power_grid":     {"name": "电力设备", "code": "159611"},
-    "medicine":       {"name": "医药",     "code": "512010"},
-    "baijiu":         {"name": "白酒",     "code": "512690"},
-    "food":           {"name": "食品饮料", "code": "515080"},
-    "appliance":      {"name": "家电",     "code": "159996"},
-    "tourism":        {"name": "文旅",     "code": "159766"},
-    "media":          {"name": "传媒",     "code": "512980"},
-    "biotech":        {"name": "创新药",   "code": "159992"},
-    "consumer":       {"name": "大消费",   "code": "159928"},
-    "bank":           {"name": "银行",     "code": "512800"},
-    "securities":     {"name": "券商",     "code": "512880"},
-    "insurance":      {"name": "保险",     "code": "512570"},
-    "coal":           {"name": "煤炭",     "code": "515220"},
-    "crude_oil":      {"name": "石油石化", "code": "501018"},
-    "nonferrous":     {"name": "有色金属", "code": "512400"},
-    "chemical":       {"name": "化工",     "code": "516220"},
-    "steel":          {"name": "钢铁",     "code": "515210"},
-    "infrastructure": {"name": "基建",     "code": "516950"},
-    "realestate":     {"name": "房地产",   "code": "512200"},
-    "gold":           {"name": "黄金",     "code": "518880"},
-    "nasdaq":         {"name": "纳斯达克", "code": "513100"},
+    # ── T1：AI算力硬科技 ──
+    "semiconductor":    {"name": "半导体",     "code": "159995"},
+    "electronics":      {"name": "电子",       "code": "159997"},
+    "ai_computing":     {"name": "AI算力",     "code": "159819"},
+    "cpo":              {"name": "CPO光通信",  "code": "515880"},
+    "ai_application":   {"name": "AI应用",     "code": "159819"},   # 人工智能ETF（覆盖AI应用落地）
+    "deepseek":         {"name": "DeepSeek概念","code": "588730"},  # 科创人工智能ETF
+    # ── T2：高端制造/智能科技 ──
+    "computer":         {"name": "计算机",     "code": "512720"},
+    "communication":    {"name": "通信",       "code": "515050"},
+    "military":         {"name": "军工",       "code": "512660"},
+    "robot":            {"name": "机器人",     "code": "562500"},
+    "humanoid_robot":   {"name": "人形机器人", "code": "159770"},   # 机器人ETF天弘（覆盖人形机器人）
+    "ai_agent":         {"name": "AI智能体",   "code": "516510"},   # 云计算ETF（AI Agent运行基础设施）
+    "low_altitude":     {"name": "低空经济",   "code": "159378"},   # 通用航空ETF（全市场首只低空经济ETF）
+    "satellite_internet":{"name": "卫星互联网","code": "159206"},   # 卫星ETF
+    # ── T3：新能源/电力设备 ──
+    "newenergy":        {"name": "新能源",     "code": "516160"},
+    "battery":          {"name": "电池",       "code": "159755"},
+    "power_grid":       {"name": "电力设备",   "code": "159611"},
+    "solid_battery":    {"name": "固态电池",   "code": "159755"},   # 电池ETF（持仓覆盖固态电池产业链）
+    "nuclear_fusion":   {"name": "可控核聚变", "code": "561790"},   # 央企现代能源ETF（最接近核聚变主题）
+    # ── T4：消费医疗/文化传媒 ──
+    "medicine":         {"name": "医药",       "code": "512010"},
+    "baijiu":           {"name": "白酒",       "code": "512690"},
+    "food":             {"name": "食品饮料",   "code": "515080"},
+    "appliance":        {"name": "家电",       "code": "159996"},
+    "tourism":          {"name": "文旅",       "code": "159766"},
+    "media":            {"name": "传媒",       "code": "512980"},
+    "biotech":          {"name": "创新药",     "code": "159992"},
+    "consumer":         {"name": "大消费",     "code": "159928"},
+    # ── V1：大金融 ──
+    "bank":             {"name": "银行",       "code": "512800"},
+    "securities":       {"name": "券商",       "code": "512880"},
+    "insurance":        {"name": "保险",       "code": "512570"},
+    # ── V2：周期资源 ──
+    "coal":             {"name": "煤炭",       "code": "515220"},
+    "crude_oil":        {"name": "石油石化",   "code": "501018"},
+    "nonferrous":       {"name": "有色金属",   "code": "512400"},
+    "chemical":         {"name": "化工",       "code": "516220"},
+    "steel":            {"name": "钢铁",       "code": "515210"},
+    # ── V3：基建地产 ──
+    "infrastructure":   {"name": "基建",       "code": "516950"},
+    "realestate":       {"name": "房地产",     "code": "512200"},
+    # ── DEF：防御资产/海外 ──
+    "gold":             {"name": "黄金",       "code": "518880"},
+    "nasdaq":           {"name": "纳斯达克",   "code": "513100"},
 }
 
 

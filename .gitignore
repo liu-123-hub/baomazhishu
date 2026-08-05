@@ -67,3 +67,7 @@ backend/dashboard.db
 .coverage.*
 htmlcov/
 .pytest_cache/
+
+# PyInstaller 构建产物与 UPX 二进制
+build_pyinstaller*.log
+upx/

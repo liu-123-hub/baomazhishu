@@ -4,8 +4,36 @@ from app.data_service import (
     get_sector_detail,
     get_line_chart_data
 )
+from app.config import settings
 
 router = APIRouter()
+
+
+@router.get("/version")
+async def sector_version():
+    """获取板块分类版本信息"""
+    from analyzer.index_calculator import get_version_info
+    return {
+        "code": 200,
+        "data": get_version_info()
+    }
+
+
+@router.get("/config")
+async def sector_config():
+    """获取完整板块配置（供前端初始化）"""
+    from analyzer.index_calculator import SECTOR_NAMES, SECTOR_META, SECTOR_CATEGORIES, TIER_COLORS, INDUSTRY_SECTORS, CONCEPT_SECTORS
+    return {
+        "code": 200,
+        "data": {
+            "sector_names": SECTOR_NAMES,
+            "sector_meta": SECTOR_META,
+            "sector_categories": SECTOR_CATEGORIES,
+            "tier_colors": TIER_COLORS,
+            "industry_sectors": INDUSTRY_SECTORS,
+            "concept_sectors": CONCEPT_SECTORS,
+        }
+    }
 
 
 @router.get("/overview")

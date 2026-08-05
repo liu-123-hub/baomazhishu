@@ -18,37 +18,53 @@ DATA_DIR = os.path.join(PROJECT_ROOT, "data")
 MARKET_DATA_FILE = os.path.join(DATA_DIR, "market_data.json")
 
 SECTOR_ETF_MAP = {
-    "semiconductor":  {"code": "159995", "name": "芯片ETF",     "ak_symbol": "sz159995"},
-    "electronics":    {"code": "159997", "name": "电子ETF",     "ak_symbol": "sz159997"},
-    "ai_computing":   {"code": "159819", "name": "人工智能ETF", "ak_symbol": "sz159819"},
-    "cpo":            {"code": "515880", "name": "通信ETF",     "ak_symbol": "sh515880"},
-    "computer":       {"code": "512720", "name": "计算机ETF",   "ak_symbol": "sh512720"},
-    "communication":  {"code": "515050", "name": "5G通信ETF",   "ak_symbol": "sh515050"},
-    "military":       {"code": "512660", "name": "军工ETF",     "ak_symbol": "sh512660"},
-    "robot":          {"code": "562500", "name": "机器人ETF",   "ak_symbol": "sh562500"},
-    "newenergy":      {"code": "516160", "name": "新能源ETF",   "ak_symbol": "sh516160"},
-    "battery":        {"code": "159755", "name": "电池ETF",     "ak_symbol": "sz159755"},
-    "power_grid":     {"code": "159611", "name": "电网ETF",     "ak_symbol": "sz159611"},
-    "medicine":       {"code": "512010", "name": "医药ETF",     "ak_symbol": "sh512010"},
-    "baijiu":         {"code": "512690", "name": "酒ETF",       "ak_symbol": "sh512690"},
-    "food":           {"code": "515080", "name": "食品ETF",     "ak_symbol": "sh515080"},
-    "appliance":      {"code": "159996", "name": "家电ETF",     "ak_symbol": "sz159996"},
-    "tourism":        {"code": "159766", "name": "旅游ETF",     "ak_symbol": "sz159766"},
-    "media":          {"code": "512980", "name": "传媒ETF",     "ak_symbol": "sh512980"},
-    "biotech":        {"code": "159992", "name": "创新药ETF",   "ak_symbol": "sz159992"},
-    "consumer":       {"code": "159928", "name": "消费ETF",     "ak_symbol": "sz159928"},
-    "bank":           {"code": "512800", "name": "银行ETF",     "ak_symbol": "sh512800"},
-    "securities":     {"code": "512880", "name": "证券ETF",     "ak_symbol": "sh512880"},
-    "insurance":      {"code": "512570", "name": "保险ETF",     "ak_symbol": "sh512570"},
-    "coal":           {"code": "515220", "name": "煤炭ETF",     "ak_symbol": "sh515220"},
-    "crude_oil":      {"code": "501018", "name": "原油基金",    "ak_symbol": "sh501018"},
-    "nonferrous":     {"code": "512400", "name": "有色ETF",     "ak_symbol": "sh512400"},
-    "chemical":       {"code": "516220", "name": "化工ETF",     "ak_symbol": "sh516220"},
-    "steel":          {"code": "515210", "name": "钢铁ETF",     "ak_symbol": "sh515210"},
-    "infrastructure": {"code": "516950", "name": "基建ETF",     "ak_symbol": "sh516950"},
-    "realestate":     {"code": "512200", "name": "房地产ETF",   "ak_symbol": "sh512200"},
-    "gold":           {"code": "518880", "name": "黄金ETF",     "ak_symbol": "sh518880"},
-    "nasdaq":         {"code": "513100", "name": "纳指ETF",     "ak_symbol": "sh513100"},
+    # ── T1：AI算力硬科技 ──
+    "semiconductor":     {"code": "159995", "name": "芯片ETF",       "ak_symbol": "sz159995"},
+    "electronics":       {"code": "159997", "name": "电子ETF",       "ak_symbol": "sz159997"},
+    "ai_computing":      {"code": "159819", "name": "人工智能ETF",    "ak_symbol": "sz159819"},
+    "cpo":               {"code": "515880", "name": "通信ETF",       "ak_symbol": "sh515880"},
+    "ai_application":    {"code": "159819", "name": "人工智能ETF(AI应用)", "ak_symbol": "sz159819"},  # 人工智能ETF（覆盖AI应用落地）
+    "deepseek":          {"code": "588730", "name": "科创人工智能ETF","ak_symbol": "sh588730"},  # 科创板AI ETF（DeepSeek概念）
+    # ── T2：高端制造/智能科技 ──
+    "computer":          {"code": "512720", "name": "计算机ETF",     "ak_symbol": "sh512720"},
+    "communication":     {"code": "515050", "name": "5G通信ETF",     "ak_symbol": "sh515050"},
+    "military":          {"code": "512660", "name": "军工ETF",       "ak_symbol": "sh512660"},
+    "robot":             {"code": "562500", "name": "机器人ETF",     "ak_symbol": "sh562500"},
+    "humanoid_robot":    {"code": "159770", "name": "机器人ETF天弘", "ak_symbol": "sz159770"},  # 覆盖人形机器人产业链
+    "ai_agent":          {"code": "516510", "name": "云计算ETF",     "ak_symbol": "sh516510"},  # AI Agent运行基础设施
+    "low_altitude":      {"code": "159378", "name": "通用航空ETF",   "ak_symbol": "sz159378"},  # 全市场首只低空经济ETF
+    "satellite_internet":{"code": "159206", "name": "卫星ETF",       "ak_symbol": "sz159206"},
+    # ── T3：新能源/电力设备 ──
+    "newenergy":         {"code": "516160", "name": "新能源ETF",     "ak_symbol": "sh516160"},
+    "battery":           {"code": "159755", "name": "电池ETF",       "ak_symbol": "sz159755"},
+    "power_grid":        {"code": "159611", "name": "电网ETF",       "ak_symbol": "sz159611"},
+    "solid_battery":     {"code": "159755", "name": "电池ETF(固态电池)", "ak_symbol": "sz159755"},  # 持仓覆盖固态电池产业链
+    "nuclear_fusion":    {"code": "561790", "name": "央企现代能源ETF","ak_symbol": "sh561790"},  # 最接近核聚变主题
+    # ── T4：消费医疗/文化传媒 ──
+    "medicine":          {"code": "512010", "name": "医药ETF",      "ak_symbol": "sh512010"},
+    "baijiu":            {"code": "512690", "name": "酒ETF",        "ak_symbol": "sh512690"},
+    "food":              {"code": "515080", "name": "食品ETF",      "ak_symbol": "sh515080"},
+    "appliance":         {"code": "159996", "name": "家电ETF",      "ak_symbol": "sz159996"},
+    "tourism":           {"code": "159766", "name": "旅游ETF",      "ak_symbol": "sz159766"},
+    "media":             {"code": "512980", "name": "传媒ETF",      "ak_symbol": "sh512980"},
+    "biotech":           {"code": "159992", "name": "创新药ETF",    "ak_symbol": "sz159992"},
+    "consumer":          {"code": "159928", "name": "消费ETF",      "ak_symbol": "sz159928"},
+    # ── V1：大金融 ──
+    "bank":              {"code": "512800", "name": "银行ETF",      "ak_symbol": "sh512800"},
+    "securities":        {"code": "512880", "name": "证券ETF",      "ak_symbol": "sh512880"},
+    "insurance":         {"code": "512570", "name": "保险ETF",      "ak_symbol": "sh512570"},
+    # ── V2：周期资源 ──
+    "coal":              {"code": "515220", "name": "煤炭ETF",      "ak_symbol": "sh515220"},
+    "crude_oil":         {"code": "501018", "name": "原油基金",     "ak_symbol": "sh501018"},
+    "nonferrous":        {"code": "512400", "name": "有色ETF",      "ak_symbol": "sh512400"},
+    "chemical":          {"code": "516220", "name": "化工ETF",      "ak_symbol": "sh516220"},
+    "steel":             {"code": "515210", "name": "钢铁ETF",      "ak_symbol": "sh515210"},
+    # ── V3：基建地产 ──
+    "infrastructure":    {"code": "516950", "name": "基建ETF",      "ak_symbol": "sh516950"},
+    "realestate":        {"code": "512200", "name": "房地产ETF",    "ak_symbol": "sh512200"},
+    # ── DEF：防御资产/海外 ──
+    "gold":              {"code": "518880", "name": "黄金ETF",      "ak_symbol": "sh518880"},
+    "nasdaq":            {"code": "513100", "name": "纳指ETF",      "ak_symbol": "sh513100"},
 }
 
 BENCHMARK_INDICES = {
