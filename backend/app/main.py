@@ -47,6 +47,12 @@ def _configure_logging() -> None:
     root_logger.addHandler(console_handler)
     root_logger.addHandler(file_handler)
 
+    # --- 降低高频第三方库的日志级别，减少日志噪音 ---
+    # httpx 默认 INFO 级别会记录每一次 HTTP HEAD 请求，在预检阶段产生大量噪音
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    # httpcore 是 httpx 的底层库，同样降低级别
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+
 
 _configure_logging()
 
@@ -56,6 +62,8 @@ logger = logging.getLogger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """启动顺序：DB初始化→数据预热→WS广播→自动采集。"""
+    logger.info("系统启动中...")
+
     print("=" * 65)
     print("   实时数据大屏系统 - FastAPI 后端")
     print(f"   {settings.PROJECT_NAME}")
@@ -64,32 +72,39 @@ async def lifespan(app: FastAPI):
     print("[1/4] 初始化数据库...")
     await db.init_database()
     print("   [OK] 数据库就绪")
+    logger.info("数据库初始化完成")
 
     print("[2/4] 启动数据服务预热（后台执行）...")
     warmup_task = asyncio.create_task(_warmup_data_service())
     print("   [OK] 数据服务预热已在后台启动")
+    logger.info("数据服务预热已在后台启动")
 
     print("[3/4] 启动实时数据推送...")
     broadcast_task = asyncio.create_task(broadcast_data_loop())
     print("   [OK] 实时推送已启动")
+    logger.info("实时数据推送已启动")
 
     print("[4/4] 启动自动数据采集（延迟5秒后首次执行）...")
     await auto_collector.start(delayed_start=True)
     print("   [OK] 自动采集已启动")
+    logger.info("自动数据采集已启动")
 
     print("\n" + "=" * 65)
     print("   [OK] 系统已启动")
     print(f"   API 服务: http://{settings.HOST}:{settings.PORT}")
     print(f"   API 文档: http://{settings.HOST}:{settings.PORT}/docs")
     print("=" * 65 + "\n")
+    logger.info("系统启动完成 API=%s:%s", settings.HOST, settings.PORT)
 
     yield
 
+    logger.info("系统关闭中...")
     print("\n[STOP] 正在关闭系统...")
     broadcast_task.cancel()
     warmup_task.cancel()
     await auto_collector.close()
     print("   [OK] 系统已关闭")
+    logger.info("系统已关闭")
 
 
 async def _warmup_data_service():
