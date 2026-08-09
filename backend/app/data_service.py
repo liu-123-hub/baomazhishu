@@ -798,6 +798,195 @@ async def get_market_data(sector: Optional[str] = None) -> Dict[str, Any]:
         return {'code': 500, 'message': str(e), 'data': None}
 
 
+# ── 指数比值面积图：创业板指 / 中证红利 ──────────────────────────────
+
+# 两个基准指数的代码与显示名称
+_RATIO_INDEX_A = 'sz399006'   # 创业板指
+_RATIO_INDEX_B = 'sh000922'   # 中证红利
+_RATIO_NAME_A = '创业板指'
+_RATIO_NAME_B = '中证红利'
+
+
+def _get_index_close_map(market_data: Dict, index_code: str) -> Dict[str, float]:
+    """从行情数据中提取指定指数的 {date: close} 映射，按日期升序排列。"""
+    indices = market_data.get('benchmark_indices', {})
+    entry = indices.get(index_code)
+    if not entry or not isinstance(entry, dict):
+        return {}
+    records = entry.get('data', [])
+    if not isinstance(records, list):
+        return {}
+    close_map: Dict[str, float] = {}
+    for rec in records:
+        if not isinstance(rec, dict):
+            continue
+        date_str = rec.get('date')
+        close_val = rec.get('close')
+        if not date_str or close_val is None:
+            continue
+        try:
+            close_map[date_str] = float(close_val)
+        except (TypeError, ValueError):
+            continue
+    return dict(sorted(close_map.items()))
+
+
+def _align_and_fill(
+    map_a: Dict[str, float],
+    map_b: Dict[str, float],
+) -> List[Dict[str, Any]]:
+    """对齐两个指数的日期序列，前向填充缺失值，返回逐日对齐列表。
+
+    返回格式: [{date, close_a, close_b}, ...]
+    缺失值用上一个交易日的收盘价填充，确保比值计算不出现空值或跳点。
+    """
+    all_dates = sorted(set(map_a.keys()) | set(map_b.keys()))
+    result: List[Dict[str, Any]] = []
+    prev_a: Optional[float] = None
+    prev_b: Optional[float] = None
+    for date_str in all_dates:
+        val_a = map_a.get(date_str)
+        val_b = map_b.get(date_str)
+        # 前向填充：当天缺失则沿用上一有效值
+        if val_a is None:
+            val_a = prev_a
+        else:
+            prev_a = val_a
+        if val_b is None:
+            val_b = prev_b
+        else:
+            prev_b = val_b
+        # 两个值都有效才能计算比值
+        if val_a is not None and val_b is not None and val_b != 0:
+            result.append({
+                'date': date_str,
+                'close_a': val_a,
+                'close_b': val_b,
+            })
+    return result
+
+
+def _aggregate_by_unit(
+    aligned: List[Dict[str, Any]],
+    unit: str,
+) -> List[Dict[str, Any]]:
+    """按时间单位聚合，取每个周期最后一个交易日的收盘价。
+
+    - year:    历年年度收盘比值
+    - quarter: 各季度末收盘比值
+    - month:   各月度收盘比值
+    """
+    if not aligned:
+        return []
+
+    # 将每条记录归类到对应周期键
+    buckets: Dict[str, Dict[str, Any]] = {}
+    for item in aligned:
+        date_str = item['date']
+        parts = date_str.split('-')
+        if len(parts) < 3:
+            continue
+        year, month = parts[0], int(parts[1])
+        if unit == 'year':
+            key = year
+        elif unit == 'quarter':
+            q = (month - 1) // 3 + 1
+            key = f'{year}-Q{q}'
+        else:  # month
+            key = f'{year}-{parts[1]}'
+        # 每个周期保留最后一条（aligned 已按日期升序）
+        buckets[key] = item
+
+    # 按日期顺序输出
+    return sorted(buckets.values(), key=lambda x: x['date'])
+
+
+async def get_index_ratio_data(unit: str = 'month') -> Dict[str, Any]:
+    """获取创业板指/中证红利比值面积图数据。
+
+    参数:
+        unit: 时间聚合单位 — 'year' | 'quarter' | 'month'
+
+    返回:
+        {
+            'x_axis': ['2023-08', ...],
+            'ratios': [0.4321, ...],
+            'chinext_values': [2239.31, ...],
+            'dividend_values': [5185.83, ...],
+            'index_names': {'a': '创业板指', 'b': '中证红利'},
+            'unit': 'month'
+        }
+    """
+    valid_units = {'year', 'quarter', 'month'}
+    if unit not in valid_units:
+        return {'code': 400, 'message': f'无效的时间单位: {unit}（应为 year/quarter/month）', 'data': None}
+
+    try:
+        market_data = _load_market_data()
+        if not market_data:
+            return {'code': 200, 'data': None, 'message': '无行情数据'}
+
+        map_a = _get_index_close_map(market_data, _RATIO_INDEX_A)
+        map_b = _get_index_close_map(market_data, _RATIO_INDEX_B)
+
+        if not map_a or not map_b:
+            missing = []
+            if not map_a:
+                missing.append(_RATIO_NAME_A)
+            if not map_b:
+                missing.append(_RATIO_NAME_B)
+            return {'code': 200, 'data': None, 'message': f'缺少指数数据: {", ".join(missing)}'}
+
+        # 对齐日期 + 前向填充缺失值
+        aligned = _align_and_fill(map_a, map_b)
+        if not aligned:
+            return {'code': 200, 'data': None, 'message': '无有效对齐数据'}
+
+        # 按时间单位聚合
+        aggregated = _aggregate_by_unit(aligned, unit)
+
+        x_axis: List[str] = []
+        ratios: List[float] = []
+        chinext_values: List[float] = []
+        dividend_values: List[float] = []
+
+        for item in aggregated:
+            close_a = item['close_a']
+            close_b = item['close_b']
+            ratio = round(close_a / close_b, 4)
+            # X轴标签根据时间单位格式化
+            date_str = item['date']
+            parts = date_str.split('-')
+            if unit == 'year':
+                label = parts[0]
+            elif unit == 'quarter':
+                year = parts[0]
+                month = int(parts[1])
+                q = (month - 1) // 3 + 1
+                label = f'{year}-Q{q}'
+            else:
+                label = f'{parts[0]}-{parts[1]}'
+            x_axis.append(label)
+            ratios.append(ratio)
+            chinext_values.append(round(close_a, 2))
+            dividend_values.append(round(close_b, 2))
+
+        return {
+            'code': 200,
+            'data': {
+                'x_axis': x_axis,
+                'ratios': ratios,
+                'chinext_values': chinext_values,
+                'dividend_values': dividend_values,
+                'index_names': {'a': _RATIO_NAME_A, 'b': _RATIO_NAME_B},
+                'unit': unit,
+            }
+        }
+    except Exception as e:
+        logger.error(f"获取指数比值数据失败 [{unit}]: {e}")
+        return {'code': 500, 'message': str(e), 'data': None}
+
+
 async def get_etf_correlation(sector: str, days: int = 30) -> Dict[str, Any]:
     """计算板块情绪指数与 ETF 价格的 Pearson 相关系数。"""
     try:

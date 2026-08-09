@@ -12,7 +12,13 @@
         :key="sector.code || sector.name"
         class="sector-item ios-pressable"
         :class="{ active: isSelected(sector), 'no-data': sector.value == null }"
+        role="button"
+        :tabindex="sector.value == null ? -1 : 0"
+        :aria-pressed="isSelected(sector)"
+        :aria-label="`${sector.name}，指数 ${formatValue(sector.value)}`"
         @click="handleSelect(sector)"
+        @keydown.enter.prevent="handleSelect(sector)"
+        @keydown.space.prevent="handleSelect(sector)"
       >
         <span class="sector-dot" :style="{ backgroundColor: sector.color }"></span>
         <span class="sector-name">{{ sector.name }}</span>
@@ -165,6 +171,11 @@ function getValueClass(value) {
     .sector-name {
       color: var(--ios-label-tertiary);
     }
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--ios-blue);
+    outline-offset: -2px;
   }
 }
 

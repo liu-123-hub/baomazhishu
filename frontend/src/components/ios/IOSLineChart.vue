@@ -355,8 +355,7 @@ watch(
   () => props.data,
   () => {
     nextTick(() => updateChart())
-  },
-  { deep: true }
+  }
 )
 
 watch(

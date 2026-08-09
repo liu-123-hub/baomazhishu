@@ -141,6 +141,9 @@ export const dashboardApi = {
     if (sector) params.sector = sector
     return request({ url: '/dashboard/market-data', method: 'GET', params })
   },
+  getIndexRatio(unit = 'month') {
+    return request({ url: '/dashboard/index-ratio', method: 'GET', params: { unit } })
+  },
   getEtfCorrelation(sector, days = 30) {
     return request({ url: '/dashboard/etf-correlation', method: 'GET', params: { sector, days } })
   },

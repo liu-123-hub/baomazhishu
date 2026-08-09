@@ -71,6 +71,7 @@ BENCHMARK_INDICES = {
     "sh000001": "上证指数",
     "sh000300": "沪深300",
     "sz399006": "创业板指",
+    "sh000922": "中证红利",
 }
 
 REQUEST_INTERVAL = 0.5

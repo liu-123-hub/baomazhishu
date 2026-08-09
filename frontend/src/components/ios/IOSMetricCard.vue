@@ -66,7 +66,9 @@ const resolvedColor = computed(() => {
 const iconBgColor = computed(() => {
   if (!props.color) return 'var(--ios-fill-primary)'
   const baseColor = resolvedColor.value
-  return baseColor + '20'
+  // 使用 color-mix() 为 CSS 变量添加透明度，兼容亮/暗模式
+  // 旧实现 baseColor + '20' 会产出 'var(--ios-blue)20' 无效 CSS
+  return `color-mix(in srgb, ${baseColor} 12%, transparent)`
 })
 
 const displayValue = computed(() => {

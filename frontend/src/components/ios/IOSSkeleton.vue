@@ -64,6 +64,7 @@ defineProps({
 
 .pulse .skeleton-block {
   animation: skeleton-pulse 1.5s ease-in-out infinite;
+  will-change: opacity;
 }
 
 @keyframes skeleton-pulse {

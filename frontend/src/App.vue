@@ -156,6 +156,8 @@ onUnmounted(() => {
   window.removeEventListener('touchstart', handlePointerDown, true)
   document.removeEventListener('click', handleDocumentClick, true)
   document.documentElement.classList.remove('user-is-keyboard', 'user-is-pointer')
+  // 清理网络状态监听器，避免内存泄漏
+  systemStore.cleanupNetworkStatus()
 })
 </script>
 

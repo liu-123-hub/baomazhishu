@@ -18,7 +18,7 @@
         <button class="ios-window-btn ios-window-btn-maximize" @click="handleMaximize" aria-label="最大化窗口"></button>
       </div>
       <div class="nav-title" :class="{ 'nav-title-with-back': showBack }">
-        <span class="title-text" role="heading" aria-level="1">{{ title }}</span>
+        <span class="title-text" role="heading" aria-level="2">{{ title }}</span>
       </div>
     </div>
     <div class="nav-right">
@@ -201,8 +201,8 @@ function handleClose() {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--ios-radius-full);
   background: var(--ios-fill-primary);
   transition: all var(--ios-duration-fast) var(--ios-ease);

@@ -171,8 +171,8 @@ watch(activeIndex, (newActive) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 30px;
-  padding: 0 10px;
+  height: 36px;
+  padding: 0 12px;
   border-radius: calc(var(--ios-radius-md) - 2px);
   font-size: var(--ios-text-sm);
   font-weight: 500;

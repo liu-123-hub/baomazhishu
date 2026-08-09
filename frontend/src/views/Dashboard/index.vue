@@ -1,6 +1,6 @@
-<template>
+﻿<template>
   <div class="dashboard-view ios-animate-fade">
-    <div class="dashboard-container">
+    <div class="dashboard-container" :class="{ 'is-offline': !systemStore.isOnline }">
       <header class="dashboard-header" role="banner">
         <div class="header-left">
           <h1 class="page-title">数据看板</h1>
@@ -126,6 +126,17 @@
           </IOSCard>
         </section>
 
+        <!-- 创业板指/中证红利 比值面积图 -->
+        <section class="chart-section ratio-chart-section ios-section" aria-label="创业板指与中证红利比值">
+          <div class="section-header">
+            <h2 class="section-title">成长/价值轮动</h2>
+            <span class="section-subtitle">创业板指 ÷ 中证红利</span>
+          </div>
+          <IOSCard elevated>
+            <IOSRatioAreaChart height="360px" />
+          </IOSCard>
+        </section>
+
         <!-- 板块排行 -->
         <section class="sectors-section ios-section" aria-label="板块排行">
           <div class="section-header">
@@ -145,7 +156,7 @@
         </section>
 
         <!-- 离线下拉刷新提示（移动端） -->
-        <div v-if="!systemStore.isOnline" class="offline-banner" role="status">
+        <div v-if="!systemStore.isOnline" class="offline-banner" role="status" aria-live="polite">
           <span aria-hidden="true">📡</span>
           <span>当前处于离线状态，数据可能不是最新</span>
         </div>
@@ -155,17 +166,20 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch, defineAsyncComponent } from 'vue'
 import { useRouter } from 'vue-router'
 import { useDashboardStore } from '@/stores/dashboard'
 import { useSystemStore } from '@/stores/system'
 import { useToastStore } from '@/stores/toast'
 import IOSMetricCard from '@/components/ios/IOSMetricCard.vue'
 import IOSCard from '@/components/ios/IOSCard.vue'
-import IOSLineChart from '@/components/ios/IOSLineChart.vue'
 import IOSSectorList from '@/components/ios/IOSSectorList.vue'
 import IOSSegmentControl from '@/components/ios/IOSSegmentControl.vue'
 import IOSSkeleton from '@/components/ios/IOSSkeleton.vue'
+
+// 图表组件异步加载，减少首屏 JS 体积
+const IOSLineChart = defineAsyncComponent(() => import('@/components/ios/IOSLineChart.vue'))
+const IOSRatioAreaChart = defineAsyncComponent(() => import('@/components/ios/IOSRatioAreaChart.vue'))
 import { SECTOR_NAMES, SECTOR_COLORS, SECTOR_CATEGORIES, INDEX_LEVELS } from '@/core/constants'
 
 const router = useRouter()
@@ -789,6 +803,15 @@ onUnmounted(() => {
   font-size: var(--ios-text-base);
 }
 
+// Ratio chart section
+.ratio-chart-section {
+  margin-bottom: var(--ios-spacing-xl);
+
+  @include mobile {
+    margin-bottom: var(--ios-spacing-lg);
+  }
+}
+
 // Sectors section
 .sectors-section {
   margin-bottom: var(--ios-spacing-xl);
@@ -817,6 +840,11 @@ onUnmounted(() => {
   z-index: 100;
   animation: slideUp var(--ios-duration-normal) var(--ios-spring);
 
+  // 离线横幅显示时，给页面底部留出空间避免遮挡
+  ~ * {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
   @include mobile {
     bottom: calc(env(safe-area-inset-bottom, 0px) + var(--ios-spacing-md));
     font-size: var(--ios-text-xs);
@@ -827,6 +855,11 @@ onUnmounted(() => {
 @keyframes slideUp {
   from { opacity: 0; transform: translateX(-50%) translateY(20px); }
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+// 离线状态时给内容区底部留出横幅空间
+.dashboard-container.is-offline {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 60px);
 }
 
 .ios-button {

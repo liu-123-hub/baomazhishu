@@ -14,6 +14,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
   const wsConnected = ref(false)
   const lastRefreshTime = ref(null)
   let _wsUnsub = null
+  let _wsConnectedUnsub = null
+  let _wsDisconnectedUnsub = null
 
   let lineChartAbortController = null
 
@@ -164,11 +166,11 @@ export const useDashboardStore = defineStore('dashboard', () => {
         _applyOverviewData(wrapped.data)
       }
     })
-    wsClient.on('connected', () => {
+    _wsConnectedUnsub = wsClient.on('connected', () => {
       wsConnected.value = true
       error.value = ''
     })
-    wsClient.on('disconnected', () => {
+    _wsDisconnectedUnsub = wsClient.on('disconnected', () => {
       wsConnected.value = false
     })
     if (!wsClient.isConnected()) {
@@ -182,6 +184,14 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (_wsUnsub) {
       _wsUnsub()
       _wsUnsub = null
+    }
+    if (_wsConnectedUnsub) {
+      _wsConnectedUnsub()
+      _wsConnectedUnsub = null
+    }
+    if (_wsDisconnectedUnsub) {
+      _wsDisconnectedUnsub()
+      _wsDisconnectedUnsub = null
     }
     wsConnected.value = false
   }

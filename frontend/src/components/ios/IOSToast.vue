@@ -12,7 +12,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 
 const props = defineProps({
   modelValue: { type: Boolean, default: false },
@@ -49,6 +49,14 @@ watch(() => props.modelValue, (val) => {
   if (val) show()
   else hide()
 }, { immediate: true })
+
+// 组件卸载时清理定时器，避免内存泄漏
+onUnmounted(() => {
+  if (hideTimer) {
+    clearTimeout(hideTimer)
+    hideTimer = null
+  }
+})
 
 defineExpose({ show, hide })
 </script>

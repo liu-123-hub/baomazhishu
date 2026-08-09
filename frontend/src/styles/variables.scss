@@ -22,8 +22,8 @@
   --ios-bg-elevated: #FFFFFF;
 
   --ios-label-primary: #000000;
-  --ios-label-secondary: rgba(60, 60, 67, 0.6);
-  --ios-label-tertiary: rgba(60, 60, 67, 0.3);
+  --ios-label-secondary: rgba(60, 60, 67, 0.78);
+  --ios-label-tertiary: rgba(60, 60, 67, 0.55);
   --ios-label-quaternary: rgba(60, 60, 67, 0.18);
 
   --ios-separator: rgba(60, 60, 67, 0.12);
@@ -50,14 +50,14 @@
     'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', 'Helvetica Neue', Helvetica,
     Arial, sans-serif;
 
-  --ios-text-xs: 11px;
-  --ios-text-sm: 13px;
-  --ios-text-base: 15px;
-  --ios-text-lg: 17px;
-  --ios-text-xl: 20px;
-  --ios-text-2xl: 22px;
-  --ios-text-3xl: 28px;
-  --ios-text-4xl: 34px;
+  --ios-text-xs: 0.6875rem;
+  --ios-text-sm: 0.8125rem;
+  --ios-text-base: 0.9375rem;
+  --ios-text-lg: 1.0625rem;
+  --ios-text-xl: 1.25rem;
+  --ios-text-2xl: 1.375rem;
+  --ios-text-3xl: 1.75rem;
+  --ios-text-4xl: 2.125rem;
 
   --ios-leading-tight: 1.2;
   --ios-leading-normal: 1.4;
@@ -96,7 +96,7 @@
 
   --ios-label-primary: #FFFFFF;
   --ios-label-secondary: rgba(235, 235, 245, 0.6);
-  --ios-label-tertiary: rgba(235, 235, 245, 0.3);
+  --ios-label-tertiary: rgba(235, 235, 245, 0.45);
   --ios-label-quaternary: rgba(235, 235, 245, 0.16);
 
   --ios-separator: rgba(84, 84, 88, 0.65);

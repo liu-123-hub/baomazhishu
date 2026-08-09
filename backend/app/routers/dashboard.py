@@ -73,6 +73,15 @@ async def market_data(
     return await get_market_data(sector)
 
 
+@router.get("/index-ratio")
+async def index_ratio_data(
+    unit: str = Query("month", description="时间聚合单位: year/quarter/month")
+):
+    """获取创业板指/中证红利比值面积图数据。"""
+    from app.data_service import get_index_ratio_data
+    return await get_index_ratio_data(unit)
+
+
 @router.get("/etf-correlation")
 async def etf_correlation(
     sector: str = Query(..., description="板块代码"),
