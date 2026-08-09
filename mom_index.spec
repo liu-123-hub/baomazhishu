@@ -30,9 +30,10 @@ PROJECT_ROOT = os.path.abspath('.')
 sys.path.insert(0, os.path.join(PROJECT_ROOT, 'backend'))
 sys.path.insert(0, PROJECT_ROOT)
 
-# UPX 压缩目录：若项目内存在 upx/ 子目录则启用，否则跳过
+# UPX 压缩目录：spec 内不启用 UPX（压缩 .dll 会导致 numpy OpenBLAS/CRT 运行时崩溃），
+# 改由构建后脚本 compress_pyd.ps1 对 .pyd 文件定向压缩（安全）。
 UPX_DIR = os.path.join(PROJECT_ROOT, 'upx')
-USE_UPX = os.path.isdir(UPX_DIR)
+USE_UPX = False  # 始终 False：防止 PyInstaller 对 .dll 执行 UPX 导致运行时崩溃
 
 datas = []
 binaries = []
@@ -75,6 +76,11 @@ hiddenimports += [
 hiddenimports += collect_submodules('aiosqlite')
 hiddenimports += collect_submodules('httpx')
 
+# ── 图标资源 → 打包为只读资源（供前端 favicon / 运行时引用）──
+# 注意：EXE 的窗口/任务栏图标由下方 EXE(icon=...) 参数嵌入，此处 datas 仅提供文件级资源
+datas += [(os.path.join(PROJECT_ROOT, 'icon.ico'), '.')]
+datas += [(os.path.join(PROJECT_ROOT, 'icon.png'), '.')]
+
 # ── 前端构建产物 → 只读资源 frontend_dist/ ──
 datas += [('frontend/dist', 'frontend_dist')]
 
@@ -101,6 +107,8 @@ excludes = [
     'matplotlib', 'sklearn', 'scipy', 'sympy',
     'bokeh', 'plotly', 'seaborn', 'PyQt5', 'PySide2', 'PySide6',
     'coverage', 'pytest_asyncio',
+    # cryptography 仅被 pdfminer.six 依赖，本项目不使用 PDF 解析，省 ~4MB
+    'cryptography', 'pdfminer', 'pdfminer.six',
 ]
 
 a = Analysis(
@@ -130,7 +138,7 @@ exe = EXE(
     upx_dir=UPX_DIR if USE_UPX else None,
     console=True,
     disable_windowed_traceback=False,
-    icon=None,
+    icon=os.path.join(PROJECT_ROOT, 'icon.ico'),
 )
 coll = COLLECT(
     exe,

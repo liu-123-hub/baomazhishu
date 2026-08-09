@@ -181,6 +181,41 @@ const POLL_INTERVAL_WS = 120000
 const POLL_INTERVAL_NO_WS = 30000
 const LINE_CHART_REFRESH_INTERVAL = 60000
 
+// 页面可见性变化防抖配置
+const VISIBILITY_DEBOUNCE_MS = 1500 // 切回页面后等待1.5秒再刷新，避免快速切换
+const MIN_HIDDEN_TIME_FOR_REFRESH = 30000 // 后台至少30秒才刷新，短时间切换不刷新
+
+let visibilityTimer = null
+let lastHiddenTime = 0
+
+function handleVisibilityChange() {
+  if (document.visibilityState === 'visible') {
+    const hiddenDuration = Date.now() - lastHiddenTime
+    // 后台时间太短，不刷新（避免频繁切换标签页导致的重复刷新）
+    if (hiddenDuration < MIN_HIDDEN_TIME_FOR_REFRESH) {
+      return
+    }
+    // 防抖：延迟刷新，避免快速来回切换
+    if (visibilityTimer) {
+      clearTimeout(visibilityTimer)
+    }
+    visibilityTimer = setTimeout(() => {
+      if (document.visibilityState === 'visible' && systemStore.isOnline) {
+        // 页面从后台切回时静默刷新，不打扰用户
+        fetchData(true)
+      }
+    }, VISIBILITY_DEBOUNCE_MS)
+  } else {
+    // 页面隐藏时记录时间
+    lastHiddenTime = Date.now()
+    // 清除待执行的刷新
+    if (visibilityTimer) {
+      clearTimeout(visibilityTimer)
+      visibilityTimer = null
+    }
+  }
+}
+
 const categoryOptions = computed(() => {
   return [
     { label: '全部', value: 'all' },
@@ -306,7 +341,7 @@ function formatTime(timeStr) {
   }
 }
 
-async function fetchData() {
+async function fetchData(silent = false) {
   if (!systemStore.isOnline && !overviewData.value) {
     toastStore.warning('网络连接已断开')
     return
@@ -314,7 +349,8 @@ async function fetchData() {
   try {
     const days = timeRangeDays[timeRange.value] || 7
     await store.fetchAll(selectedSectors.value, days)
-    if (overviewData.value) {
+    // 静默模式不显示 toast，仅在有数据且非静默时显示
+    if (overviewData.value && !silent) {
       toastStore.success('数据已更新')
     }
   } catch (e) {
@@ -389,12 +425,6 @@ function scheduleLineChartRefresh() {
   }, LINE_CHART_REFRESH_INTERVAL)
 }
 
-function handleVisibilityChange() {
-  if (document.visibilityState === 'visible' && systemStore.isOnline) {
-    fetchData()
-  }
-}
-
 onMounted(() => {
   selectedSectors.value = [...allLeafSectorCodes.value]
   store.initWebSocket()
@@ -436,6 +466,10 @@ onUnmounted(() => {
   if (lineChartTimer) {
     clearTimeout(lineChartTimer)
     lineChartTimer = null
+  }
+  if (visibilityTimer) {
+    clearTimeout(visibilityTimer)
+    visibilityTimer = null
   }
   document.removeEventListener('visibilitychange', handleVisibilityChange)
 })

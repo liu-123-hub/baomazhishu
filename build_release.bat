@@ -20,7 +20,7 @@ echo ================================================================
 echo.
 
 REM --- Step 1: Frontend build ---
-echo [1/4] Building frontend...
+echo [1/5] Building frontend...
 cd frontend
 call npm run build
 if errorlevel 1 (
@@ -31,8 +31,21 @@ cd ..
 echo   [OK] Frontend built to frontend\dist\
 echo.
 
-REM --- Step 2: PyInstaller build ---
-echo [2/4] Building backend with PyInstaller...
+REM --- Step 2: Verify icon file before build ---
+echo [2/5] Verifying icon resources...
+if not exist "icon.ico" (
+  echo [ERROR] icon.ico not found! Cannot build without program icon.
+  exit /b 1
+)
+if not exist "icon.png" (
+  echo [WARNING] icon.png not found, proceeding with .ico only.
+) else (
+  echo   [OK] icon.ico and icon.png found.
+)
+echo.
+
+REM --- Step 3: PyInstaller build ---
+echo [3/5] Building backend with PyInstaller...
 pyinstaller mom_index.spec --noconfirm --clean
 if errorlevel 1 (
   echo [ERROR] PyInstaller build failed.
@@ -41,31 +54,39 @@ if errorlevel 1 (
 echo   [OK] Backend built to dist\MomIndex\
 echo.
 
-REM --- Step 3: Download UPX if not present ---
+REM --- Verify icon embedded in EXE ---
+echo   Verifying icon embedding in MomIndex.exe...
+powershell -ExecutionPolicy Bypass -File "%~dp0verify_icon.ps1" -ExePath "%~dp0dist\MomIndex\MomIndex.exe"
+echo.
+
+REM --- Step 4: Download UPX if not present ---
 set "UPX_EXE="
 if exist "upx\upx.exe" (
   set "UPX_EXE=upx\upx.exe"
 ) else (
-  echo [3/4] Downloading UPX...
-  powershell -Command "try { $url='https://github.com/upx/upx/releases/download/v4.2.4/upx-4.2.4-win64.zip'; $tmp=\"$env:TEMP\upx_dl.zip\"; Invoke-WebRequest -Uri $url -OutFile $tmp -UseBasicParsing -TimeoutSec 60; $ext=\"$env:TEMP\upx_dl_ext\"; if (Test-Path $ext) { Remove-Item $ext -Recurse -Force }; Expand-Archive -Path $tmp -DestinationPath $ext -Force; New-Item -ItemType Directory -Path upx -Force | Out-Null; Copy-Item \"$ext\upx-4.2.4-win64\upx.exe\" upx\upx.exe -Force; Remove-Item $tmp -Force; Remove-Item $ext -Recurse -Force; Write-Output 'UPX downloaded' } catch { Write-Output \"UPX download failed: $_\"; exit 1 }"
+  echo [4/5] Downloading UPX...
+  powershell -ExecutionPolicy Bypass -File "%~dp0download_upx.ps1"
   if exist "upx\upx.exe" (
     set "UPX_EXE=upx\upx.exe"
   )
 )
 
-REM --- Step 4: UPX compress .pyd files (skip all .dll to avoid crashes) ---
+REM --- Step 5: UPX compress .pyd files (skip all .dll to avoid crashes) ---
 if defined UPX_EXE (
-  echo [4/4] Compressing .pyd files with UPX ^(skipping .dll and numpy._core^)...
-  powershell -Command "$upx='upx\upx.exe'; $internal='dist\MomIndex\_internal'; $targets = Get-ChildItem $internal -Recurse -File -Filter *.pyd | Where-Object { $_.FullName -notmatch 'numpy\\_core' }; foreach ($t in $targets) { try { & $upx $t.FullName --best --quiet 2>&1 | Out-Null } catch {} }; Write-Output \"Compressed $($targets.Count) .pyd files\""
+  echo [5/5] Compressing .pyd files with UPX ^(skipping .dll and numpy._core^)...
+  powershell -ExecutionPolicy Bypass -File "%~dp0compress_pyd.ps1" -UpxExe "%~dp0upx\upx.exe" -InternalDir "%~dp0dist\MomIndex\_internal"
   echo   [OK] UPX compression done
 ) else (
-  echo [4/4] UPX not available, skipping compression
+  echo [5/5] UPX not available, skipping compression
   echo       To enable: download upx.exe to upx\ directory
 )
 echo.
 
-REM --- Copy run.bat to dist ---
+REM --- Copy run.bat and icon files to dist ---
 copy run.bat "dist\MomIndex\run.bat" >nul 2>&1
+copy icon.ico "dist\MomIndex\icon.ico" >nul 2>&1
+copy icon.png "dist\MomIndex\icon.png" >nul 2>&1
+echo   [OK] Copied run.bat, icon.ico, icon.png to dist\MomIndex\
 
 REM --- Final size report ---
 echo ================================================================

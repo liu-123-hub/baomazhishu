@@ -43,6 +43,20 @@ let chartInstance = null
 let resizeObserver = null
 let rafId = null
 
+// 页面可见性状态：页面不可见时暂停图表更新，减少后台资源消耗
+let isPageVisible = true
+let pendingUpdate = false
+
+function handleVisibilityChange() {
+  const wasVisible = isPageVisible
+  isPageVisible = document.visibilityState === 'visible'
+  // 页面从不可见变为可见时，处理待更新的图表
+  if (isPageVisible && !wasVisible && pendingUpdate) {
+    pendingUpdate = false
+    nextTick(() => updateChart())
+  }
+}
+
 const colors = [
   '#007AFF',
   '#34C759',
@@ -316,6 +330,13 @@ function initChart() {
 
 function updateChart() {
   if (!chartInstance || chartInstance.isDisposed()) return
+
+  // 页面不可见时标记待更新，避免后台重绘导致浏览器闪烁
+  if (!isPageVisible) {
+    pendingUpdate = true
+    return
+  }
+
   if (rafId) cancelAnimationFrame(rafId)
   rafId = requestAnimationFrame(() => {
     if (!chartInstance || chartInstance.isDisposed()) return
@@ -362,6 +383,10 @@ onMounted(() => {
   } else {
     window.addEventListener('resize', scheduleResize, { passive: true })
   }
+
+  // 监听页面可见性变化，优化后台资源使用
+  document.addEventListener('visibilitychange', handleVisibilityChange)
+  isPageVisible = document.visibilityState === 'visible'
 })
 
 onUnmounted(() => {
@@ -375,6 +400,7 @@ onUnmounted(() => {
     chartInstance.dispose()
     chartInstance = null
   }
+  document.removeEventListener('visibilitychange', handleVisibilityChange)
 })
 
 defineExpose({
