@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""宝妈指数系统一键启动脚本：后台启动前后端服务，支持状态查询/停止/重启/日志查看。"""
+"""宝妈指数系统一键启动脚本"""
 from __future__ import annotations
 
 import argparse

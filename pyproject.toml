@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "mom-index"
 version = "1.0.0"
-description = "宝妈指数 - 市场情绪实时监控系统"
+description = "宝妈指数-市场情绪实时监控系统"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
