@@ -1,4 +1,3 @@
-"""新闻URL抽样可达性验证，确保链接真实可访问。"""
 import random
 import time
 from typing import Dict, List, Any, Optional, Tuple
@@ -70,7 +69,7 @@ def _check_single_url(url: str, timeout: int = DEFAULT_TIMEOUT) -> Dict[str, Any
                 result["reachable"] = True
                 return result
             elif resp.status_code == 405:
-                # HEAD被禁用时降级用GET探测（仅读取headers，不下载body）
+                
                 try:
                     start = time.time()
                     resp_get = requests.get(

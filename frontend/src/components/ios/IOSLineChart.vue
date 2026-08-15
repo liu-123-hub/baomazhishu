@@ -43,14 +43,14 @@ let chartInstance = null
 let resizeObserver = null
 let rafId = null
 
-// 页面可见性状态：页面不可见时暂停图表更新，减少后台资源消耗
+
 let isPageVisible = true
 let pendingUpdate = false
 
 function handleVisibilityChange() {
   const wasVisible = isPageVisible
   isPageVisible = document.visibilityState === 'visible'
-  // 页面从不可见变为可见时，处理待更新的图表
+  
   if (isPageVisible && !wasVisible && pendingUpdate) {
     pendingUpdate = false
     nextTick(() => updateChart())
@@ -112,10 +112,10 @@ const chartOption = computed(() => {
   }
 
   const dataCount = xAxis.length
-  // 密集数据（>14个点）时旋转标签，避免重叠
+  
   const isDense = dataCount > 14
   const rotate = isDense ? 35 : 0
-  // 旋转模式下需要更大的底部空间
+  
   const bottomMargin = isDense ? 90 : 72
   const labelInterval = dataCount <= 7 ? 0 : dataCount <= 14 ? 1 : Math.floor(dataCount / 7)
 
@@ -331,7 +331,7 @@ function initChart() {
 function updateChart() {
   if (!chartInstance || chartInstance.isDisposed()) return
 
-  // 页面不可见时标记待更新，避免后台重绘导致浏览器闪烁
+  
   if (!isPageVisible) {
     pendingUpdate = true
     return
@@ -383,7 +383,7 @@ onMounted(() => {
     window.addEventListener('resize', scheduleResize, { passive: true })
   }
 
-  // 监听页面可见性变化，优化后台资源使用
+  
   document.addEventListener('visibilitychange', handleVisibilityChange)
   isPageVisible = document.visibilityState === 'visible'
 })

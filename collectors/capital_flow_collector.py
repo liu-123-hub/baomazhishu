@@ -1,4 +1,3 @@
-"""市场异动数据采集器，基于 AKShare 获取涨停池和龙虎榜数据。"""
 import json
 import os
 import time
@@ -94,7 +93,6 @@ def collect_limit_up_pool(start_date: Optional[str] = None, end_date: Optional[s
 
 
 def _fetch_dragon_tiger_list(trade_date: str) -> Optional[List[Dict]]:
-    """非交易日调用会抛KeyError('股票代码')，需显式捕获返回None。"""
     REQUIRED_COLUMNS = ("股票代码", "股票名称", "收盘价", "对应值", "成交量", "成交额", "指标")
     for attempt in range(MAX_RETRIES + 1):
         try:
@@ -317,7 +315,7 @@ def validate_capital_flow(data: Dict) -> Dict:
     return {"stats": stats, "issues": issues}
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":  
     print("=" * 50)
     print("  市场异动数据采集器测试 (AKShare)")
     print("=" * 50)

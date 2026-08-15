@@ -1,4 +1,3 @@
-"""基于关键词规则的宝妈指数分析器，无LLM依赖、结果可复现。"""
 from typing import Dict, List, Tuple
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -10,7 +9,7 @@ class Signal:
     weight: float
     description: str
 
-# 权重体系：NEWBIE正权重(+2~+8)，PRO负权重(-2~-5)；最终raw_score*4+10映射到0-100
+
 NEWBIE_SIGNALS = [
     Signal("身份自述", 8, "明确自称小白/新手/刚入门/宝妈"),
     Signal("知识求助", 6, "在问基础问题（怎么买/在哪看/什么意思）"),
@@ -104,7 +103,6 @@ class AnalysisResult:
 
 
 def analyze_post(post: Dict, sector: str) -> AnalysisResult:
-    """关键词匹配→打分→分级→情绪/意图识别，返回结构化结果。"""
     title = post.get("title", "")
     content = post.get("content", "")
     full_text = f"{title} {content}" if content else title
@@ -282,7 +280,6 @@ def _generate_reasoning(
 
 
 def _analyze_sentiment(text: str) -> float:
-    """基于贪婪/恐惧词频计算情绪极性，范围[-1.0, +1.0]。"""
     greed_words = [
         "冲", "梭哈", "稳赚", "必涨", "躺赚", "满仓", "抄底", "起飞", "暴涨", "翻倍", "赚了", "盈利",
         "涨停", "飙升", "大涨", "拉升", "疯涨", "连涨", "创新高", "吸金", "爆买", "抢筹", "逆市",

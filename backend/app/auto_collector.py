@@ -1,4 +1,3 @@
-"""自动数据采集模块，后台执行 pipeline.py 并维护采集状态。"""
 import asyncio
 import logging
 import sys
@@ -20,7 +19,6 @@ if _PROJECT_ROOT not in sys.path:
 
 
 class AutoCollector:
-    """自动数据采集器：全量采集 + 定时采集 + 看门狗。"""
 
     STATUS_IDLE = "idle"
     STATUS_RUNNING = "running"
@@ -177,7 +175,6 @@ class AutoCollector:
         logger.info(f"数据库同步完成: {synced_count}个板块写入, {skipped_count}个跳过")
 
     async def run_once(self, trigger: str = "scheduled"):
-        """执行一次完整采集：预检→采集→校验→同步DB→清缓存。"""
         run_start_time = time.monotonic()
         await self._update_status(
             status=self.STATUS_RUNNING,
@@ -309,7 +306,6 @@ class AutoCollector:
             )
 
     async def run_with_retry(self, trigger: str = "scheduled"):
-        """带重试机制的采集入口。"""
         max_retries = (await self.get_status())["max_retries"]
         for attempt in range(max_retries + 1):
             await self._update_status(retry_count=attempt)
@@ -324,7 +320,6 @@ class AutoCollector:
                 await asyncio.sleep(wait)
 
     async def _periodic_loop(self):
-        """定时采集循环，异常不中断定时器。"""
         while True:
             status = await self.get_status()
             if status["status"] in (self.STATUS_SUCCESS, self.STATUS_FAILED):
@@ -356,7 +351,6 @@ class AutoCollector:
                 )
 
     async def _watchdog_loop(self):
-        """看门狗：检测漏触发（missed-run）和卡死（stuck-run）。"""
         check_interval = settings.WATCHDOG_CHECK_INTERVAL
         interval = settings.AUTO_COLLECT_INTERVAL
         deadline = settings.COLLECTOR_RUN_DEADLINE

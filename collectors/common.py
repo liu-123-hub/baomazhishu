@@ -1,4 +1,3 @@
-"""采集器公共工具：HTML清洗、HTTP重试、板块归类等共享逻辑。"""
 import hashlib
 import html
 import re

@@ -32,7 +32,7 @@ body {
 
 #app { position: relative; }
 
-// 焦点安全机制：指针用户（鼠标/触摸）模式下，抑制不必要的焦点视觉
+
 html.user-is-pointer {
   button,
   a,
@@ -53,7 +53,7 @@ html.user-is-pointer {
   }
 }
 
-// 仅在键盘用户模式下显示焦点环
+
 html.user-is-keyboard {
   button:focus-visible,
   a:focus-visible,

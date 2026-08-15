@@ -1,8 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
-// Toast 节流配置：相同内容的提示在指定时间内只显示一次
-const THROTTLE_MS = 10000 // 10秒节流
+
+const THROTTLE_MS = 10000 
 
 export const useToastStore = defineStore('toast', () => {
   const visible = ref(false)
@@ -10,7 +10,7 @@ export const useToastStore = defineStore('toast', () => {
   const type = ref('info')
   const duration = ref(3000)
 
-  // 节流状态记录
+  
   let lastMessage = ''
   let lastType = ''
   let lastShowTime = 0
@@ -18,7 +18,7 @@ export const useToastStore = defineStore('toast', () => {
   function show(msg, options = {}) {
     const msgType = options.type || 'info'
 
-    // 节流检查：相同内容+相同类型在节流时间内不重复显示
+    
     const now = Date.now()
     if (msg === lastMessage && msgType === lastType && (now - lastShowTime) < THROTTLE_MS) {
       return
@@ -54,7 +54,7 @@ export const useToastStore = defineStore('toast', () => {
     visible.value = false
   }
 
-  // 清除节流缓存（用于需要强制显示的场景）
+  
   function clearThrottle() {
     lastMessage = ''
     lastType = ''

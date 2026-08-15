@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""宝妈指数系统一键启动脚本"""
+
+
 from __future__ import annotations
 
 import argparse
@@ -155,12 +154,11 @@ def wait_ready(name: str, port: int, timeout: int = 60) -> bool:
 
 
 def _rotate_log(log_path: Path, max_size: int = 5 * 1024 * 1024, backups: int = 2) -> None:
-    """日志轮转：超过 max_size 时滚动旧日志，保留 backups 个备份。"""
     if not log_path.exists():
         return
     if log_path.stat().st_size < max_size:
         return
-    # 依次重命名 .1→.2, .0→.1，然后当前→.0
+    
     for i in range(backups, 0, -1):
         older = log_path.with_suffix(f".log.{i}")
         newer = log_path.with_suffix(f".log.{i - 1}") if i > 1 else log_path
@@ -168,7 +166,7 @@ def _rotate_log(log_path: Path, max_size: int = 5 * 1024 * 1024, backups: int = 
             older.unlink()
         if newer.exists() and i > 1:
             newer.rename(older)
-    # 当 i==1 时，把当前日志重命名为 .log.1
+    
     backup = log_path.with_suffix(".log.1")
     if backup.exists():
         backup.unlink()
@@ -179,22 +177,19 @@ def start_process(name: str):
     cfg = SERVICES[name]
     RUN_DIR.mkdir(parents=True, exist_ok=True)
 
-    # --- 日志轮转：防止日志文件无限增长 ---
+    
     _rotate_log(cfg["log"])
 
-    # --- 以二进制追加模式打开日志文件 ---
+    
     log_fp = open(cfg["log"], "ab", buffering=0)
     sep = f"\n{'=' * 60}\n[{datetime.now()}] 启动 {name}\n{'=' * 60}\n"
     log_fp.write(sep.encode("utf-8"))
 
-    # --- 构建子进程环境：强制 UTF-8 编码输出 ---
-    # Windows 下 Python 子进程的 stdout/stderr 默认使用系统 ANSI 代码页 (cp936/GBK)，
-    # 导致中文输出写入日志后产生乱码。通过 PYTHONUTF8=1 (Python 3.7+) 和
-    # PYTHONIOENCODING=utf-8 (兼容旧版本) 强制子进程以 UTF-8 编码输出。
+    
     child_env = os.environ.copy()
     child_env["PYTHONUTF8"] = "1"
     child_env["PYTHONIOENCODING"] = "utf-8"
-    # 强制控制台输出使用 UTF-8，确保 npm/node.js 子进程也输出 UTF-8
+    
     if IS_WINDOWS:
         child_env.setdefault("LANG", "en_US.UTF-8")
 

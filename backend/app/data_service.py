@@ -1,4 +1,3 @@
-"""数据服务层：大盘数据计算与历史趋势查询。"""
 import time
 import json
 import logging
@@ -183,7 +182,6 @@ def _load_data_quality() -> Dict[str, Any]:
 
 
 def _load_data_provenance() -> Dict[str, Any]:
-    """加载数据溯源信息，兼容新旧数据格式。"""
     try:
         if not os.path.exists(JSON_DATA_PATH):
             return {'available': False, 'reason': '数据文件尚未生成（首次启动或采集未完成）'}
@@ -222,7 +220,6 @@ def _load_data_provenance() -> Dict[str, Any]:
 
 
 def _compute_trend(history: List[Dict]) -> str:
-    """根据最近两条历史记录计算趋势。"""
     if not history or len(history) < 2:
         return '平稳'
     try:
@@ -246,7 +243,6 @@ def _compute_trend(history: List[Dict]) -> str:
 
 
 def _build_merged_history_for_trend(code: str, db_history: List[Dict], json_history_map: Dict[str, List[Dict]]) -> List[Dict]:
-    """合并数据库与 history.json 历史数据，同日期以数据库为准。"""
     merged: Dict[str, Dict] = {}
     for item in (json_history_map.get(code) or []):
         date_str = item.get('date')
@@ -260,7 +256,6 @@ def _build_merged_history_for_trend(code: str, db_history: List[Dict], json_hist
 
 
 def _compute_positive_ratio(row: Dict) -> float:
-    """根据买卖指数估算正面情绪比例。"""
     buy = float(row.get('buy_index', 0) or 0)
     sell = float(row.get('sell_index', 0) or 0)
     total = buy + sell
@@ -391,7 +386,6 @@ def _map_json_sector(
 
 
 async def _compute_dashboard_overview() -> Dict[str, Any]:
-    """DB优先，JSON降级回补，双源融合策略。"""
     try:
         rows = await db.get_latest_sector_index()
 
@@ -621,7 +615,6 @@ async def get_sector_detail(code: str) -> Dict[str, Any]:
 
 
 async def _compute_history_trend(code: Optional[str], days: int = 7) -> Dict[str, Any]:
-    """合并数据库与 history.json 数据。"""
     if code and code not in VALID_SECTORS:
         logger.warning(f"请求了未配置板块的历史趋势: {code}")
         return {
@@ -775,7 +768,6 @@ def _load_market_data() -> Dict[str, Any]:
 
 
 async def get_market_data(sector: Optional[str] = None) -> Dict[str, Any]:
-    """获取行情数据（ETF + 基准指数）。"""
     try:
         data = _load_market_data()
         if not data:
@@ -798,17 +790,13 @@ async def get_market_data(sector: Optional[str] = None) -> Dict[str, Any]:
         return {'code': 500, 'message': str(e), 'data': None}
 
 
-# ── 指数比值面积图：创业板指 / 中证红利 ──────────────────────────────
-
-# 两个基准指数的代码与显示名称
-_RATIO_INDEX_A = 'sz399006'   # 创业板指
-_RATIO_INDEX_B = 'sh000922'   # 中证红利
+_RATIO_INDEX_A = 'sz399006'   
+_RATIO_INDEX_B = 'sh000922'   
 _RATIO_NAME_A = '创业板指'
 _RATIO_NAME_B = '中证红利'
 
 
 def _get_index_close_map(market_data: Dict, index_code: str) -> Dict[str, float]:
-    """从行情数据中提取指定指数的 {date: close} 映射，按日期升序排列。"""
     indices = market_data.get('benchmark_indices', {})
     entry = indices.get(index_code)
     if not entry or not isinstance(entry, dict):
@@ -847,7 +835,7 @@ def _align_and_fill(
     for date_str in all_dates:
         val_a = map_a.get(date_str)
         val_b = map_b.get(date_str)
-        # 前向填充：当天缺失则沿用上一有效值
+        
         if val_a is None:
             val_a = prev_a
         else:
@@ -856,7 +844,7 @@ def _align_and_fill(
             val_b = prev_b
         else:
             prev_b = val_b
-        # 两个值都有效才能计算比值
+        
         if val_a is not None and val_b is not None and val_b != 0:
             result.append({
                 'date': date_str,
@@ -879,7 +867,7 @@ def _aggregate_by_unit(
     if not aligned:
         return []
 
-    # 将每条记录归类到对应周期键
+    
     buckets: Dict[str, Dict[str, Any]] = {}
     for item in aligned:
         date_str = item['date']
@@ -892,31 +880,16 @@ def _aggregate_by_unit(
         elif unit == 'quarter':
             q = (month - 1) // 3 + 1
             key = f'{year}-Q{q}'
-        else:  # month
+        else:  
             key = f'{year}-{parts[1]}'
-        # 每个周期保留最后一条（aligned 已按日期升序）
+        
         buckets[key] = item
 
-    # 按日期顺序输出
+    
     return sorted(buckets.values(), key=lambda x: x['date'])
 
 
 async def get_index_ratio_data(unit: str = 'month') -> Dict[str, Any]:
-    """获取创业板指/中证红利比值面积图数据。
-
-    参数:
-        unit: 时间聚合单位 — 'year' | 'quarter' | 'month'
-
-    返回:
-        {
-            'x_axis': ['2023-08', ...],
-            'ratios': [0.4321, ...],
-            'chinext_values': [2239.31, ...],
-            'dividend_values': [5185.83, ...],
-            'index_names': {'a': '创业板指', 'b': '中证红利'},
-            'unit': 'month'
-        }
-    """
     valid_units = {'year', 'quarter', 'month'}
     if unit not in valid_units:
         return {'code': 400, 'message': f'无效的时间单位: {unit}（应为 year/quarter/month）', 'data': None}
@@ -937,12 +910,12 @@ async def get_index_ratio_data(unit: str = 'month') -> Dict[str, Any]:
                 missing.append(_RATIO_NAME_B)
             return {'code': 200, 'data': None, 'message': f'缺少指数数据: {", ".join(missing)}'}
 
-        # 对齐日期 + 前向填充缺失值
+        
         aligned = _align_and_fill(map_a, map_b)
         if not aligned:
             return {'code': 200, 'data': None, 'message': '无有效对齐数据'}
 
-        # 按时间单位聚合
+        
         aggregated = _aggregate_by_unit(aligned, unit)
 
         x_axis: List[str] = []
@@ -954,7 +927,7 @@ async def get_index_ratio_data(unit: str = 'month') -> Dict[str, Any]:
             close_a = item['close_a']
             close_b = item['close_b']
             ratio = round(close_a / close_b, 4)
-            # X轴标签根据时间单位格式化
+            
             date_str = item['date']
             parts = date_str.split('-')
             if unit == 'year':
@@ -988,7 +961,6 @@ async def get_index_ratio_data(unit: str = 'month') -> Dict[str, Any]:
 
 
 async def get_etf_correlation(sector: str, days: int = 30) -> Dict[str, Any]:
-    """计算板块情绪指数与 ETF 价格的 Pearson 相关系数。"""
     try:
         market_data = _load_market_data()
         etf_data = market_data.get('etf_data', {}).get(sector, [])
@@ -1056,7 +1028,6 @@ def _load_capital_flow() -> Dict[str, Any]:
 
 
 async def get_capital_flow_summary() -> Dict[str, Any]:
-    """获取市场异动数据概览。"""
     try:
         data = _load_capital_flow()
         if not data:
@@ -1098,7 +1069,6 @@ async def get_capital_flow_summary() -> Dict[str, Any]:
 
 
 async def get_capital_flow_detail(data_type: str, trade_date: Optional[str] = None) -> Dict[str, Any]:
-    """获取指定类型和日期的市场异动明细。"""
     try:
         data = _load_capital_flow()
         if not data:

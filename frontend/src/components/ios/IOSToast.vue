@@ -50,7 +50,7 @@ watch(() => props.modelValue, (val) => {
   else hide()
 }, { immediate: true })
 
-// 组件卸载时清理定时器，避免内存泄漏
+
 onUnmounted(() => {
   if (hideTimer) {
     clearTimeout(hideTimer)

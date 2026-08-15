@@ -1,6 +1,6 @@
 <template>
   <div class="ios-ratio-chart">
-    <!-- 时间单位切换栏 -->
+    
     <div class="ratio-toolbar">
       <div class="toolbar-left">
         <span class="ratio-label">创业板指 / 中证红利</span>
@@ -13,7 +13,7 @@
       />
     </div>
 
-    <!-- 图表区域 -->
+    
     <div class="ratio-chart-wrapper">
       <div v-if="loading" class="chart-loading">
         <div class="ios-spinner" aria-hidden="true"></div>
@@ -48,7 +48,7 @@ import { useThemeStore } from '@/stores/theme'
 import { dashboardApi } from '@/core/api'
 import IOSSegmentControl from '@/components/ios/IOSSegmentControl.vue'
 
-// 按需注册 ECharts 模块，与项目现有 IOSLineChart 保持一致的 tree-shaking 方式
+
 echarts.use([
   LineChart,
   GridComponent,
@@ -71,7 +71,7 @@ let chartInstance = null
 let resizeObserver = null
 let rafId = null
 
-// ── 响应式状态 ──────────────────────────────────────────
+
 const currentUnit = ref('month')
 const unitOptions = [
   { label: '年', value: 'year' },
@@ -82,7 +82,7 @@ const loading = ref(false)
 const error = ref('')
 const chartData = ref(null)
 
-// 页面可见性优化：后台时暂停重绘
+
 let isPageVisible = true
 let pendingUpdate = false
 
@@ -99,7 +99,7 @@ const hasData = computed(() => {
   return chartData.value && chartData.value.ratios && chartData.value.ratios.length > 0
 })
 
-// ── 数据获取 ──────────────────────────────────────────
+
 async function fetchData() {
   loading.value = true
   error.value = ''
@@ -123,7 +123,7 @@ function handleUnitChange() {
   fetchData()
 }
 
-// ── ECharts 配置 ──────────────────────────────────────────
+
 const chartOption = computed(() => {
   const isDark = themeStore.isDark
   const textColor = isDark ? 'rgba(235, 235, 245, 0.85)' : 'rgba(60, 60, 67, 0.85)'
@@ -132,7 +132,7 @@ const chartOption = computed(() => {
   const tooltipBg = isDark ? 'rgba(44, 44, 46, 0.98)' : 'rgba(255, 255, 255, 0.98)'
   const tooltipBorder = isDark ? 'rgba(84, 84, 88, 0.6)' : 'rgba(60, 60, 67, 0.1)'
 
-  // 比值面积主色：蓝紫渐变，与项目 iOS 设计语言一致
+  
   const areaMainColor = '#007AFF'
   const areaGradientTop = 'rgba(0, 122, 255, 0.35)'
   const areaGradientBottom = 'rgba(0, 122, 255, 0.02)'
@@ -147,7 +147,7 @@ const chartOption = computed(() => {
   const nameB = chartData.value.index_names?.b || '中证红利'
 
   const dataCount = xAxis.length
-  // 密集数据时旋转标签避免重叠
+  
   const isDense = dataCount > 14
   const rotate = isDense ? 35 : 0
   const bottomMargin = isDense ? 80 : 64
@@ -184,7 +184,7 @@ const chartOption = computed(() => {
         label: { show: false },
         z: 0
       },
-      // 自定义 Tooltip：展示比值 + 两个指数原值
+      
       formatter: function (params) {
         if (!params || !params.length) return ''
         const idx = params[0].dataIndex
@@ -195,21 +195,21 @@ const chartOption = computed(() => {
 
         let html = `<div style="font-weight:600;margin-bottom:8px;font-size:13px;color:${textColor}">${label}</div>`
 
-        // 比值（高亮）
+        
         html += `<div style="display:flex;align-items:center;gap:8px;margin:5px 0;font-size:13px">
           <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${areaMainColor}"></span>
           <span style="color:${subTextColor};flex:1">比值</span>
           <span style="color:${areaMainColor};font-weight:700;font-size:15px">${ratio != null ? ratio.toFixed(4) : '--'}</span>
         </div>`
 
-        // 创业板指原值
+        
         html += `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:12px">
           <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#FF9500"></span>
           <span style="color:${subTextColor};flex:1">${nameA}</span>
           <span style="color:${textColor};font-weight:600">${valA != null ? valA.toFixed(2) : '--'}</span>
         </div>`
 
-        // 中证红利原值
+        
         html += `<div style="display:flex;align-items:center;gap:8px;margin:4px 0;font-size:12px">
           <span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#34C759"></span>
           <span style="color:${subTextColor};flex:1">${nameB}</span>
@@ -266,7 +266,7 @@ const chartOption = computed(() => {
           type: 'solid'
         }
       },
-      // 自动计算合理的 Y 轴范围，留 10% 边距
+      
       min: (value) => {
         const range = value.max - value.min
         return Math.floor((value.min - range * 0.1) * 100) / 100
@@ -276,7 +276,7 @@ const chartOption = computed(() => {
         return Math.ceil((value.max + range * 0.1) * 100) / 100
       }
     },
-    // 时间范围选择器：支持拖拽缩放
+    
     dataZoom: [
       {
         type: 'inside',
@@ -336,7 +336,7 @@ const chartOption = computed(() => {
           width: 2.5,
           color: areaMainColor
         },
-        // 面积填充样式：完整覆盖比值曲线与坐标轴之间的区域
+        
         areaStyle: {
           opacity: 1,
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
@@ -362,7 +362,7 @@ const chartOption = computed(() => {
             shadowColor: 'rgba(0,0,0,0.15)'
           }
         },
-        // 标注比值=1.0 的参考线，便于判断成长/价值轮动
+        
         markLine: {
           silent: true,
           symbol: 'none',
@@ -385,7 +385,7 @@ const chartOption = computed(() => {
   }
 })
 
-// ── 图表生命周期管理 ──────────────────────────────────────────
+
 function initChart() {
   if (!chartRef.value) return
 
@@ -429,7 +429,7 @@ function scheduleResize() {
   })
 }
 
-// 监听数据变化 → 更新图表
+
 watch(
   () => chartData.value,
   () => {
@@ -444,7 +444,7 @@ watch(
   { deep: true }
 )
 
-// 监听主题变化 → 重建图表
+
 watch(
   () => themeStore.isDark,
   () => {

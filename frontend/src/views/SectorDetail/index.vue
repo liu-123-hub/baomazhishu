@@ -1,7 +1,7 @@
 <template>
   <div class="sector-detail-view ios-animate-fade">
     <div class="detail-container">
-      <!-- 骨架屏加载状态 -->
+      
       <template v-if="loading && !detail">
         <div class="detail-skeleton">
           <div class="sector-header-skeleton">
@@ -311,7 +311,7 @@ onUnmounted(() => {
   }
 }
 
-// Skeleton styles
+
 .detail-skeleton {
   .sector-header-skeleton {
     text-align: center;
@@ -357,7 +357,7 @@ onUnmounted(() => {
   100% { background-position: -200% 0; }
 }
 
-// Sector header
+
 .sector-header {
   text-align: center;
   margin-bottom: var(--ios-spacing-xl);
@@ -443,7 +443,7 @@ onUnmounted(() => {
   margin-top: var(--ios-spacing-xs);
 }
 
-// Metrics
+
 .metrics-section {
   margin-bottom: var(--ios-spacing-lg);
 }
@@ -463,7 +463,7 @@ onUnmounted(() => {
   }
 }
 
-// Info card
+
 .info-card {
   margin-bottom: var(--ios-spacing-lg);
 }
@@ -500,7 +500,7 @@ onUnmounted(() => {
   &.trend-flat { color: var(--ios-label-secondary); }
 }
 
-// Section header
+
 .section-header {
   display: flex;
   align-items: center;
@@ -536,7 +536,7 @@ onUnmounted(() => {
   }
 }
 
-// Chart section
+
 .chart-section {
   margin-bottom: var(--ios-spacing-xl);
 }
@@ -569,7 +569,7 @@ onUnmounted(() => {
   font-size: var(--ios-text-base);
 }
 
-// Error/Loading states
+
 .loading-state,
 .error-state {
   display: flex;

@@ -1,10 +1,3 @@
-"""应用配置，支持环境变量覆盖。板块配置从 analyzer 统一导入。
-
-打包模式（PyInstaller frozen）下的路径策略：
-- RESOURCE_DIR: 只读打包资源目录（sys._MEIPASS），存放前端静态文件与种子数据
-- PROJECT_ROOT:  可写运行目录（可执行文件所在目录），存放运行时生成的 data/logs/db
-- 开发模式下两者均为项目根目录
-"""
 import os
 import shutil
 import sys
@@ -13,28 +6,23 @@ from typing import List
 from pydantic_settings import BaseSettings
 
 
-# 清除可能被其他应用注入的冲突环境变量，防止 DB_PATH 等被覆盖
-# BaseSettings 会自动从环境变量加载同名配置项，需在 Settings 实例化前移除
 for _conflict_var in ("DB_PATH", "DATABASE_URL", "DATA_DIR", "BACKEND_DIR", "STATIC_DIR"):
     _conflict_val = os.environ.get(_conflict_var, "")
-    # 仅当环境变量指向项目目录之外时才移除（允许用户通过 .env 显式覆盖）
+    
     if _conflict_val and "baomazhishu" not in _conflict_val.lower():
         os.environ.pop(_conflict_var, None)
 
 
 def _is_frozen() -> bool:
-    """是否运行于 PyInstaller 打包环境中。"""
     return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 
-# 资源目录（只读）：打包后指向 _MEIPASS；开发模式指向项目根
 RESOURCE_DIR: Path = Path(sys._MEIPASS) if _is_frozen() else Path(__file__).resolve().parent.parent.parent
 
-# 项目根（可写）：打包后指向可执行文件所在目录；开发模式指向项目根
+
 PROJECT_ROOT_PATH: Path = Path(sys.executable).resolve().parent if _is_frozen() else Path(__file__).resolve().parent.parent.parent
 
-# 开发模式下需要将项目根加入 sys.path 以支持 analyzer/collectors 顶层导入；
-# 打包后 PyInstaller 自动处理 _MEIPASS，无需手动添加
+
 if not _is_frozen():
     if str(RESOURCE_DIR) not in sys.path:
         sys.path.insert(0, str(RESOURCE_DIR))
@@ -81,16 +69,16 @@ class Settings(BaseSettings):
 
     CORS_ALLOW_LOCALHOST_REGEX: bool = True
 
-    # 可写运行目录（打包后为可执行文件所在目录）
+    
     PROJECT_ROOT: Path = PROJECT_ROOT_PATH
-    # 运行时数据目录（可写，存放 collectors 产出的 JSON 与数据库）
+    
     DATA_DIR: Path = PROJECT_ROOT_PATH / "data"
-    # 后端目录（用于日志输出；打包后为可执行文件所在目录下的 backend）
+    
     BACKEND_DIR: Path = PROJECT_ROOT_PATH / "backend"
     DB_PATH: Path = PROJECT_ROOT_PATH / "backend" / "dashboard.db"
-    # 前端静态资源目录（只读）：打包后指向 _MEIPASS/frontend_dist；开发模式指向 frontend/dist
+    
     STATIC_DIR: Path = RESOURCE_DIR / "frontend_dist" if _is_frozen() else PROJECT_ROOT_PATH / "frontend" / "dist"
-    # 打包内种子数据目录（只读）
+    
     SEED_DATA_DIR: Path = RESOURCE_DIR / "data" if _is_frozen() else PROJECT_ROOT_PATH / "data"
 
     CACHE_TTL: int = 300
@@ -128,10 +116,6 @@ settings.BACKEND_DIR.mkdir(parents=True, exist_ok=True)
 
 
 def _ensure_seed_data() -> None:
-    """打包模式下首次运行时，将只读资源内的种子数据 JSON 拷贝到可写数据目录。
-
-    开发模式下数据目录即源数据目录，无需拷贝。
-    """
     if not _is_frozen():
         return
     src = settings.SEED_DATA_DIR

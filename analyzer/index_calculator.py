@@ -1,6 +1,3 @@
-"""宝妈指数计算引擎，各板块独立计算并维护历史曲线。基于T1~T4成长梯队+V1~V3价值防御+DEF防御资产的分类体系。
-v3.0 - 2026年8月板块分类体系全面修正，对齐同花顺最新标准，新增AI应用/DeepSeek/AI智能体/人形机器人/可控核聚变/低空经济/卫星互联网/固态电池等板块。
-"""
 from datetime import datetime, date
 from typing import Dict, List, Optional
 import json
@@ -9,14 +6,14 @@ import os
 DATA_DIR = os.path.join(os.path.dirname(os.path.dirname(__file__)), "data")
 
 SECTOR_NAMES = {
-    # ── T1：AI算力硬科技 ──
+    
     "semiconductor": "半导体",
     "electronics": "电子",
     "ai_computing": "AI算力",
     "cpo": "CPO光通信",
     "ai_application": "AI应用",
     "deepseek": "DeepSeek概念",
-    # ── T2：高端制造/智能科技 ──
+    
     "computer": "计算机",
     "communication": "通信",
     "military": "军工",
@@ -25,13 +22,13 @@ SECTOR_NAMES = {
     "ai_agent": "AI智能体",
     "low_altitude": "低空经济",
     "satellite_internet": "卫星互联网",
-    # ── T3：新能源/电力设备 ──
+    
     "newenergy": "新能源",
     "battery": "电池",
     "power_grid": "电力设备",
     "solid_battery": "固态电池",
     "nuclear_fusion": "可控核聚变",
-    # ── T4：消费医疗/文化传媒 ──
+    
     "medicine": "医药",
     "baijiu": "白酒",
     "food": "食品饮料",
@@ -40,26 +37,26 @@ SECTOR_NAMES = {
     "media": "传媒",
     "biotech": "创新药",
     "consumer": "大消费",
-    # ── V1：大金融 ──
+    
     "bank": "银行",
     "securities": "券商",
     "insurance": "保险",
-    # ── V2：周期资源 ──
+    
     "coal": "煤炭",
     "crude_oil": "石油石化",
     "nonferrous": "有色金属",
     "chemical": "化工",
     "steel": "钢铁",
-    # ── V3：基建地产 ──
+    
     "infrastructure": "基建",
     "realestate": "房地产",
-    # ── DEF：防御资产/海外 ──
+    
     "gold": "黄金",
     "nasdaq": "纳斯达克",
 }
 
 SECTOR_META = {
-    # ──── T1 ────
+    
     "semiconductor": {
         "sector_type": "industry",
         "tier": "T1",
@@ -113,7 +110,7 @@ SECTOR_META = {
         "related_industries": ["computer", "ai_computing", "ai_application", "ai_agent"],
     },
 
-    # ──── T2 ────
+    
     "computer": {
         "sector_type": "industry",
         "tier": "T2",
@@ -184,7 +181,7 @@ SECTOR_META = {
         "related_industries": ["military", "communication", "electronics"],
     },
 
-    # ──── T3 ────
+    
     "newenergy": {
         "sector_type": "industry",
         "tier": "T3",
@@ -228,7 +225,7 @@ SECTOR_META = {
         "related_industries": ["power_grid", "infrastructure", "nonferrous"],
     },
 
-    # ──── T4 ────
+    
     "medicine": {
         "sector_type": "industry",
         "tier": "T4",
@@ -296,7 +293,7 @@ SECTOR_META = {
         "related_industries": ["baijiu", "food", "appliance", "tourism"],
     },
 
-    # ──── V1 ────
+    
     "bank": {
         "sector_type": "industry",
         "tier": "V1",
@@ -322,7 +319,7 @@ SECTOR_META = {
         "related_concepts": [],
     },
 
-    # ──── V2 ────
+    
     "coal": {
         "sector_type": "industry",
         "tier": "V2",
@@ -364,7 +361,7 @@ SECTOR_META = {
         "related_concepts": [],
     },
 
-    # ──── V3 ────
+    
     "infrastructure": {
         "sector_type": "industry",
         "tier": "V3",
@@ -382,7 +379,7 @@ SECTOR_META = {
         "related_concepts": [],
     },
 
-    # ──── DEF ────
+    
     "gold": {
         "sector_type": "concept",
         "tier": "DEF",
@@ -534,7 +531,6 @@ def _empty_details() -> Dict:
 
 
 def compute_sector_index(analysis_results: List) -> Dict:
-    """四维权重：小白占比40%+平均小白分25%+情绪强度20%+纯度信号15%。买卖指数：参与占比50%+小白烈度修正30%+关键词强度20%。"""
     if not analysis_results:
         return {
             "index": 0,
@@ -643,7 +639,6 @@ def interpret_index(index: float) -> str:
 
 
 def load_history() -> Dict:
-    """同日期记录去重，保留时间戳最新者。自动兼容旧版板块数据，缺失板块填空数据。"""
     history_file = os.path.join(DATA_DIR, "history.json")
     if os.path.exists(history_file):
         with open(history_file, 'r', encoding='utf-8') as f:
@@ -673,7 +668,7 @@ def load_history() -> Dict:
                 print(f"  [历史数据] 跳过无 date 字段的记录: {invalid_count} 条")
                 changed = True
             
-            # 兼容旧版：为缺失的新板块填空数据
+            
             empty_data = _empty_sector_data()
             for record in deduped:
                 sectors = record.get("sectors", {})
@@ -689,7 +684,6 @@ def load_history() -> Dict:
 
 
 def save_history(history: Dict):
-    """tmp + replace 原子写入避免文件损坏。"""
     history_file = os.path.join(DATA_DIR, "history.json")
     os.makedirs(DATA_DIR, exist_ok=True)
     tmp_file = history_file + ".tmp"
@@ -699,7 +693,6 @@ def save_history(history: Dict):
 
 
 def add_record(sector_indices: Dict[str, Dict], analysis_results: Dict):
-    """追加当日指数快照，同日重复执行覆盖旧记录。"""
     history = load_history()
     
     record = {

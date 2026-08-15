@@ -1,4 +1,3 @@
-"""网易财经采集器，通过 RSS/HTML 提取公开新闻并按板块分类。"""
 import os
 import sys
 from typing import Dict, List
@@ -76,7 +75,7 @@ def collect_all() -> Dict[str, List[Dict]]:
     return result
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":  
     data = collect_all()
     for key, value in data.items():
         print(f"{key}: {len(value)} posts")

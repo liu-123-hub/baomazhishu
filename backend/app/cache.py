@@ -1,4 +1,3 @@
-"""基于内存的异步 TTL + LRU 缓存。"""
 import time
 import asyncio
 from collections import OrderedDict
@@ -8,7 +7,6 @@ from .config import settings
 
 
 class AsyncTTLCache:
-    """异步安全的 TTL + LRU 缓存。"""
 
     def __init__(self, max_size: int = 500, default_ttl: int = 300):
         self._max_size = max_size

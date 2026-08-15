@@ -11,7 +11,6 @@ router = APIRouter()
 
 @router.get("/version")
 async def sector_version():
-    """获取板块分类版本信息"""
     from analyzer.index_calculator import get_version_info
     return {
         "code": 200,
@@ -21,7 +20,6 @@ async def sector_version():
 
 @router.get("/config")
 async def sector_config():
-    """获取完整板块配置（供前端初始化）"""
     from analyzer.index_calculator import SECTOR_NAMES, SECTOR_META, SECTOR_CATEGORIES, TIER_COLORS, INDUSTRY_SECTORS, CONCEPT_SECTORS
     return {
         "code": 200,

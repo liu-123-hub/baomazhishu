@@ -1,4 +1,3 @@
-"""宝妈指数主流程：采集→分析→计算→存储→输出。"""
 import sys
 import os
 import json
@@ -40,7 +39,6 @@ DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 
 class DataSourceStatus:
-    """聚合各源采集结果并生成汇总。"""
     
     def __init__(self):
         self.sources: Dict[str, Dict] = {}
@@ -115,7 +113,6 @@ def _merge_sector_posts(
 
 
 def _write_dashboard_data(dashboard: Dict):
-    """tmp + os.replace 原子写入，避免中断损坏。"""
     os.makedirs(DATA_DIR, exist_ok=True)
     dashboard_file = os.path.join(DATA_DIR, "dashboard_data.json")
     tmp_file = dashboard_file + ".tmp"
@@ -126,7 +123,6 @@ def _write_dashboard_data(dashboard: Dict):
 
 
 def run_pipeline() -> Dict:
-    """连通性预检→九路采集→规则分析→指数计算→历史存储→仪表盘输出。"""
     print("=" * 65)
     print("   👩‍👧 宝妈指数 · 真实数据采集与分析")
     print(f"   {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

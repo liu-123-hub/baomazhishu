@@ -1,4 +1,3 @@
-"""FastAPI 主应用，实时数据大屏后端服务。"""
 import asyncio
 import logging
 import os
@@ -47,10 +46,9 @@ def _configure_logging() -> None:
     root_logger.addHandler(console_handler)
     root_logger.addHandler(file_handler)
 
-    # --- 降低高频第三方库的日志级别，减少日志噪音 ---
-    # httpx 默认 INFO 级别会记录每一次 HTTP HEAD 请求，在预检阶段产生大量噪音
+    
     logging.getLogger("httpx").setLevel(logging.WARNING)
-    # httpcore 是 httpx 的底层库，同样降低级别
+    
     logging.getLogger("httpcore").setLevel(logging.WARNING)
 
 
@@ -61,7 +59,6 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """启动顺序：DB初始化→数据预热→WS广播→自动采集。"""
     logger.info("系统启动中...")
 
     print("=" * 65)
@@ -241,12 +238,6 @@ def create_app() -> FastAPI:
 
 
 def _configure_static(app: FastAPI) -> None:
-    """挂载前端静态资源并配置 SPA 路由回退。
-
-    - 存在 STATIC_DIR（已构建前端）时：托管 /assets，根路径返回 index.html，
-      其余未匹配路径回退到 index.html 以支持前端路由；/api/* 仍返回 JSON 404
-    - 开发模式且未构建前端时：根路径返回服务信息 JSON
-    """
     static_dir = settings.STATIC_DIR
     index_html = static_dir / "index.html" if static_dir else None
 
@@ -273,7 +264,7 @@ def _configure_static(app: FastAPI) -> None:
 
     @app.get("/{full_path:path}", include_in_schema=False)
     async def _spa_fallback(full_path: str):
-        # /api 与 /ws 已由专用路由处理；落到此处且以 api/ 开头视为未知 API，返回 JSON 404
+        
         if full_path.startswith("api/"):
             raise HTTPException(status_code=404, detail="Not Found")
         return FileResponse(index_path)

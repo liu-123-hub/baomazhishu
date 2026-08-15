@@ -1,4 +1,3 @@
-"""数据真实性校验模块，生成 data provenance 用于 API 溯源。"""
 import hashlib
 import json
 import os

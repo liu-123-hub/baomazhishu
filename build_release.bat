@@ -88,6 +88,12 @@ copy icon.ico "dist\MomIndex\icon.ico" >nul 2>&1
 copy icon.png "dist\MomIndex\icon.png" >nul 2>&1
 echo   [OK] Copied run.bat, icon.ico, icon.png to dist\MomIndex\
 
+REM --- Copy data directory to dist (运行时 DATA_DIR 指向此目录，确保市场数据/行情数据可用) ---
+if not exist "dist\MomIndex\data" mkdir "dist\MomIndex\data"
+copy "data\*.json" "dist\MomIndex\data\" >nul 2>&1
+echo   [OK] Copied data files to dist\MomIndex\data\
+
+
 REM --- Final size report ---
 echo ================================================================
 echo   BUILD COMPLETE

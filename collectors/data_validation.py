@@ -1,4 +1,3 @@
-"""数据校验工具，采集数据进入分析链路前的字段、时效和去重校验。"""
 import re
 from datetime import datetime, timedelta
 from typing import Dict, List, Tuple

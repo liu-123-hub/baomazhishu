@@ -1,4 +1,3 @@
-"""Google News RSS 采集器，无需 API Key，为各板块补充公开新闻信号。"""
 import hashlib
 import os
 import sys
@@ -102,7 +101,6 @@ def _parse_rss(xml_text: str) -> List[Dict]:
 
 
 def search_news(keyword: str, limit: int = 8) -> List[Dict]:
-    """Google News RSS 请求间隔控制，避免被限流。4xx错误不重试。"""
     global _last_request_ts
     url = RSS_TEMPLATE.format(query=quote_plus(keyword))
     last_err = None
@@ -177,7 +175,7 @@ def collect_all() -> Dict[str, List[Dict]]:
     return result
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":  
     data = collect_all()
     for key, value in data.items():
         print(f"{key}: {len(value)} posts")

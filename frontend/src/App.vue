@@ -44,7 +44,7 @@ const navTitle = computed(() => {
   return route.meta?.title || APP_CONFIG.name
 })
 
-// 全局未处理Promise拒绝
+
 function handleUnhandledRejection(event) {
   console.error('[UnhandledRejection]', event.reason)
   const error = event.reason
@@ -53,12 +53,12 @@ function handleUnhandledRejection(event) {
   }
 }
 
-// 全局错误处理
+
 function handleGlobalError(event) {
   console.error('[GlobalError]', event.error || event.message)
 }
 
-// 焦点安全管理：鼠标/触摸点击后清除按钮焦点，避免持续聚焦
+
 let isKeyboardUser = false
 
 function handleKeyDown(e) {
@@ -74,7 +74,7 @@ function handlePointerDown() {
   document.documentElement.classList.remove('user-is-keyboard')
   document.documentElement.classList.add('user-is-pointer')
 
-  // 清除当前聚焦的按钮/锚点元素焦点（非输入类元素）
+  
   const active = document.activeElement
   if (
     active &&
@@ -82,7 +82,7 @@ function handlePointerDown() {
     !['INPUT', 'TEXTAREA', 'SELECT', 'CONTENTEDITABLE'].includes(active.tagName) &&
     !active.isContentEditable
   ) {
-    // 延迟到点击事件处理完成后再blur，避免影响正常点击事件
+    
     setTimeout(() => {
       if (document.activeElement === active && !isKeyboardUser) {
         active.blur()
@@ -91,11 +91,11 @@ function handlePointerDown() {
   }
 }
 
-// 监听文档空白区域点击，确保释放焦点
+
 function handleDocumentClick(e) {
   if (isKeyboardUser) return
   const target = e.target
-  // 如果点击的不是交互元素或其内部，清除焦点
+  
   const isInteractive = target.closest(
     'button, a, input, textarea, select, [role="button"], [tabindex]:not([tabindex="-1"])'
   )
@@ -113,17 +113,17 @@ function handleDocumentClick(e) {
 }
 
 onMounted(async () => {
-  // 监听全局错误
+  
   window.addEventListener('unhandledrejection', handleUnhandledRejection)
   window.addEventListener('error', handleGlobalError)
 
-  // 焦点安全管理：区分键盘用户与指针用户
+  
   window.addEventListener('keydown', handleKeyDown, true)
   window.addEventListener('mousedown', handlePointerDown, true)
   window.addEventListener('touchstart', handlePointerDown, { passive: true, capture: true })
   document.addEventListener('click', handleDocumentClick, true)
 
-  // 默认添加 pointer 用户标识
+  
   document.documentElement.classList.add('user-is-pointer')
 
   await platform.init()
@@ -156,7 +156,7 @@ onUnmounted(() => {
   window.removeEventListener('touchstart', handlePointerDown, true)
   document.removeEventListener('click', handleDocumentClick, true)
   document.documentElement.classList.remove('user-is-keyboard', 'user-is-pointer')
-  // 清理网络状态监听器，避免内存泄漏
+  
   systemStore.cleanupNetworkStatus()
 })
 </script>

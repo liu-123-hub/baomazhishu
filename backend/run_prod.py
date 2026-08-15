@@ -1,30 +1,44 @@
-"""生产环境启动入口：PyInstaller 打包主入口，开发模式亦可运行。
-
-与 backend/main.py 的区别：
-- 关闭 reload（生产无需热重载，且 reload 在 frozen 模式下不可用）
-- 直接以 app 实例启动 uvicorn，避免字符串导入在打包后失效
-- 打包模式下服务就绪后自动打开浏览器
-
-开发运行：cd backend && python run_prod.py
-打包后：双击运行可执行文件，或通过 run.bat / run.sh 启动
-"""
+import os
+import shutil
 import sys
 import threading
 import webbrowser
 
-import uvicorn
-
 from app.config import settings
-from app.main import app  # 直接导入已构造好的 app 实例
 
 
 def _is_frozen() -> bool:
-    """是否运行于 PyInstaller 打包环境中。"""
     return getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS")
 
 
+def _copy_seed_data() -> None:
+    if not _is_frozen():
+        return
+    seed_dir = settings.SEED_DATA_DIR
+    data_dir = settings.DATA_DIR
+    if not seed_dir.is_dir():
+        return
+    data_dir.mkdir(parents=True, exist_ok=True)
+    for fname in os.listdir(str(seed_dir)):
+        if fname.endswith('.json'):
+            src = seed_dir / fname
+            dst = data_dir / fname
+            
+            if not dst.exists() or (src.stat().st_mtime > dst.stat().st_mtime):
+                try:
+                    shutil.copy2(str(src), str(dst))
+                except Exception:
+                    pass
+
+
+_copy_seed_data()
+
+import uvicorn
+
+from app.main import app  
+
+
 def _open_browser_when_ready(url: str, delay: float = 2.5) -> None:
-    """服务就绪后延迟打开浏览器（仅打包模式，避免干扰开发）。"""
     def _open():
         import time
         time.sleep(delay)

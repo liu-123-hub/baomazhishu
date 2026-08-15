@@ -1,4 +1,3 @@
-"""WebSocket 连接管理。"""
 import asyncio
 import logging
 from datetime import datetime
@@ -11,7 +10,6 @@ MAX_CONNECTIONS = 50
 
 
 class ConnectionManager:
-    """WebSocket 连接管理器。"""
 
     def __init__(self):
         self.active_connections: Set[WebSocket] = set()

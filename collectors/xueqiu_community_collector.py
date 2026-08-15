@@ -1,4 +1,3 @@
-"""雪球社区讨论采集器，通过搜索 API 获取公开 UGC 讨论数据。"""
 import os
 import sys
 from typing import Dict, List
@@ -52,14 +51,13 @@ def _empty_result() -> Dict[str, List[Dict]]:
 
 
 def collect_all() -> Dict[str, List[Dict]]:
-    """雪球2025年底加强WAF，/statuses/search.json返回400016需登录，无登录态降级返回空数据。"""
     result = _empty_result()
     print("  [雪球社区] ⚠️ 雪球讨论 API 需登录账号（400016 WAF），本采集器降级跳过")
     print("  [雪球社区] 提示：东方财富股吧已覆盖板块新闻数据，可作为替代信号源")
     return result
 
 
-if __name__ == "__main__":  # pragma: no cover
+if __name__ == "__main__":  
     data = collect_all()
     for key, value in data.items():
         print(f"{key}: {len(value)} posts")

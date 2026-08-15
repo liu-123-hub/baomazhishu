@@ -105,7 +105,6 @@ _collect_tasks: set = set()
 
 
 def _collect_task_done(task):
-    """记录异常并从集合移除。"""
     _collect_tasks.discard(task)
     if task.cancelled():
         return

@@ -1,4 +1,3 @@
-"""双触发机制数据自动更新功能的单元测试。"""
 import asyncio
 import logging
 import os
@@ -70,7 +69,6 @@ def make_empty_dashboard() -> dict:
 
 
 class TestValidateDashboardForSync:
-    """validate_dashboard_for_sync校验逻辑测试。"""
 
     def test_valid_dashboard_passes(self):
         dashboard = make_valid_dashboard()
@@ -254,7 +252,6 @@ class TestPeriodicTimerStabilityOnException:
 
 
 class TestRunDeadline:
-    """验证run_in_executor的deadline超时保护。"""
 
     @pytest.mark.asyncio
     async def test_deadline_timeout_recreates_executor_and_sets_failed(self, monkeypatch):
@@ -295,7 +292,6 @@ class TestRunDeadline:
 
 
 class TestWatchdogMissedRun:
-    """验证看门狗在长期无成功运行时发出ERROR告警。"""
 
     @pytest.mark.asyncio
     async def test_watchdog_alerts_when_no_success_past_threshold(self, monkeypatch, caplog):
@@ -351,7 +347,6 @@ class TestWatchdogMissedRun:
 
 
 class TestStartupTaskExceptionHandling:
-    """验证run_with_retry抛出未预期异常时，启动包装器将状态置为FAILED。"""
 
     @pytest.mark.asyncio
     async def test_startup_exception_sets_failed_status(self, monkeypatch):

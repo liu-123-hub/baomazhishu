@@ -19,7 +19,7 @@
         </div>
       </header>
 
-      <!-- 骨架屏加载状态 -->
+      
       <template v-if="isInitialLoading">
         <div class="metrics-skeleton" aria-label="加载中">
           <IOSSkeleton v-for="i in 3" :key="i" variant="card" class="metric-skeleton-item" />
@@ -177,7 +177,7 @@ import IOSSectorList from '@/components/ios/IOSSectorList.vue'
 import IOSSegmentControl from '@/components/ios/IOSSegmentControl.vue'
 import IOSSkeleton from '@/components/ios/IOSSkeleton.vue'
 
-// 图表组件异步加载，减少首屏 JS 体积
+
 const IOSLineChart = defineAsyncComponent(() => import('@/components/ios/IOSLineChart.vue'))
 const IOSRatioAreaChart = defineAsyncComponent(() => import('@/components/ios/IOSRatioAreaChart.vue'))
 import { SECTOR_NAMES, SECTOR_COLORS, SECTOR_CATEGORIES, INDEX_LEVELS } from '@/core/constants'
@@ -195,9 +195,9 @@ const POLL_INTERVAL_WS = 120000
 const POLL_INTERVAL_NO_WS = 30000
 const LINE_CHART_REFRESH_INTERVAL = 60000
 
-// 页面可见性变化防抖配置
-const VISIBILITY_DEBOUNCE_MS = 1500 // 切回页面后等待1.5秒再刷新，避免快速切换
-const MIN_HIDDEN_TIME_FOR_REFRESH = 30000 // 后台至少30秒才刷新，短时间切换不刷新
+
+const VISIBILITY_DEBOUNCE_MS = 1500 
+const MIN_HIDDEN_TIME_FOR_REFRESH = 30000 
 
 let visibilityTimer = null
 let lastHiddenTime = 0
@@ -205,24 +205,24 @@ let lastHiddenTime = 0
 function handleVisibilityChange() {
   if (document.visibilityState === 'visible') {
     const hiddenDuration = Date.now() - lastHiddenTime
-    // 后台时间太短，不刷新（避免频繁切换标签页导致的重复刷新）
+    
     if (hiddenDuration < MIN_HIDDEN_TIME_FOR_REFRESH) {
       return
     }
-    // 防抖：延迟刷新，避免快速来回切换
+    
     if (visibilityTimer) {
       clearTimeout(visibilityTimer)
     }
     visibilityTimer = setTimeout(() => {
       if (document.visibilityState === 'visible' && systemStore.isOnline) {
-        // 页面从后台切回时静默刷新，不打扰用户
+        
         fetchData(true)
       }
     }, VISIBILITY_DEBOUNCE_MS)
   } else {
-    // 页面隐藏时记录时间
+    
     lastHiddenTime = Date.now()
-    // 清除待执行的刷新
+    
     if (visibilityTimer) {
       clearTimeout(visibilityTimer)
       visibilityTimer = null
@@ -363,7 +363,7 @@ async function fetchData(silent = false) {
   try {
     const days = timeRangeDays[timeRange.value] || 7
     await store.fetchAll(selectedSectors.value, days)
-    // 静默模式不显示 toast，仅在有数据且非静默时显示
+    
     if (overviewData.value && !silent) {
       toastStore.success('数据已更新')
     }
@@ -467,7 +467,7 @@ watch(wsConnected, (connected) => {
 
 watch(lastUpdateTime, (newTime, oldTime) => {
   if (newTime && newTime !== oldTime && oldTime) {
-    // 静默更新，不每次都弹toast
+    
   }
 })
 
@@ -592,7 +592,7 @@ onUnmounted(() => {
   }
 }
 
-// Skeleton styles
+
 .metrics-skeleton {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
@@ -645,7 +645,7 @@ onUnmounted(() => {
   100% { background-position: -200% 0; }
 }
 
-// Loading/Error states
+
 .loading-state,
 .error-state {
   display: flex;
@@ -673,7 +673,7 @@ onUnmounted(() => {
   max-width: 400px;
 }
 
-// Metrics
+
 .metrics-section {
   margin-bottom: var(--ios-spacing-lg);
 
@@ -697,7 +697,7 @@ onUnmounted(() => {
   }
 }
 
-// Category filter
+
 .category-filter {
   display: flex;
   justify-content: center;
@@ -716,7 +716,7 @@ onUnmounted(() => {
   }
 }
 
-// Section header
+
 .section-header {
   display: flex;
   align-items: center;
@@ -758,7 +758,7 @@ onUnmounted(() => {
   }
 }
 
-// Chart section
+
 .chart-section {
   margin-bottom: var(--ios-spacing-xl);
 
@@ -803,7 +803,7 @@ onUnmounted(() => {
   font-size: var(--ios-text-base);
 }
 
-// Ratio chart section
+
 .ratio-chart-section {
   margin-bottom: var(--ios-spacing-xl);
 
@@ -812,7 +812,7 @@ onUnmounted(() => {
   }
 }
 
-// Sectors section
+
 .sectors-section {
   margin-bottom: var(--ios-spacing-xl);
 
@@ -821,7 +821,7 @@ onUnmounted(() => {
   }
 }
 
-// Offline banner
+
 .offline-banner {
   position: fixed;
   bottom: calc(env(safe-area-inset-bottom, 0px) + var(--ios-spacing-lg));
@@ -840,7 +840,7 @@ onUnmounted(() => {
   z-index: 100;
   animation: slideUp var(--ios-duration-normal) var(--ios-spring);
 
-  // 离线横幅显示时，给页面底部留出空间避免遮挡
+  
   ~ * {
     padding-bottom: env(safe-area-inset-bottom, 0px);
   }
@@ -857,7 +857,7 @@ onUnmounted(() => {
   to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }
 
-// 离线状态时给内容区底部留出横幅空间
+
 .dashboard-container.is-offline {
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 60px);
 }

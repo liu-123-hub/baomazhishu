@@ -1,4 +1,3 @@
-"""小红书数据采集器，通过 rnote.dev API 获取真实笔记数据。"""
 import os
 import sys
 import time

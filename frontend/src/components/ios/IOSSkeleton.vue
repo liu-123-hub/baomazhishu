@@ -72,7 +72,7 @@ defineProps({
   100% { background-position: -200% 0; }
 }
 
-// Card variant
+
 .skeleton-card {
   .skeleton-header {
     display: flex;
@@ -104,7 +104,7 @@ defineProps({
   }
 }
 
-// Chart variant
+
 .skeleton-chart {
   .skeleton-chart-header {
     margin-bottom: var(--ios-spacing-md);
@@ -131,7 +131,7 @@ defineProps({
   }
 }
 
-// List variant
+
 .skeleton-list {
   .skeleton-list-item {
     display: flex;
@@ -162,7 +162,7 @@ defineProps({
   }
 }
 
-// Text variant
+
 .skeleton-generic {
   display: flex;
   flex-direction: column;

@@ -1,4 +1,3 @@
-"""数据源连通性预检模块，采集前探测各数据源可用性。"""
 import asyncio
 import os
 import socket

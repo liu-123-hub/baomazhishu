@@ -1,4 +1,3 @@
-"""基于 aiosqlite 的异步 SQLite 数据库操作。"""
 import json
 import aiosqlite
 from typing import Optional, List, Dict, Any
@@ -9,7 +8,6 @@ from .config import settings
 
 
 class Database:
-    """数据库管理类（单例）。"""
 
     _instance = None
 
@@ -115,7 +113,6 @@ class Database:
             """)
 
     async def insert_sector_index(self, data: Dict) -> int:
-        """插入或更新板块指数记录（UPSERT）。"""
         now = datetime.now().isoformat()
         async with self.get_connection() as conn:
             cursor = await conn.execute(
@@ -206,7 +203,6 @@ class Database:
             return result
 
     async def add_audit_log(self, username: str, action: str, **kwargs):
-        """记录审计日志。"""
         now = datetime.now().isoformat()
         async with self.get_connection() as conn:
             await conn.execute(
